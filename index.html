@@ -735,7 +735,7 @@
 
         function validarAntesDoWhatsApp() {
           // ✅ Pronta Entrega: não exige data/horário
-          if ( activeFulfillment !== 'Encomenda') return true;
+          if ( activeOrderType !== 'Encomenda') return true;
 
           const dateInput = document.getElementById('order-date');
           const timeInput = document.getElementById('order-time');
