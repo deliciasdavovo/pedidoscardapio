@@ -1,744 +1,129 @@
-
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Delícias da Vovó - Cardápio Digital</title>
-    
-    <!-- Bibliotecas Externas -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Lora:ital,wght@0,400;0,600;1,400;1,600&display=swap" rel="stylesheet">
-
-    <style>
-        :root {
-            /* Palette Premium Earthy */
-            --primary: #9E764E; 
-            --primary-dark: #7D5C3D;
-            --secondary: #5A3E2B; /* Marrom Tabaco */
-            --bg: #FCFAF7;
-            --accent: #E8D5C4;
-        }
-
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: var(--bg);
-            color: var(--secondary);
-            scroll-behavior: smooth;
-            -webkit-tap-highlight-color: transparent;
-        }
-
-        .serif-font { font-family: 'Lora', serif; }
-
-        /* Scrollbars */
-        .no-scrollbar::-webkit-scrollbar { display: none; }
-        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-        
-        .custom-scrollbar::-webkit-scrollbar { width: 4px; }
-        .custom-scrollbar::-webkit-scrollbar-track { background: #F3EEE8; }
-        .custom-scrollbar::-webkit-scrollbar-thumb { background: var(--primary); border-radius: 10px; }
-
-        /* Animations */
-        @keyframes slideUp {
-            from { transform: translateY(30px); opacity: 0; }
-            to { transform: translateY(0); opacity: 1; }
-        }
-        .animate-slide-up { animation: slideUp 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) forwards; }
-
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-        .animate-fade { animation: fadeIn 0.4s ease-out forwards; }
-
-        /* UI Helpers */
-        .cart-open { overflow: hidden; }
-        
-        input[type="number"]::-webkit-inner-spin-button, 
-        input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
-
-        .category-btn.active {
-            background-color: #EFE7DF;
-            color: #4A3223;
-            border-color: #4A3223;
-            box-shadow: 0 6px 14px rgba(74, 50, 35, 0.18);
-            transform: scale(1.05);
-        }
-
-        /* Botão de Cesta no Header */
-        .header-cart-btn {
-            background: var(--primary);
-            box-shadow: 0 8px 20px rgba(158, 118, 78, 0.25);
-        }
-
-        .product-card {
-            background: white;
-            border-radius: 2.5rem;
-            border: 1px solid rgba(158, 118, 78, 0.08);
-            transition: all 0.5s cubic-bezier(0.2, 0.8, 0.2, 1);
-        }
-        .product-card:hover {
-            transform: translateY(-8px);
-            box-shadow: 0 30px 60px rgba(36, 27, 21, 0.08);
-            border-color: rgba(158, 118, 78, 0.2);
-        }
-
-        .btn-primary {
-            background: var(--primary);
-            color: white;
-            box-shadow: 0 10px 25px rgba(158, 118, 78, 0.2);
-            transition: all 0.3s ease;
-        }
-        .btn-primary:hover {
-            background: var(--primary-dark);
-            transform: translateY(-1px);
-        }
-
-        .toggle-container {
-            position: relative;
-            background: #F3EEE8;
-            border-radius: 1.25rem;
-            padding: 5px;
-            display: flex;
-            gap: 5px;
-            border: 1px solid rgba(158, 118, 78, 0.1);
-        }
-        .toggle-btn {
-            position: relative;
-            z-index: 2;
-            flex: 1;
-            text-align: center;
-            padding: 8px 0;
-            border-radius: 1rem;
-            font-size: 10px;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.1em;
-            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-            color: var(--primary);
-        }
-        .toggle-btn.active {
-            color: white;
-            background: var(--secondary);
-            box-shadow: 0 6px 15px rgba(36, 27, 21, 0.25);
-        }
-        
-        #cart-items-list {
-            overscroll-behavior: contain;
-            -webkit-overflow-scrolling: touch;
-        }
-    </style>
-</head>
-<body class="relative min-h-screen">
-
-    <!-- Header Fixo (Fundo Marrom Sólido) -->
-    <div class="sticky top-0 z-50 flex flex-col w-full shadow-2xl shadow-black/10">
-        <header class="bg-[#5A3E2B] text-white border-b border-white/5">
-            <div class="max-w-7xl mx-auto px-6 py-5 flex justify-between items-center">
-                <div class="flex flex-col cursor-pointer group" onclick="window.scrollTo({top:0, behavior:'smooth'})">
-                    <h1 class="text-2xl font-normal tracking-tight serif-font group-hover:text-[#9E764E] transition-colors">Delícias da Vovó</h1>
-                    <span class="text-[9px] uppercase font-bold tracking-[0.3em] text-[#9E764E]">Padaria Artesanal</span>
-                </div>
-                <div class="flex items-center gap-3">
-                    <button onclick="toggleSearch()" class="p-3 hover:bg-white/10 rounded-2xl transition-all active:scale-90">
-                        <i class="fas fa-search text-lg"></i>
-                    </button>
-                    <button onclick="openCart()" class="relative flex items-center gap-4 header-cart-btn hover:brightness-110 px-5 py-3 rounded-2xl transition-all active:scale-95 border border-white/10">
-                        <i class="fas fa-shopping-basket text-lg"></i>
-                        <span id="cart-badge" class="hidden absolute -top-2 -right-2 bg-[#E4572E] text-white text-[10px] font-bold w-6 h-6 rounded-full flex items-center justify-center border-2 border-[#241B15] shadow-lg">
-                        <span class="hidden sm:block text-sm font-semibold serif-font tracking-wide" id="header-total">R$ 0,00</span>
-                    </button>
-                </div>
-            </div>
-        </header>
-
-        <!-- Navegação por Categorias -->
-        <nav class="bg-white/95 backdrop-blur-xl border-b border-[#9E764E]/10 overflow-hidden">
-            <div id="category-nav" class="flex items-center gap-3 overflow-x-auto no-scrollbar py-4 px-6 scroll-smooth">
-                <!-- Injetado via JS -->
-            </div>
-        </nav>
-    </div>
-
-    <!-- Overlay de Busca -->
-    <div id="search-bar" class="max-h-0 opacity-0 overflow-hidden transition-all duration-700 bg-white/60 backdrop-blur-md border-b border-[#9E764E]/10">
-        <div class="max-w-2xl mx-auto p-6">
-            <div class="relative group">
-                <i class="fas fa-search absolute left-5 top-1/2 -translate-y-1/2 text-[#9E764E]"></i>
-                <input type="text" id="search-input" oninput="handleSearch(this.value)" placeholder="Encontre sua delícia preferida..." class="w-full pl-14 pr-6 py-5 bg-white/80 border border-[#9E764E]/20 rounded-3xl focus:outline-none focus:ring-4 focus:ring-[#9E764E]/10 italic shadow-inner text-lg transition-all">
-            </div>
-        </div>
-    </div>
-
-    <!-- Conteúdo Principal -->
-    <main id="menu-container" class="max-w-7xl mx-auto px-6 py-12 space-y-24 pb-48">
-        <!-- Produtos injetados via JS -->
-    </main>
-
-    <!-- Barra de Carrinho Inferior (Mobile) -->
-    <div id="sticky-cart-bar" class="fixed bottom-8 left-0 right-0 z-40 px-6 flex justify-center translate-y-40 transition-transform duration-700 pointer-events-none">
-        <button onclick="openCart()" class="pointer-events-auto w-full max-w-md bg-[#241B15] text-white px-10 py-6 rounded-[3rem] shadow-[0_30px_70px_rgba(0,0,0,0.4)] flex items-center justify-between border border-white/5 active:scale-95 transition-all group">
-            <div class="flex items-center gap-5">
-                <div class="relative group-hover:scale-110 transition-transform">
-                    <i class="fas fa-shopping-basket text-3xl text-[#9E764E]"></i>
-                    <span id="sticky-cart-count" class="absolute -top-2 -right-2 bg-[#E4572E] text-white text-[10px] font-black w-6 h-6 rounded-full flex items-center justify-center shadow-lg border-2 border-[#241B15]">
-                </div>
-                <div class="text-left">
-                    <p class="text-[11px] uppercase tracking-[0.25em] text-[#9E764E] font-bold">Ver Carrinho</p>
-                    <p class="text-[10px] italic text-white/40">Total estimado</p>
-                </div>
-            </div>
-            <span class="text-3xl font-light serif-font tracking-tight" id="sticky-total">R$ 0,00</span>
-        </button>
-    </div>
-
-    <!-- Carrinho Lateral (Modal) -->
-    <div id="cart-modal" class="fixed inset-0 z-[60] invisible">
-        <div class="absolute inset-0 bg-[#241B15]/70 backdrop-blur-md opacity-0 transition-opacity duration-500" onclick="closeCart()"></div>
-        <div class="absolute inset-y-0 right-0 w-full max-w-lg bg-[#FCFAF7] shadow-2xl translate-x-full transition-transform duration-600 flex flex-col h-full">
-            <div class="p-6 sm:p-8 border-b border-[#9E764E]/10 bg-white flex justify-between items-center shrink-0">
-                <h2 class="text-lg sm:text-xl font-medium uppercase tracking-[0.2em] flex items-center gap-4 serif-font">
-                    <i class="fas fa-shopping-basket text-[#9E764E]"></i> Minha Seleção
-                </h2>
-                <button onclick="closeCart()" class="text-[#9E764E] w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center rounded-full hover:bg-[#F3EEE8] transition-all">
-                    <i class="fas fa-times text-xl sm:text-2xl"></i>
-                </button>
-            </div>
-            
-            <!-- LISTA DE ITENS COM MIN-H-0 PARA FUNCIONAR SCROLL NO FLEX -->
-            <div id="cart-items-list" class="flex-grow min-h-0 overflow-y-auto p-6 sm:p-8 space-y-6 custom-scrollbar">
-                <!-- Itens do carrinho aqui -->
-            </div>
-
-            <div id="cart-footer" class="hidden shrink-0 p-6 sm:p-8 bg-white border-t border-[#9E764E]/10 space-y-4 sm:space-y-6 overflow-y-auto max-h-[60%] custom-scrollbar">
-                <!-- Formulário de Checkout -->
-                <div class="space-y-4 sm:space-y-6">
-                    <div class="space-y-2">
-                        <label class="text-[10px] uppercase font-bold text-[#9E764E] ml-2 tracking-[0.2em]">Identificação </label>
-                        <input type="text" id="order-name" placeholder="Como podemos te chamar?" class="w-full bg-[#F3EEE8]/50 border border-[#9E764E]/10 rounded-2xl px-5 py-3 text-sm focus:outline-none focus:ring-4 focus:ring-[#9E764E]/5 transition-all">
-                    </div>
-                    
-                    <div class="space-y-2">
-                        <label class="text-[10px] uppercase font-bold text-[#9E764E] ml-2 tracking-[0.2em]">Disponibilidade</label>
-                        <div class="toggle-container">
-                            <button onclick="setOrderType('Pronta entrega')" id="btn-order-ready" class="toggle-btn active">Pronta entrega</button>
-                            <button onclick="setOrderType('Encomenda')" id="btn-order-sched" class="toggle-btn">Encomenda</button>
-                        </div>
-                    </div>
-
-                    <div id="sched-fields" class="hidden grid grid-cols-2 gap-3 animate-fade">
-                        <div class="space-y-1">
-                            <label class="text-[9px] uppercase font-bold text-[#9E764E] ml-2">Data</label>
-                            <input type="date" id="order-date" class="w-full bg-[#F3EEE8]/50 rounded-xl px-4 py-2 text-xs border border-[#9E764E]/10 outline-none">
-                        </div>
-                        <div class="space-y-1">
-                            <label class="text-[9px] uppercase font-bold text-[#9E764E] ml-2">Horário</label>
-                            <input type="time" id="order-time" class="w-full bg-[#F3EEE8]/50 rounded-xl px-4 py-2 text-xs border border-[#9E764E]/10 outline-none">
-                        </div>
-                    </div>
-
-                    <div class="space-y-2">
-                        <label class="text-[10px] uppercase font-bold text-[#9E764E] ml-2 tracking-[0.2em]">Como receber?</label>
-                        <div class="toggle-container">
-                            <button onclick="setFulfillment('Retirada')" id="btn-pickup" class="toggle-btn active">Retirada</button>
-                            <button onclick="setFulfillment('Entrega')" id="btn-delivery" class="toggle-btn">Entrega</button>
-                        </div>
-                    </div>
-
-                    <div id="fulfillment-details" class="animate-fade">
-                        <div id="pickup-location-container" class="space-y-2">
-                            <label class="text-[9px] uppercase font-bold text-[#9E764E] ml-2 block">Unidade Escolhida</label>
-                            <select id="pickup-location" class="w-full bg-[#F3EEE8]/50 border border-[#9E764E]/10 rounded-2xl px-5 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#9E764E]/20 appearance-none text-[#241B15]">
-                                <option value="Matriz">Unidade Matriz - Centro</option>
-                                <option value="Vila Nova">Unidade Vila Nova - Unicenter</option>
-                            </select>
-                        </div>
-                        <div id="delivery-address-container" class="hidden space-y-2">
-                            <label class="text-[9px] uppercase font-bold text-[#9E764E] ml-2 block">Endereço para Entrega</label>
-                            <input type="text" id="delivery-address" placeholder="Rua, número, bairro e apto/casa" class="w-full bg-[#F3EEE8]/50 border border-[#9E764E]/10 rounded-2xl px-5 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#9E764E]/20 transition-all">
-                        </div>
-                    </div>
-                </div>
-
-                <div class="pt-4 border-t border-[#9E764E]/15 space-y-2">
-                    <div id="delivery-fee-row" class="hidden flex justify-between items-center px-2 text-sm text-[#9E764E]">
-                        <span class="font-medium">Serviço de Entrega</span>
-                        <span class="font-bold">R$ 15,00</span>
-                    </div>
-                    <div class="flex justify-between items-center px-2">
-                        <div class="text-left">
-                            <span class="text-[#9E764E] text-[10px] font-bold uppercase tracking-[0.2em] block mb-0.5">Total Estimado</span>
-                            <span class="text-[9px] text-gray-400 italic">Pesagem final na entrega</span>
-                        </div>
-                        <span class="text-3xl sm:text-4xl serif-font text-[#241B15] tracking-tighter" id="cart-final-total">R$ 0,00</span>
-                    </div>
-                </div>
-
-                <button onclick="sendWhatsAppOrder()" class="w-full bg-[#1F8F7A] hover:bg-[#176E60] text-white py-4 sm:py-6 rounded-[2rem] font-bold uppercase tracking-[0.25em] text-[10px] sm:text-[11px] transition-all shadow-2xl flex items-center justify-center gap-4 active:scale-95 group">
-                    <i class="fab fa-whatsapp text-xl sm:text-2xl group-hover:rotate-12 transition-transform"></i> Finalizar WhatsApp
-                </button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Script Principal -->
-    <script>
-        // CONFIGURAÇÕES E DADOS
-        const WHATSAPP_NUMBER = '5511988921216';
-        const DELIVERY_FEE = 15.00;
-        
-        const CATEGORIES = [
-            'Cestas de café da manhã', 'Coffee Breaks', 'Mini salgados', 
-            'Salgados assados', 'Lanches frios', 'Bolos caseiros', 
-            'Bebidas', 'Doces panificação'
-        ];
-        
-        const MENU_ITEMS = [
-            { id: 'cst1', name: 'Cesta Amarela', description: 'Para duas pessoas. Lanches, quiches, sucos e mini sonhos de creme.', category: 'Cestas de café da manhã', image: 'https://images.unsplash.com/photo-1544991583-524629472658?auto=format&fit=crop&q=80&w=600', price: 135.00, units: ['un'] },
-            { 
-                id: 'cb1', 
-                name: 'Coffee Simples', 
-                description: 'Pão de queijo, Mini Esfirra, Bolo e Café fresco. Itens somados individualmente na cesta.', 
-                category: 'Coffee Breaks', 
-                image: 'https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?auto=format&fit=crop&q=80&w=600', 
-                price: 25.50, 
-                units: ['pessoas'], 
-                isKit: true,
-                composition: [
-                    { id: 'ms4', multiplier: 2 },
-                    { id: 'ms1', multiplier: 2 },
-                    { id: 'sa1', multiplier: 1 }
-                ]
-            },
-            { 
-                id: 'ms1', 
-                name: 'Salgadinhos Fritos', 
-                description: 'Coxinhas, bolinhas de queijo gourmet e kibes tradicionais.', 
-                category: 'Mini salgados', 
-                image: 'https://images.unsplash.com/photo-1541544741938-0af808891cc5?auto=format&fit=crop&q=80&w=400', 
-                price: 1.20, 
-                units: ['un'],
-                flavors: ['Coxinha', 'Bolinha de Queijo', 'Risólis de Milho', 'Kibe Tradicional']
-            },
-            { id: 'ms4', name: 'Pão de Queijo Mini', description: 'Receita mineira autêntica com queijo canastra curado.', category: 'Mini salgados', image: 'https://res.cloudinary.com/ds53z2vv8/image/upload/v1769811066/IMG_2987_1_jjjdvz.jpg', price: 1.00, priceKg: 69.00, units: ['un', 'kg'] },
-            { id: 'sa1', name: 'Salgado Assado Grande', description: 'Assado artesanal: Esfirra de carne, Bauru ou Enroladinho.', category: 'Salgados assados', image: 'https://images.unsplash.com/photo-1517433670267-08bbd4be890f?auto=format&fit=crop&q=80&w=400', price: 8.50, units: ['un'], flavors: ['Carne', 'Frango c/ Requeijão', 'Presunto e Queijo'] },
-            { 
-                id: 'bc1', 
-                name: 'Bolo de Vitrine', 
-                description: 'Bolo artesanal redondo com cobertura generosa.', 
-                category: 'Bolos caseiros', 
-                image: 'https://res.cloudinary.com/ds53z2vv8/image/upload/v1770141071/D2950C0B-FD6C-48B8-A046-73151ED11899_z2ujlo.png', 
-                price: 45.00, 
-                units: ['un'],
-                sizes: [
-                    { label: 'Aro 15cm', price: 45.00 },
-                    { label: 'Aro 21cm', price: 78.00 },
-                    { label: 'Aro 25cm', price: 115.00 }
-                ]
-            },
-            { id: 'dp1', name: 'Mini Sonho', description: 'Mini sonho aerado recheado com creme de baunilha Bourbon.', category: 'Doces panificação', image: 'https://res.cloudinary.com/ds53z2vv8/image/upload/v1769891765/mini_sonho_1_bz8dwc.png', priceKg: 72.00, units: ['kg'] }
-        ];
-
-        // ESTADO DA APLICAÇÃO
-        let cart = [];
-        let activeOrderType = 'Pronta Entrega';
-        let activeFulfillment = 'Retirada';
-        let currentSearch = '';
-
-        window.onload = () => {
-            renderCategories();
-            renderMenu();
-            setOrderType('Pronta Entrega');
-            setFulfillment('Retirada');
-        };
-
-        function renderCategories() {
-            const nav = document.getElementById('category-nav');
-            let html = `<button onclick="scrollToCategory('Todos')" class="category-btn active px-7 py-2.5 rounded-full text-sm font-semibold serif-font transition-all whitespace-nowrap border border-transparent">Todos</button>`;
-            CATEGORIES.forEach(cat => {
-                html += `<button onclick="scrollToCategory('${cat}')" class="category-btn px-7 py-2.5 rounded-full text-sm font-medium serif-font transition-all whitespace-nowrap border border-transparent text-[#241B15]/50 hover:bg-[#F3EEE8]">${cat}</button>`;
-            });
-            nav.innerHTML = html;
-        }
-
-        function renderMenu() {
-            const container = document.getElementById('menu-container');
-            container.innerHTML = '';
-
-            CATEGORIES.forEach(cat => {
-                const items = MENU_ITEMS.filter(item => {
-                    const matchesCategory = item.category === cat;
-                    const matchesSearch = item.name.toLowerCase().includes(currentSearch.toLowerCase()) || 
-                                         item.description.toLowerCase().includes(currentSearch.toLowerCase());
-                    return matchesCategory && matchesSearch;
-                });
-
-                if (items.length > 0) {
-                    const section = document.createElement('section');
-                    section.id = sanitizeId(cat);
-                    section.className = 'animate-slide-up';
-                    
-                    let html = `
-                        <div class="flex flex-col items-center mb-12">
-                            <h2 class="text-3xl italic serif-font mb-4 tracking-tight">${cat}</h2>
-                            <div class="flex items-center gap-4">
-                                <div class="w-16 h-[1px] bg-[#9E764E]/20"></div>
-                                <div class="w-2 h-2 rotate-45 border border-[#9E764E]/40"></div>
-                                <div class="w-16 h-[1px] bg-[#9E764E]/20"></div>
-                            </div>
-                        </div>
-                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-10">
-                    `;
-
-                    items.forEach(item => {
-                        html += createProductCard(item);
-                    });
-
-                    html += `</div>`;
-                    section.innerHTML = html;
-                    container.appendChild(section);
-                }
-            });
-        }
-
-        function createProductCard(item) {
-            const hasKg = item.units.includes('kg');
-            const hasSizes = item.sizes && item.sizes.length > 0;
-            const hasFlavors = item.flavors && item.flavors.length > 0;
-            
-            const initialQty = item.isKit ? 10 : (item.units[0] === 'kg' ? 0.5 : 1);
-            const initialPrice = hasSizes ? item.sizes[0].price : (item.units[0] === 'kg' ? item.priceKg : item.price);
-            const unitSuffix = item.isKit ? '/pessoa' : (item.units[0] === 'kg' ? '/kg' : '/un');
-
-            return `
-                <div class="product-card group flex flex-col h-full overflow-hidden">
-                    <div class="relative h-56 overflow-hidden">
-                        <img src="${item.image}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-[1s]">
-                    </div>
-                    <div class="p-8 flex flex-col flex-grow">
-                        <div class="mb-5">
-                            <h3 class="text-2xl serif-font mb-2 group-hover:text-[#9E764E] transition-colors">${item.name}</h3>
-                            <p class="text-[11px] leading-relaxed text-[#241B15]/60 line-clamp-2">${item.description}</p>
-                            <p class="text-[10px] font-bold text-[#9E764E] mt-2 uppercase tracking-widest" id="unit-price-label-${item.id}">
-                                R$ ${initialPrice.toFixed(2)} ${unitSuffix}
-                            </p>
-                        </div>
-                        
-                        <div class="mt-auto pt-6 border-t border-[#9E764E]/10 space-y-5">
-                            <!-- Toggle Un/Kg -->
-                            ${hasKg ? `
-                            <div class="flex bg-[#F3EEE8] p-1 rounded-2xl border border-[#9E764E]/5">
-                                <button onclick="setCardUnit('${item.id}', 'un')" id="unit-un-${item.id}" class="unit-btn active flex-1 py-1.5 rounded-xl text-[9px] font-black uppercase bg-[#241B15] text-white">Unidade</button>
-                                <button onclick="setCardUnit('${item.id}', 'kg')" id="unit-kg-${item.id}" class="unit-btn flex-1 py-1.5 rounded-xl text-[9px] font-black uppercase text-[#9E764E]/50">Kilo</button>
-                            </div>
-                            ` : ''}
-
-                            <!-- Seleção de Tamanho (Aro) -->
-                            ${hasSizes ? `
-                            <div class="space-y-2">
-                                <label class="text-[9px] font-black uppercase tracking-widest text-[#9E764E]">Tamanho</label>
-                                <div class="grid grid-cols-3 gap-1 bg-[#F3EEE8] p-1 rounded-xl">
-                                    ${item.sizes.map((s, idx) => `
-                                        <button onclick="setCardSize('${item.id}', ${idx})" id="size-${item.id}-${idx}" class="size-btn ${idx === 0 ? 'bg-[#9E764E] text-white' : 'text-[#9E764E]/60'} py-2 rounded-lg text-[9px] font-bold uppercase transition-all whitespace-nowrap">
-                                            ${s.label}
-                                        </button>
-                                    `).join('')}
-                                </div>
-                            </div>
-                            ` : ''}
-
-                            <!-- Seleção de Sabores -->
-                            ${hasFlavors ? `
-                            <div class="space-y-2">
-                                <label class="text-[9px] font-black uppercase tracking-widest text-[#9E764E]">Sabor/Tipo</label>
-                                <select id="flavor-${item.id}" class="w-full bg-[#F3EEE8] border border-[#9E764E]/10 rounded-xl px-4 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-[#9E764E]/20 appearance-none text-[#241B15]">
-                                    ${item.flavors.map(f => `<option value="${f}">${f}</option>`).join('')}
-                                </select>
-                            </div>
-                            ` : ''}
-
-                            <div class="flex items-center justify-between">
-                                <div class="flex items-center gap-2 bg-[#F3EEE8] p-1 rounded-full">
-                                    <button onclick="changeQtyUI('${item.id}', -1)" class="w-9 h-9 rounded-full bg-white flex items-center justify-center text-[10px] shadow-sm hover:bg-[#241B15] hover:text-white transition-all"><i class="fas fa-minus"></i></button>
-                                    <input type="number" id="qty-${item.id}" value="${initialQty}" step="${item.units[0] === 'kg' ? '0.1' : '1'}" class="w-10 bg-transparent text-center text-sm font-bold text-[#241B15] focus:outline-none">
-                                    <button onclick="changeQtyUI('${item.id}', 1)" class="w-9 h-9 rounded-full bg-white flex items-center justify-center text-[10px] shadow-sm hover:bg-[#241B15] hover:text-white transition-all"><i class="fas fa-plus"></i></button>
-                                </div>
-                                <div class="text-right">
-                                    <p class="text-xl serif-font font-semibold tracking-tighter" id="price-preview-${item.id}">R$ ${(initialPrice * initialQty).toFixed(2)}</p>
-                                    <p class="text-[8px] uppercase text-[#9E764E] font-black tracking-widest" id="price-label-${item.id}">Total</p>
-                                </div>
-                            </div>
-                            
-                            <button onclick="addToCart('${item.id}')" class="btn-primary w-full py-4 rounded-[1.5rem] text-[10px] uppercase tracking-[0.2em] font-black active:scale-95">
-                                ${item.isKit ? 'Montar Kit' : 'Adicionar à Cesta'}
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            `;
-        }
-
-        // LÓGICA DE UI
-        function toggleSearch() {
-            const bar = document.getElementById('search-bar');
-            const isHidden = bar.classList.contains('opacity-0');
-            if (isHidden) { bar.classList.remove('max-h-0', 'opacity-0'); bar.classList.add('max-h-52', 'opacity-100'); document.getElementById('search-input').focus(); }
-            else { bar.classList.add('max-h-0', 'opacity-0'); bar.classList.remove('max-h-52', 'opacity-100'); }
-        }
-
-        function handleSearch(val) { currentSearch = val; renderMenu(); }
-
-        function scrollToCategory(cat) {
-            document.querySelectorAll('.category-btn').forEach(btn => {
-                if(btn.innerText === cat) btn.classList.add('active'); else btn.classList.remove('active');
-            });
-            if (cat === 'Todos') { window.scrollTo({ top: 0, behavior: 'smooth' }); return; }
-            const el = document.getElementById(sanitizeId(cat));
-            if (el) window.scrollTo({ top: el.getBoundingClientRect().top + window.pageYOffset - 180, behavior: 'smooth' });
-        }
-
-        function setCardSize(id, idx) {
-            document.querySelectorAll(`[id^="size-${id}-"]`).forEach(btn => {
-                btn.classList.remove('bg-[#9E764E]', 'text-white');
-                btn.classList.add('text-[#9E764E]/60');
-            });
-            const selectedBtn = document.getElementById(`size-${id}-${idx}`);
-            selectedBtn.classList.add('bg-[#9E764E]', 'text-white');
-            selectedBtn.classList.remove('text-[#9E764E]/60');
-            updatePricePreview(id);
-        }
-
-        function changeQtyUI(id, delta) {
-            const input = document.getElementById(`qty-${id}`);
-            const item = MENU_ITEMS.find(i => i.id === id);
-            const unit = getSelectedUnit(id);
-            const step = unit === 'kg' ? 0.1 : 1;
-            const min = item.isKit ? 5 : (unit === 'kg' ? 0.1 : 1);
-            let val = parseFloat(input.value) + (delta * step);
-            if (val < min) val = min;
-            input.value = val.toFixed(unit === 'kg' ? 1 : 0);
-            updatePricePreview(id);
-        }
-
-        function setCardUnit(id, unit) {
-            const btnUn = document.getElementById('unit-un-' + id);
-            const btnKg = document.getElementById('unit-kg-' + id);
-            const input = document.getElementById('qty-' + id);
-            if (unit === 'un') {
-                btnUn.classList.add('active', 'bg-[#241B15]', 'text-white'); btnUn.classList.remove('text-[#9E764E]/50');
-                btnKg.classList.remove('active', 'bg-[#241B15]', 'text-white'); btnKg.classList.add('text-[#9E764E]/50');
-                input.value = "1"; input.step = "1";
-            } else {
-                btnKg.classList.add('active', 'bg-[#241B15]', 'text-white'); btnKg.classList.remove('text-[#9E764E]/50');
-                btnUn.classList.remove('active', 'bg-[#241B15]', 'text-white'); btnUn.classList.add('text-[#9E764E]/50');
-                input.value = "0.5"; input.step = "0.1";
-            }
-            updatePricePreview(id);
-        }
-
-        function getSelectedUnit(id) {
-            const btnKg = document.getElementById('unit-kg-' + id);
-            return (btnKg && btnKg.classList.contains('active')) ? 'kg' : 'un';
-        }
-
-        function updatePricePreview(id) {
-            const item = MENU_ITEMS.find(i => i.id === id);
-            const qty = parseFloat(document.getElementById('qty-' + id).value);
-            const unit = getSelectedUnit(id);
-            let price;
-            let suffix = item.isKit ? '/pessoa' : (unit === 'kg' ? '/kg' : '/un');
-
-            if (item.sizes && item.sizes.length > 0) {
-                const activeIdx = Array.from(document.querySelectorAll(`[id^="size-${id}-"]`)).findIndex(b => b.classList.contains('bg-[#9E764E]'));
-                price = item.sizes[activeIdx].price;
-            } else {
-                price = unit === 'kg' ? item.priceKg : item.price;
-            }
-
-            document.getElementById('unit-price-label-' + id).innerText = 'R$ ' + price.toFixed(2) + ' ' + suffix;
-            document.getElementById('price-preview-' + id).innerText = 'R$ ' + (price * qty).toFixed(2);
-        }
-
-        // LÓGICA DO CARRINHO
-        function openCart() {
-            document.getElementById('cart-modal').classList.remove('invisible');
-            setTimeout(() => {
-                document.getElementById('cart-modal').querySelector('.opacity-0').classList.add('opacity-100');
-                document.getElementById('cart-modal').querySelector('.translate-x-full').classList.remove('translate-x-full');
-            }, 10);
-            document.body.classList.add('cart-open');
-            renderCartItems();
-            updateCartSummary();
-        }
-
-        function closeCart() {
-            document.getElementById('cart-modal').querySelector('.opacity-0').classList.remove('opacity-100');
-            document.getElementById('cart-modal').querySelector('div:last-child').classList.add('translate-x-full');
-            setTimeout(() => { document.getElementById('cart-modal').classList.add('invisible'); document.body.classList.remove('cart-open'); }, 500);
-        }
-
-        function addToCart(id) {
-            const item = MENU_ITEMS.find(i => i.id === id);
-            const qty = parseFloat(document.getElementById('qty-' + id).value);
-            const flavor = document.getElementById('flavor-' + id) ? document.getElementById('flavor-' + id).value : null;
-            let size = null;
-            let price = item.price;
-
-            if (item.sizes && item.sizes.length > 0) {
-                const activeIdx = Array.from(document.querySelectorAll(`[id^="size-${id}-"]`)).findIndex(b => b.classList.contains('bg-[#9E764E]'));
-                size = item.sizes[activeIdx].label;
-                price = item.sizes[activeIdx].price;
-            }
-
-            if (item.isKit && item.composition) {
-                item.composition.forEach(comp => {
-                    const subItem = MENU_ITEMS.find(si => si.id === comp.id);
-                    if (subItem) addIndividualToCart(subItem.id, 'un', Math.ceil(qty * comp.multiplier), null, null);
-                });
-            } else {
-                const unit = getSelectedUnit(id);
-                if (unit === 'kg') price = item.priceKg;
-                addIndividualToCart(id, unit, qty, flavor, size, price);
-            }
-            updateCartSummary();
-            openCart();
-        }
-
-        function addIndividualToCart(id, unit, qty, flavor, size, price) {
-            const item = MENU_ITEMS.find(i => i.id === id);
-            const finalPrice = price || (unit === 'kg' ? item.priceKg : item.price);
-            const existing = cart.find(c => c.id === id && c.unit === unit && c.flavor === flavor && c.size === size);
-            if (existing) { existing.qty += qty; }
-            else { cart.push({ ...item, qty, unit, flavor, size, finalPrice }); }
-        }
-
-        function updateCartSummary() {
-            let total = cart.reduce((acc, item) => acc + (item.finalPrice * item.qty), 0);
-            const count = cart.length;
-            if (activeFulfillment === 'Entrega' && count > 0) { total += DELIVERY_FEE; document.getElementById('delivery-fee-row').classList.remove('hidden'); }
-            else { document.getElementById('delivery-fee-row').classList.add('hidden'); }
-            document.getElementById('cart-badge').innerText = count;
-            document.getElementById('cart-badge').classList.toggle('hidden', count === 0);
-            document.getElementById('header-total').innerText = 'R$ ' + total.toFixed(2);
-            document.getElementById('sticky-total').innerText = 'R$ ' + total.toFixed(2);
-            document.getElementById('cart-final-total').innerText = 'R$ ' + total.toFixed(2);
-            document.getElementById('sticky-cart-count').innerText = count;
-            const bar = document.getElementById('sticky-cart-bar');
-            if (count > 0) bar.classList.remove('translate-y-40'); else bar.classList.add('translate-y-40');
-            document.getElementById('cart-footer').classList.toggle('hidden', count === 0);
-        }
-
-        function renderCartItems() {
-            const container = document.getElementById('cart-items-list');
-            if (cart.length === 0) {
-                container.innerHTML = `<div class="text-center py-24 opacity-30 flex flex-col items-center"><i class="fas fa-bread-slice text-6xl mb-6 text-[#9E764E] opacity-50"></i><p class="serif-font text-xl">Sua cesta está vazia...</p></div>`;
-                return;
-            }
-            container.innerHTML = cart.map((item, idx) => {
-                const unitLabel = item.unit === 'kg' ? 'kg' : 'un';
-                return `
-                <div class="bg-white p-4 sm:p-5 rounded-[2rem] border border-[#9E764E]/10 flex gap-4 sm:gap-5 animate-fade shadow-sm">
-                    <img src="${item.image}" class="w-14 h-14 sm:w-16 sm:h-16 object-cover rounded-2xl shadow-md">
-                    <div class="flex-grow min-w-0">
-                        <div class="flex justify-between items-start mb-1">
-                            <div>
-                                <h4 class="serif-font text-sm font-semibold truncate">${item.name}</h4>
-                                <div class="flex flex-wrap gap-2 mt-1">
-                                    ${item.size ? `<span class="text-[8px] bg-[#9E764E]/10 text-[#9E764E] px-2 py-0.5 rounded-full font-bold uppercase">${item.size}</span>` : ''}
-                                    ${item.flavor ? `<span class="text-[8px] bg-[#241B15]/5 text-[#241B15] px-2 py-0.5 rounded-full font-bold uppercase">${item.flavor}</span>` : ''}
-                                </div>
-                                <p class="text-[9px] text-[#9E764E]/70 font-bold mt-1 uppercase tracking-widest">R$ ${item.finalPrice.toFixed(2)} /${unitLabel}</p>
-                            </div>
-                            <button onclick="removeFromCart(${idx})" class="text-red-300 hover:text-red-600 transition-colors p-2">
-                                <i class="fas fa-trash-alt text-sm"></i>
-                            </button>
-                        </div>
-                        <div class="flex justify-between items-end mt-2">
-                            <div class="flex items-center gap-3 bg-[#F3EEE8] px-2 py-1 rounded-full border border-[#9E764E]/5">
-                                <button onclick="updateCartQty(${idx}, -1)" class="text-[10px] text-[#9E764E] w-6 h-6 flex items-center justify-center bg-white rounded-full shadow-sm"><i class="fas fa-minus"></i></button>
-                                <span class="text-xs font-bold text-[#241B15]">${item.qty.toFixed(item.unit === 'kg' ? 1 : 0)}${unitLabel}</span>
-                                <button onclick="updateCartQty(${idx}, 1)" class="text-[10px] text-[#9E764E] w-6 h-6 flex items-center justify-center bg-white rounded-full shadow-sm"><i class="fas fa-plus"></i></button>
-                            </div>
-                            <span class="text-base font-bold text-[#241B15]">R$ ${(item.finalPrice * item.qty).toFixed(2)}</span>
-                        </div>
-                    </div>
-                </div>
-            `}).join('');
-        }
-
-        function updateCartQty(idx, delta) {
-            const item = cart[idx]; const step = item.unit === 'kg' ? 0.1 : 1;
-            item.qty += (delta * step); if (item.qty <= 0) cart.splice(idx, 1);
-            updateCartSummary(); renderCartItems();
-        }
-
-        function removeFromCart(idx) { cart.splice(idx, 1); updateCartSummary(); renderCartItems(); }
-
-        function setOrderType(type) {
-            activeOrderType = type;
-            document.getElementById('btn-order-ready').classList.toggle('active', type === 'Pronta Entrega');
-            document.getElementById('btn-order-sched').classList.toggle('active', type === 'Encomenda');
-            document.getElementById('sched-fields').classList.toggle('hidden', type === 'Pronta entrega');
-            updateCartSummary();
-            if (type === 'Encomenda') configurarRestricoesEncomenda();
-        }
-
-        function setFulfillment(method) {
-            activeFulfillment = method;
-            document.getElementById('btn-pickup').classList.toggle('active', method === 'Retirada');
-            document.getElementById('btn-delivery').classList.toggle('active', method === 'Entrega');
-            document.getElementById('pickup-location-container').classList.toggle('hidden', method === 'Entrega');
-            document.getElementById('delivery-address-container').classList.toggle('hidden', method === 'Retirada');
-            updateCartSummary();
-        }
-
-        function sendWhatsAppOrder() {
-            const name = document.getElementById('order-name').value;
-            if (!name) return alert('Por favor, informe seu nome!');
-            if (activeFulfillment === 'Entrega' && !document.getElementById('delivery-address').value) return alert('Por favor, informe o endereço!');
-            const itemsText = cart.map(i => '- ' + i.qty.toFixed(i.unit === 'kg' ? 1 : 0) + (i.unit === 'kg' ? 'kg' : 'un') + ' • ' + i.name + (i.size ? ' (' + i.size + ')' : '') + (i.flavor ? ' [' + i.flavor + ']' : '') + ' (R$ ' + i.finalPrice.toFixed(2) + '/' + (i.unit === 'kg' ? 'kg' : 'un') + ')').join('\\n');
-            let total = cart.reduce((acc, item) => acc + (item.finalPrice * item.qty), 0);
-            const deliveryText = activeFulfillment === 'Entrega' ? '\\nTaxa de Entrega: R$ ' + DELIVERY_FEE.toFixed(2) : '';
-            if(activeFulfillment === 'Entrega') total += DELIVERY_FEE;
-            const fulfillmentInfo = activeFulfillment === 'Entrega' ? 'Entrega: ' + document.getElementById('delivery-address').value : 'Retirada: ' + document.getElementById('pickup-location').value;
-            const message = 'Novo Pedido • Sabor & Arte\\n' + '__________________________\\n' + 'Cliente: ' + name + '\\n' + 'Tipo: ' + activeOrderType + '\\n' + fulfillmentInfo + deliveryText + '\\n\\n' + 'Seleção:\\n' + itemsText + '\\n\\n' + 'Total: R$ ' + total.toFixed(2) + '\\n' + '*(Sujeito a pesagem final)*';
-            window.open('https://wa.me/' + WHATSAPP_NUMBER + '?text=' + encodeURIComponent(message), '_blank');
-        }
-        function configurarRestricoesEncomenda() {
-          const dateInput = document.getElementById('order-date');
-          const timeInput = document.getElementById('order-time');
-          if (!dateInput || !timeInput) return;
-
-          // horário permitido para encomendas
-          timeInput.min = "07:30";
-          timeInput.max = "20:00";
-
-          // data mínima (amanhã) — em horário LOCAL (sem UTC)
-          const hoje = new Date();
-          const amanha = new Date(hoje.getFullYear(), hoje.getMonth(), hoje.getDate() + 1);
-
-          const yyyy = amanha.getFullYear();
-          const mm = String(amanha.getMonth() + 1).padStart(2, "0");
-          const dd = String(amanha.getDate()).padStart(2, "0");
-          const amanhaISO = `${yyyy}-${mm}-${dd}`;
-
-          dateInput.min = amanhaISO;
-
-          // se estiver vazio ou menor que o mínimo, ajusta
-          if (!dateInput.value || dateInput.value < amanhaISO) dateInput.value = amanhaISO;
-
-          // se horário estiver vazio, sugere um padrão
-          if (!timeInput.value) timeInput.value = "08:00";
-        }
-            const sanitizeId = (name) => name.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
-   
-    
-    
-    
-    
-    
-    
-     </script>
-</body>
-</html>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Delícias da Vovó - Cardápio Digital</title>
+<!-- Bibliotecas Externas -->
+<script src="<https://cdn.tailwindcss.com>"></script>
+<link rel="stylesheet" href="<https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css>" />
+<link href="<https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Lora:ital,wght@0,400;0,600;1,400;1,600&display=swap>" rel="stylesheet">
+
+<style>
+    :root {
+        /* Palette Premium Earthy */
+        --primary: #9E764E;
+        --primary-dark: #7D5C3D;
+        --secondary: #5A3E2B; /* Marrom Tabaco */
+        --bg: #FCFAF7;
+        --accent: #E8D5C4;
+    }
+
+    body {
+        font-family: 'Inter', sans-serif;
+        background-color: var(--bg);
+        color: var(--secondary);
+        scroll-behavior: smooth;
+        -webkit-tap-highlight-color: transparent;
+    }
+
+    .serif-font { font-family: 'Lora', serif; }
+
+    /* Scrollbars */
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+    .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+    .custom-scrollbar::-webkit-scrollbar-track { background: #F3EEE8; }
+    .custom-scrollbar::-webkit-scrollbar-thumb { background: var(--primary); border-radius: 10px; }
+
+    /* Animations */
+    @keyframes slideUp {
+        from { transform: translateY(30px); opacity: 0; }
+        to { transform: translateY(0); opacity: 1; }
+    }
+    .animate-slide-up { animation: slideUp 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) forwards; }
+
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+    .animate-fade { animation: fadeIn 0.4s ease-out forwards; }
+
+    /* UI Helpers */
+    .cart-open { overflow: hidden; }
+
+    input[type="number"]::-webkit-inner-spin-button,
+    input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+
+    .category-btn.active {
+        background-color: #EFE7DF;
+        color: #4A3223;
+        border-color: #4A3223;
+        box-shadow: 0 6px 14px rgba(74, 50, 35, 0.18);
+        transform: scale(1.05);
+    }
+
+    /* Botão de Cesta no Header */
+    .header-cart-btn {
+        background: var(--primary);
+        box-shadow: 0 8px 20px rgba(158, 118, 78, 0.25);
+    }
+
+    .product-card {
+        background: white;
+        border-radius: 2.5rem;
+        border: 1px solid rgba(158, 118, 78, 0.08);
+        transition: all 0.5s cubic-bezier(0.2, 0.8, 0.2, 1);
+    }
+    .product-card:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 30px 60px rgba(36, 27, 21, 0.08);
+        border-color: rgba(158, 118, 78, 0.2);
+    }
+
+    .btn-primary {
+        background: var(--primary);
+        color: white;
+        box-shadow: 0 10px 25px rgba(158, 118, 78, 0.2);
+        transition: all 0.3s ease;
+    }
+    .btn-primary:hover {
+        background: var(--primary-dark);
+        transform: translateY(-1px);
+    }
+
+    .toggle-container {
+        position: relative;
+        background: #F3EEE8;
+        border-radius: 1.25rem;
+        padding: 5px;
+        display: flex;
+        gap: 5px;
+        border: 1px solid rgba(158, 118, 78, 0.1);
+    }
+    .toggle-btn {
+        position: relative;
+        z-index: 2;
+        flex: 1;
+        text-align: center;
+        padding: 8px 0;
+        border-radius: 1rem;
+        font-size: 10px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        color: var(--primary);
+    }
+    .toggle-btn.active {
+        color: white;
+        background: var(--secondary);
+        box-shadow: 0 6px 15px rgba(36, 27, 21, 0.25);
+    }
+
+    #cart-items-list {
+        overscroll-behavior: contain;
+        -webkit-overflow-scrolling: touch;
+    }
+</style>
