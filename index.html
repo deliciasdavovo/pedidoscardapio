@@ -693,23 +693,72 @@
             updateCartSummary();
         }
 
-        function sendWhatsAppOrder() {
-            const name = document.getElementById('order-name').value;
-            if (!name) return alert('Por favor, informe seu nome!');
-            if (activeFulfillment === 'Entrega' && !document.getElementById('delivery-address').value) return alert('Por favor, informe o endereço!');
-            if (!validarAntesDoWhatsApp()) return;
-            const schedText = (activeOrderType === 'Encomenda')
-  ? `\\nAgendamento: ${document.getElementById('order-date').value} às ${document.getElementById('order-time').value}`
-  : '';
-            const itemsText = cart.map(i => '- ' + i.qty.toFixed(i.unit === 'kg' ? 1 : 0) + (i.unit === 'kg' ? 'kg' : 'un') + ' • ' + i.name + (i.size ? ' (' + i.size + ')' : '') + (i.flavor ? ' [' + i.flavor + ']' : '') + ' (R$ ' + i.finalPrice.toFixed(2) + '/' + (i.unit === 'kg' ? 'kg' : 'un') + ')').join('\\n');
-            let total = cart.reduce((acc, item) => acc + (item.finalPrice * item.qty), 0);
-            const deliveryText = activeFulfillment === 'Entrega' ? '\\nTaxa de Entrega: R$ ' + DELIVERY_FEE.toFixed(2) : '';
-            if(activeFulfillment === 'Entrega') total += DELIVERY_FEE;
-            const fulfillmentInfo = activeFulfillment === 'Entrega' ? 'Entrega: ' + document.getElementById('delivery-address').value : 'Retirada: ' + document.getElementById('pickup-location').value;
-            const message = 'Novo Pedido • Sabor & Arte\\n' + '__________________________\\n' + 'Cliente: ' + name + '\\n' + 'Tipo: ' + activeOrderType + '\\n' + fulfillmentInfo + deliveryText + '\\n\\n' + 'Seleção:\\n' + itemsText + '\\n\\n' + 'Total: R$ ' + total.toFixed(2) + '\\n' + '*(Sujeito a pesagem final)*';
-            window.open('https://wa.me/' + WHATSAPP_NUMBER + '?text=' + encodeURIComponent(message), '_blank');
+            function sendWhatsAppOrder() {
+  const name = document.getElementById('order-name')?.value?.trim() || '';
+  if (!name) return alert('Por favor, informe seu nome!');
 
-        }
+  if (activeFulfillment === 'Entrega' && !document.getElementById('delivery-address')?.value?.trim()) {
+    return alert('Por favor, informe o endereço!');
+  }
+
+  // Se você estiver usando as regras de encomenda:
+  if (typeof validarAntesDoWhatsApp === "function") {
+    if (!validarAntesDoWhatsApp()) return;
+  }
+
+  // Monta o bloco de itens
+  const itemsText = cart.map(i => {
+    const qty = i.qty.toFixed(i.unit === 'kg' ? 1 : 0);
+    const unitLabel = i.unit === 'kg' ? 'kg' : 'un';
+    const details =
+      (i.size ? ` (${i.size})` : '') +
+      (i.flavor ? ` (${i.flavor})` : '');
+
+    return `- ${qty}${unitLabel} • ${i.name}${details}`;
+  }).join('\n');
+
+  // Total
+  let total = cart.reduce((acc, item) => acc + (item.finalPrice * item.qty), 0);
+  if (activeFulfillment === 'Entrega') total += DELIVERY_FEE;
+
+  const disponibilidade = activeOrderType; // "Pronta Entrega" ou "Encomenda"
+  const tipo = activeFulfillment === 'Entrega' ? 'ENTREGA' : 'RETIRADA';
+
+  // Endereço ou Unidade
+  let destinoLinha = '';
+  if (activeFulfillment === 'Entrega') {
+    const address = document.getElementById('delivery-address').value.trim();
+    destinoLinha = `Endereço: ${address}`;
+  } else {
+    const unidade = document.getElementById('pickup-location').value;
+    destinoLinha = `Unidade: ${unidade}`;
+  }
+
+  // Agendamento (somente se for Encomenda)
+  let agendamentoLinha = '';
+  if (activeOrderType === 'Encomenda') {
+    const dateVal = document.getElementById('order-date')?.value;
+    const timeVal = document.getElementById('order-time')?.value;
+    if (dateVal && timeVal) agendamentoLinha = `\nAgendamento: ${dateVal} às ${timeVal}`;
+  }
+
+  const message =
+`Pedido • Delícias da Vovó
+
+Disponibilidade: ${disponibilidade}
+Tipo: ${tipo}
+${destinoLinha}${agendamentoLinha}
+
+
+Itens:
+${itemsText}
+
+Total estimado: R$ ${total.toFixed(2)}
+
+_Pedido gerado via Cardápio Digital_`;
+
+  window.open('https://wa.me/' + WHATSAPP_NUMBER + '?text=' + encodeURIComponent(message), '_blank');
+}
         function configurarRestricoesEncomenda() {
           const dateInput = document.getElementById('order-date');
           const timeInput = document.getElementById('order-time');
