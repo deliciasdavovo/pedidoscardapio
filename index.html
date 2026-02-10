@@ -694,6 +694,8 @@
         }
 
         function sendWhatsAppOrder() {
+            if (!validarAntesDoWhatsApp()) return;
+            const name = document.getElementById('order-name').value;
             const name = document.getElementById('order-name').value;
             if (!name) return alert('Por favor, informe seu nome!');
             if (activeFulfillment === 'Entrega' && !document.getElementById('delivery-address').value) return alert('Por favor, informe o endereço!');
