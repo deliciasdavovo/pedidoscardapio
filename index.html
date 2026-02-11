@@ -291,7 +291,7 @@
         const CATEGORIES = [
             'Cestas de café da manhã', 'Coffee Breaks', 'Mini salgados', 
             'Salgados assados', 'Lanches frios', 'Bolos caseiros', 'Tortas & Quiches',
-            'Bebidas', 'Doces panificação', 'Pão de bolinha','Bolachas & biscoitos','Especiais de Natal','Mini sobremesas','Sobremesas unitárias','Bolos gelados','Tortas doces','Sobremesas'
+            'Bebidas', 'Doces panificação', 'Pão de bolinha','Bolachas & biscoitos','Especiais de Natal','Mini sobremesas','Sobremesas unitárias','Bolos gelados','Tortas doces','Sobremesas', 'Sobremesas clássicas'
         ];
         
         const MENU_ITEMS = [
@@ -1566,7 +1566,220 @@
   image: 'https://images.unsplash.com/photo-1541976076758-347942db1974?auto=format&fit=crop&q=80&w=900',
   priceKg: 42.00,
   units: ['kg']
+},
+
+// 1) Pudim — 68/kg → preços por unidade aproximados pelos tamanhos
+{
+  id: 'sc_pudim',
+  name: 'Pudim',
+  description: 'Sobremesa clássica artesanal.',
+  category: 'Sobremesas clássicas',
+  image: 'https://images.unsplash.com/photo-1606313564200-e75d5e30476c?auto=format&fit=crop&q=80&w=900',
+  units: ['un'],
+  sizes: [
+    { label: 'Pequeno (600g–800g)', price: 48.00 },
+    { label: 'Vitrine (900g–1,1kg)', price: 68.00 },
+    { label: 'Família (1,2kg–1,5kg)', price: 88.00 }
+  ]
+},
+
+// 2) Caçarola — 62/kg
+{
+  id: 'sc_cacarola',
+  name: 'Caçarola',
+  description: 'Sobremesa clássica artesanal.',
+  category: 'Sobremesas clássicas',
+  image: 'https://images.unsplash.com/photo-1541976076758-347942db1974?auto=format&fit=crop&q=80&w=900',
+  units: ['un'],
+  sizes: [
+    { label: 'Pequeno (600g–800g)', price: 43.00 },
+    { label: 'Vitrine (900g–1,1kg)', price: 62.00 },
+    { label: 'Família (1,2kg–1,5kg)', price: 81.00 }
+  ]
+},
+
+// 3) Brigadeirão — 72/kg
+{
+  id: 'sc_brigadeirao',
+  name: 'Brigadeirão',
+  description: 'Sobremesa clássica artesanal.',
+  category: 'Sobremesas clássicas',
+  image: 'https://images.unsplash.com/photo-1606313564200-e75d5e30476c?auto=format&fit=crop&q=80&w=900',
+  units: ['un'],
+  sizes: [
+    { label: 'Pequeno (600g–800g)', price: 50.00 },
+    { label: 'Vitrine (900g–1,1kg)', price: 72.00 },
+    { label: 'Família (1,2kg–1,5kg)', price: 94.00 }
+  ]
+},
+
+// 4) Gelatina bicolor — 72/kg
+{
+  id: 'sc_gelatina_bicolor',
+  name: 'Gelatina Bicolor',
+  description: 'Sobremesa clássica artesanal.',
+  category: 'Sobremesas clássicas',
+  image: 'https://images.unsplash.com/photo-1540189549336-e6e99c3679fe?auto=format&fit=crop&q=80&w=900',
+  units: ['un'],
+  sizes: [
+    { label: 'Pequeno (600g–800g)', price: 50.00 },
+    { label: 'Vitrine (900g–1,1kg)', price: 72.00 },
+    { label: 'Família (1,2kg–1,5kg)', price: 94.00 }
+  ]
+},
+
+// 5) Gelatina mosaico — 68/kg
+{
+  id: 'sc_gelatina_mosaico',
+  name: 'Gelatina Mosaico',
+  description: 'Sobremesa clássica artesanal.',
+  category: 'Sobremesas clássicas',
+  image: 'https://images.unsplash.com/photo-1540189549336-e6e99c3679fe?auto=format&fit=crop&q=80&w=900',
+  units: ['un'],
+  sizes: [
+    { label: 'Pequeno (600g–800g)', price: 48.00 },
+    { label: 'Vitrine (900g–1,1kg)', price: 68.00 },
+    { label: 'Família (1,2kg–1,5kg)', price: 88.00 }
+  ]
+},
+
+// 6) Quindão — 78/kg
+{
+  id: 'sc_quindao',
+  name: 'Quindão',
+  description: 'Sobremesa clássica artesanal.',
+  category: 'Sobremesas clássicas',
+  image: 'https://images.unsplash.com/photo-1519869325930-281384150729?auto=format&fit=crop&q=80&w=900',
+  units: ['un'],
+  sizes: [
+    { label: 'Pequeno (600g–800g)', price: 55.00 },
+    { label: 'Vitrine (900g–1,1kg)', price: 78.00 },
+    { label: 'Família (1,2kg–1,5kg)', price: 101.00 }
+  ]
+},
+
+// 7) Delícia de Coco — 76/kg
+{
+  id: 'sc_delicia_coco',
+  name: 'Delícia de Coco',
+  description: 'Sobremesa clássica artesanal.',
+  category: 'Sobremesas clássicas',
+  image: 'https://images.unsplash.com/photo-1541976076758-347942db1974?auto=format&fit=crop&q=80&w=900',
+  units: ['un'],
+  sizes: [
+    { label: 'Pequeno (600g–800g)', price: 53.00 },
+    { label: 'Vitrine (900g–1,1kg)', price: 76.00 },
+    { label: 'Família (1,2kg–1,5kg)', price: 99.00 }
+  ]
+},
+
+// 8) Charlotte — 82/kg (com flavor no subtítulo)
+{
+  id: 'sc_charlotte',
+  name: 'Charlotte',
+  description: 'Sobremesa clássica artesanal.',
+  category: 'Sobremesas clássicas',
+  image: 'https://images.unsplash.com/photo-1606313564200-e75d5e30476c?auto=format&fit=crop&q=80&w=900',
+  units: ['un'],
+  flavors: ['Morango', 'Chocolate', 'Frutas'],
+  sizes: [
+    { label: 'Pequeno (600g–800g)', price: 57.00 },
+    { label: 'Vitrine (900g–1,1kg)', price: 82.00 },
+    { label: 'Família (1,2kg–1,5kg)', price: 107.00 }
+  ]
+},
+
+// 9) Romeu & Julieta — 72/kg
+{
+  id: 'sc_romeu_julieta',
+  name: 'Romeu & Julieta',
+  description: 'Sobremesa clássica artesanal.',
+  category: 'Sobremesas clássicas',
+  image: 'https://images.unsplash.com/photo-1541976076758-347942db1974?auto=format&fit=crop&q=80&w=900',
+  units: ['un'],
+  sizes: [
+    { label: 'Pequeno (600g–800g)', price: 50.00 },
+    { label: 'Vitrine (900g–1,1kg)', price: 72.00 },
+    { label: 'Família (1,2kg–1,5kg)', price: 94.00 }
+  ]
+},
+
+// 10) Pudim doce de leite — 76/kg
+{
+  id: 'sc_pudim_doce_leite',
+  name: 'Pudim Doce de Leite',
+  description: 'Sobremesa clássica artesanal.',
+  category: 'Sobremesas clássicas',
+  image: 'https://images.unsplash.com/photo-1606313564200-e75d5e30476c?auto=format&fit=crop&q=80&w=900',
+  units: ['un'],
+  sizes: [
+    { label: 'Pequeno (600g–800g)', price: 53.00 },
+    { label: 'Vitrine (900g–1,1kg)', price: 76.00 },
+    { label: 'Família (1,2kg–1,5kg)', price: 99.00 }
+  ]
+},
+
+// 11) Banoffe — 88/kg
+{
+  id: 'sc_banoffe',
+  name: 'Banoffe',
+  description: 'Sobremesa clássica artesanal.',
+  category: 'Sobremesas clássicas',
+  image: 'https://images.unsplash.com/photo-1541976076758-347942db1974?auto=format&fit=crop&q=80&w=900',
+  units: ['un'],
+  sizes: [
+    { label: 'Pequeno (600g–800g)', price: 62.00 },
+    { label: 'Vitrine (900g–1,1kg)', price: 88.00 },
+    { label: 'Família (1,2kg–1,5kg)', price: 114.00 }
+  ]
+},
+
+// 12) Sorvetão artesanal — 92/kg
+{
+  id: 'sc_sorvetao',
+  name: 'Sorvetão Artesanal',
+  description: 'Sobremesa clássica artesanal.',
+  category: 'Sobremesas clássicas',
+  image: 'https://images.unsplash.com/photo-1540189549336-e6e99c3679fe?auto=format&fit=crop&q=80&w=900',
+  units: ['un'],
+  sizes: [
+    { label: 'Pequeno (600g–800g)', price: 64.00 },
+    { label: 'Vitrine (900g–1,1kg)', price: 92.00 },
+    { label: 'Família (1,2kg–1,5kg)', price: 120.00 }
+  ]
+},
+
+// 13) Manjar de ameixa — 79/kg
+{
+  id: 'sc_manjar_ameixa',
+  name: 'Manjar de Ameixa',
+  description: 'Sobremesa clássica artesanal.',
+  category: 'Sobremesas clássicas',
+  image: 'https://images.unsplash.com/photo-1540189549336-e6e99c3679fe?auto=format&fit=crop&q=80&w=900',
+  units: ['un'],
+  sizes: [
+    { label: 'Pequeno (600g–800g)', price: 55.00 },
+    { label: 'Vitrine (900g–1,1kg)', price: 79.00 },
+    { label: 'Família (1,2kg–1,5kg)', price: 103.00 }
+  ]
+},
+
+// 14) Cheesecake — 85/kg (com flavors)
+{
+  id: 'sc_cheesecake',
+  name: 'Cheesecake',
+  description: 'Sobremesa clássica artesanal.',
+  category: 'Sobremesas clássicas',
+  image: 'https://images.unsplash.com/photo-1606313564200-e75d5e30476c?auto=format&fit=crop&q=80&w=900',
+  units: ['un'],
+  flavors: ['Goiabada', 'Frutas Vermelhas'],
+  sizes: [
+    { label: 'Pequeno (600g–800g)', price: 60.00 },
+    { label: 'Vitrine (900g–1,1kg)', price: 85.00 },
+    { label: 'Família (1,2kg–1,5kg)', price: 111.00 }
+  ]
 }
+
 
 
 
