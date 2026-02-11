@@ -357,20 +357,7 @@
                 price: 8.50, 
                 units: ['un'], 
                 flavors: ['Carne', 'Frango c/ Requeijão', 'Presunto e Queijo'] },
-            { 
-                id: 'bc1', 
-                name: 'Bolo Redondo', 
-                description: 'Bolo artesanal redondo com cobertura generosa.', 
-                category: 'Bolos caseiros', 
-                image: 'https://res.cloudinary.com/ds53z2vv8/image/upload/v1770141071/D2950C0B-FD6C-48B8-A046-73151ED11899_z2ujlo.png', 
-                price: 45.00, 
-                units: ['un'],
-                sizes: [
-                    { label: 'Aro 15cm', price: 45.00 },
-                    { label: 'Aro 21cm', price: 78.00 },
-                    { label: 'Aro 25cm', price: 115.00 }
-                ]
-            },
+           
             { id: 'dp1', 
              name: 'Mini Sonho', 
              description: 'Mini sonho aerado recheado com creme de baunilha Bourbon.', 
@@ -1022,7 +1009,119 @@
   image: 'https://images.unsplash.com/photo-1541976076758-347942db1974?auto=format&fit=crop&q=80&w=900',
   priceKg: 75.00,
   units: ['kg']
+},
+            // =====================
+// BOLOS CASEIROS
+// =====================
+{
+  id: 'bc_pedaco_bolo',
+  name: 'Pedaço de Bolo',
+  description: 'Bolo caseiro em pedaço.',
+  category: 'Bolos caseiros',
+  image: 'https://res.cloudinary.com/ds53z2vv8/image/upload/v1769897023/IMG_2555_x3nvdi.jpg',
+  price: 4.00,
+  units: ['un'],
+  flavors: ['Chocomousse', 'Cenoura', 'Limão', 'Laranja', 'Formigueiro', 'Coco com Amendoim']
+},
+{
+  id: 'bc_ingles',
+  name: 'Bolo Inglês',
+  description: 'Rende mais ou menos 8 fatias.',
+  category: 'Bolos caseiros',
+  image: 'https://images.unsplash.com/photo-1541976076758-347942db1974?auto=format&fit=crop&q=80&w=900',
+  price: 28.00,
+  units: ['un'],
+  flavors: ['Chocomousse', 'Cenoura', 'Limão', 'Laranja', 'Formigueiro', 'Coco com Amendoim', 'Indiano']
+},
+            
+{
+  id: 'bc_bolo_tira',
+  name: 'Bolo em Tira',
+  description: 'Bolo em tira (caseiro).',
+  category: 'Bolos caseiros',
+  image: 'https://res.cloudinary.com/ds53z2vv8/image/upload/v1769882145/7ddf4ca4-e911-44d6-8d14-eb2ec90ad75b_gbuc9n.jpg',
+  price: 28.00,
+  priceKg: 59.00,
+  units: ['un', 'kg'],
+  flavors: ['Chocomousse', 'Cenoura', 'Limão', 'Laranja', 'Formigueiro', 'Coco com Amendoim', 'Indiano']
+},
+           
+{
+  id: 'bc_redondo',
+  name: 'Bolo Redondo',
+  description: 'Pequeno - rende aprox. 6 fatias 
+      Vitrine - rende aprox.s 8 fatias 
+      Tam. Familia - rende aprox. 20 fatias',
+  category: 'Bolos caseiros',
+  image: 'https://images.unsplash.com/photo-1563729784474-d77dbb933a9f?auto=format&fit=crop&q=80&w=900',
+  price: 18.00,
+  units: ['un'],
+  flavors: ['Chocomousse', 'Cenoura', 'Limão', 'Laranja', 'Formigueiro', 'Coco com Amendoim', 'Indiano', 'Fubá', 'Fubá com Milho', 'Milho']
+    sizes: [
+                    { label: 'Pequeno', price: 18.00 },
+                    { label: 'Vitrine', price: 28.00 },
+                    { label: 'Tam. familia', price: 72.00 }
+                ]
+},
+{
+  id: 'bc_brownie',
+  name: 'Brownie',
+  description: 'Massa de chocolate com nozes, com cobertura de ganache (aprox. 80g).',
+  category: 'Bolos caseiros',
+  image: 'https://res.cloudinary.com/ds53z2vv8/image/upload/v1769888880/IMG_1194_bdyf26.jpg',
+  price: 7.50,
+  priceKg: 88.00,
+  units: ['un', 'kg']
+},
+{
+  id: 'bc_kuffa',
+  name: 'Kuffa',
+  description: 'Bolo caseiro de frutas cristalizadas com farofa de açúcar por cima (aprox. 80g).',
+  category: 'Bolos caseiros',
+  image: 'https://images.unsplash.com/photo-1541976076758-347942db1974?auto=format&fit=crop&q=80&w=900',
+  price: 6.00,
+  priceKg: 45.00,
+  units: ['un', 'kg']
+},
+{
+  id: 'bc_cuca',
+  name: 'Cuca',
+  description: 'Bolo caseiro de banana com chocolate e farofa de açúcar por cima (aprox. 80g).',
+  category: 'Bolos caseiros',
+  image: 'https://images.unsplash.com/photo-1541976076758-347942db1974?auto=format&fit=crop&q=80&w=900',
+  price: 6.00,
+  priceKg: 45.00,
+  units: ['un', 'kg']
+},
+{
+  id: 'bc_rocambole',
+  name: 'Rocambole',
+  description: 'Rocambole recheado, perfeito para dividir.',
+  category: 'Bolos caseiros',
+  image: 'https://images.unsplash.com/photo-1606313564200-e75d5e30476c?auto=format&fit=crop&q=80&w=900',
+  price: 28.00,
+  units: ['un'],
+  flavors: ['Doce de Leite', 'Goiabada']
+},
+{
+  id: 'bc_vulcao_ninho',
+  name: 'Bolo Vulcão Ninho',
+  description: 'Bolo de chocomousse com recheio de Nutella e cobertura de Ninho.',
+  category: 'Bolos caseiros',
+  image: 'https://images.unsplash.com/photo-1563729784474-d77dbb933a9f?auto=format&fit=crop&q=80&w=900',
+  price: 47.00,
+  units: ['un']
+},
+{
+  id: 'bc_vulcao_cenoura',
+  name: 'Bolo Vulcão Cenoura',
+  description: 'Bolo de cenoura recheado e com cobertura de brigadeiro.',
+  category: 'Bolos caseiros',
+  image: 'https://images.unsplash.com/photo-1563729784474-d77dbb933a9f?auto=format&fit=crop&q=80&w=900',
+  price: 42.00,
+  units: ['un']
 }
+
 
 
         ];
