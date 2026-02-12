@@ -1879,23 +1879,27 @@
             const unitSuffix = item.isKit ? '/pessoa' : (item.units[0] === 'kg' ? '/kg' : '/un');
 
             return `
-                <div class="relative h-56 overflow-hidden"
-     ontouchstart="swipeStart(event, '${item.id}')"
-     ontouchend="swipeEnd(event, '${item.id}')"
->
+                <div class="product-card group flex flex-col h-full overflow-hidden">
+                    <div class="relative h-56 overflow-hidden">
   <img 
     id="img-${item.id}" 
     src="${(item.images && item.images.length ? item.images[0] : item.image)}"
     class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-[1s]"
-    draggable="false"
   >
 
   ${((item.images && item.images.length > 1) ? `
+    <button onclick="prevImage('${item.id}')" class="absolute left-3 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white text-[#241B15] w-9 h-9 rounded-full shadow-md flex items-center justify-center active:scale-95">
+      <i class="fas fa-chevron-left text-xs"></i>
+    </button>
+    <button onclick="nextImage('${item.id}')" class="absolute right-3 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white text-[#241B15] w-9 h-9 rounded-full shadow-md flex items-center justify-center active:scale-95">
+      <i class="fas fa-chevron-right text-xs"></i>
+    </button>
+
     <div class="absolute bottom-3 left-0 right-0 flex justify-center gap-2">
       ${item.images.map((_, idx) => `
         <button onclick="setImage('${item.id}', ${idx})"
           id="dot-${item.id}-${idx}"
-          class="w-1.5 h-1.5 rounded-full ${idx === 0 ? 'bg-white' : 'bg-white/40'} shadow"
+          class="w-2.5 h-2.5 rounded-full ${idx === 0 ? 'bg-white' : 'bg-white/40'} shadow"
           aria-label="Imagem ${idx+1}">
         </button>
       `).join('')}
@@ -2256,32 +2260,6 @@ function nextImage(id) {
   const cur = imageIndexById[id] ?? 0;
   const next = (cur + 1) % imgs.length;
   setImage(id, next);
-}
-const swipeStateById = {}; // guarda início do toque
-
-function swipeStart(e, id) {
-  if (!getItemImages(id).length) return;
-  const touch = e.touches[0];
-  swipeStateById[id] = { x0: touch.clientX, t0: Date.now() };
-}
-
-function swipeEnd(e, id) {
-  const st = swipeStateById[id];
-  if (!st) return;
-
-  const touch = e.changedTouches[0];
-  const dx = touch.clientX - st.x0;
-  const dt = Date.now() - st.t0;
-
-  const MIN_DIST = 35;
-  const MAX_TIME = 900;
-
-  if (dt <= MAX_TIME && Math.abs(dx) >= MIN_DIST) {
-    if (dx < 0) nextImage(id);
-    else prevImage(id);
-  }
-
-  delete swipeStateById[id];
 }
 
 function prevImage(id) {
