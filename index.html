@@ -391,16 +391,19 @@
   flavors: ['Peito de Peru', 'Quatro Queijos']
 },
 {
-  id: 'ms_trouxinha',
-  name: 'Mini Trouxinha',
-  description: 'Massa folhada recheada de frango.',
+  id: 'ms_folhados',
+  name: 'Mini folhados',
+  description: 'Mini salgados na massa folhada recheada.',
   category: 'Mini salgados',
-  image: 'https://res.cloudinary.com/ds53z2vv8/image/upload/v1769891765/mini_sonho_1_bz8dwc.png',
-  price: 2.20,
-  priceKg: 65.00,
+  images: ['https://res.cloudinary.com/ds53z2vv8/image/upload/v1769889248/mini_croissant_oi6jig.jpg', 
+          'https://res.cloudinary.com/ds53z2vv8/image/upload/v1769891765/mini_sonho_1_bz8dwc.png'],
+  price: 2.50,
+  priceKg: 69.00,
   units: ['un', 'kg'],
-  flavors: ['Frango']
-},
+  flavors: ['Presunto', 'Frango', 'Queijo', 'Peito de peru', 'Palmito com milho', 'Brócolis', 'Alho poró'],
+  sizes: [
+    { label: 'Croissant', price: 2.50 }, { label: 'Trouxinha', price: 2.20 },{ label: 'Cortadinho', price: 1.80 } ]
+        }
 {
   id: 'ms_quiche',
   name: 'Mini Quiche',
