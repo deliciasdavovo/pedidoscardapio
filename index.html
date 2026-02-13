@@ -1971,6 +1971,18 @@
             selectedBtn.classList.add('bg-[#9E764E]', 'text-white');
             selectedBtn.classList.remove('text-[#9E764E]/60');
             updatePricePreview(id);
+            // atualizar imagem ao trocar tamanho
+const item = MENU_ITEMS.find(i => i.id === id);
+const imgEl = document.getElementById(`img-${id}`);
+
+if (imgEl) {
+  const sizeImg = item?.sizes?.[idx]?.image;
+  if (sizeImg) {
+    imgEl.src = sizeImg;
+  } else {
+    imgEl.src = (item.images && item.images.length ? item.images[0] : item.image);
+  }
+}
             const item = MENU_ITEMS.find(i => i.id === id);
 if (!item || !item.sizes) return;
 
@@ -2006,11 +2018,7 @@ if (desc && item.sizes[idx] && item.sizes[idx].description) {
                 btnUn.classList.remove('active', 'bg-[#241B15]', 'text-white'); btnUn.classList.add('text-[#9E764E]/50');
                 input.value = "0.5"; input.step = "0.1";
             }
-            const item = MENU_ITEMS.find(i => i.id === id);
-if (item && item.sizes && item.sizes[idx] && item.sizes[idx].image) {
-  const img = document.getElementById(`img-${id}`);
-  if (img) img.src = item.sizes[idx].image;
-}
+           
 
             updatePricePreview(id);
         }
