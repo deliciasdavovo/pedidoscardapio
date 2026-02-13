@@ -2006,13 +2006,16 @@
             const unit = getSelectedUnit(id);
             let price;
             let suffix = item.isKit ? '/pessoa' : (unit === 'kg' ? '/kg' : '/un');
-
-            if (item.sizes && item.sizes.length > 0) {
-                const activeIdx = Array.from(document.querySelectorAll(`[id^="size-${id}-"]`)).findIndex(b => b.classList.contains('bg-[#9E764E]'));
-                price = item.sizes[activeIdx].price;
-            } else {
-                price = unit === 'kg' ? item.priceKg : item.price;
-            }
+if (unit === 'kg') {
+    price = item.priceKg;
+} 
+else if (item.sizes && item.sizes.length > 0) {
+    const activeIdx = Array.from(document.querySelectorAll(`[id^="size-${id}-"]`)).findIndex(b => b.classList.contains('bg-[#9E764E]'));
+    price = item.sizes[activeIdx].price;
+} 
+else {
+    price = item.price;
+}
 
             document.getElementById('unit-price-label-' + id).innerText = 'R$ ' + price.toFixed(2) + ' ' + suffix;
             document.getElementById('price-preview-' + id).innerText = 'R$ ' + (price * qty).toFixed(2);
