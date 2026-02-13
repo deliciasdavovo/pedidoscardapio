@@ -797,27 +797,66 @@
   units: ['un', 'kg']
 },
 {
-  id: 'dp_hungaro_doce',
+  id: 'dp_hungaro',
   name: 'Húngaro Doce',
-  description: 'Massa de pão doce recheada.',
+  description: 'Escolha a massa e o recheio.',
   category: 'Doces panificação',
-  image: 'https://images.unsplash.com/photo-1616031034566-7b0f2a2b9b1e?auto=format&fit=crop&q=80&w=900',
+
+  // imagem inicial (vai trocar pelo variant)
+  image: 'https://res.cloudinary.com/ds53z2vv8/image/upload/v1771019901/IMG_2639_h3sq1a.jpg',
+
+  // preço base (vai ser sobrescrito pelo variant quando precisar)
   price: 4.50,
   priceKg: 52.00,
   units: ['un', 'kg'],
-  flavors: ['Coco com Leite Condensado', 'Frutas Cristalizadas']
+
+  // 1 select só (do jeito que teu sistema suporta hoje)
+  flavors: [
+    'Tradicional • Coco c/ Leite Condensado',
+    'Tradicional • Frutas Cristalizadas',
+    'Folhado • Coco c/ Leite Condensado',
+    'Folhado • Frutas Cristalizadas'
+  ],
+
+  variants: {
+    'Tradicional • Coco c/ Leite Condensado': {
+      price: 4.50,
+      priceKg: 52.00,
+      description: 'Massa tradicional de pão doce recheada com coco e leite condensado.',
+      images: [
+        'https://res.cloudinary.com/ds53z2vv8/image/upload/v1771019901/IMG_2639_h3sq1a.jpg'
+      ]
+    },
+
+    'Tradicional • Frutas Cristalizadas': {
+      price: 4.50,
+      priceKg: 52.00,
+      description: 'Massa tradicional de pão doce recheada com frutas cristalizadas.',
+      images: [
+        'https://res.cloudinary.com/ds53z2vv8/image/upload/v1771019901/IMG_2639_h3sq1a.jpg'
+      ]
+    },
+
+    'Folhado • Coco c/ Leite Condensado': {
+      price: 4.50,
+      priceKg: 68.00,
+      description: 'Massa folhada doce recheada com coco e leite condensado.',
+      images: [
+        'https://images.unsplash.com/photo-1608198093002-ad4e005484ec?auto=format&fit=crop&q=80&w=900'
+      ]
+    },
+
+    'Folhado • Frutas Cristalizadas': {
+      price: 4.50,
+      priceKg: 68.00,
+      description: 'Massa folhada doce recheada com frutas cristalizadas.',
+      images: [
+        'https://images.unsplash.com/photo-1608198093002-ad4e005484ec?auto=format&fit=crop&q=80&w=900'
+      ]
+    }
+  }
 },
-{
-  id: 'dp_hungaro_folhado',
-  name: 'Húngaro Doce Folhado',
-  description: 'Massa folhada doce recheada.',
-  category: 'Doces panificação',
-  image: 'https://images.unsplash.com/photo-1608198093002-ad4e005484ec?auto=format&fit=crop&q=80&w=900',
-  price: 4.50,
-  priceKg: 68.00,
-  units: ['un', 'kg'],
-  flavors: ['Coco com Leite Condensado', 'Frutas Cristalizadas']
-},
+
 {
   id: 'dp_croissant_doce_mini',
   name: 'Croissant Doce',
@@ -867,7 +906,7 @@
   name: 'Catarina (Strudel Folhado)',
   description: 'Strudel folhado recheado com creme e frutas.',
   category: 'Doces panificação',
-  image: 'https://images.unsplash.com/photo-1608198093002-ad4e005484ec?auto=format&fit=crop&q=80&w=900',
+  image: 'https://res.cloudinary.com/ds53z2vv8/image/upload/v1771019901/IMG_2570_eebal8.jpg',
   priceKg: 68.00,
   units: ['kg'],
   flavors: ['Maçã com Creme', 'Banana com Creme', 'Maçã com Chocolate', 'Banana com Chocolate']
@@ -901,16 +940,6 @@
   image: 'https://images.unsplash.com/photo-1608198093002-ad4e005484ec?auto=format&fit=crop&q=80&w=900',
   price: 9.80,
   priceKg: 85.00,
-  units: ['un', 'kg']
-},
-{
-  id: 'dp_carolinas_cristal',
-  name: 'Carolinas Cristalizadas',
-  description: 'Carolinhas delicadas e crocantes.',
-  category: 'Doces panificação',
-  image: 'https://images.unsplash.com/photo-1519869325930-281384150729?auto=format&fit=crop&q=80&w=900',
-  price: 2.00,
-  priceKg: 45.00,
   units: ['un', 'kg']
 },
 {
@@ -1321,7 +1350,7 @@
   name: 'Chocotone',
   description: 'Chocotone caseiro com gotas de chocolate.',
   category: 'Especiais de Natal',
-  image: 'https://images.unsplash.com/photo-1608198093002-ad4e005484ec?auto=format&fit=crop&q=80&w=900',
+  image: 'https://res.cloudinary.com/ds53z2vv8/image/upload/v1771019880/IMG_1453_ibc7br.jpg',
   price: 17.80,
   units: ['un']
 },
@@ -1361,7 +1390,7 @@
   name: 'Carolinas',
   description: 'Carolinhas com recheios variados.',
   category: 'Mini sobremesas',
-  image: 'https://images.unsplash.com/photo-1519869325930-281384150729?auto=format&fit=crop&q=80&w=900',
+  image: 'https://res.cloudinary.com/ds53z2vv8/image/upload/v1771019902/IMG_2878_ljd2im.jpg',
   price: 2.80,
   priceKg: 69.00,
   units: ['un', 'kg'],
