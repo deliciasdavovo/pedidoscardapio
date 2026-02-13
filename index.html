@@ -1879,7 +1879,7 @@
                     <div class="p-8 flex flex-col flex-grow">
                         <div class="mb-5">
                             <h3 class="text-2xl serif-font mb-2 group-hover:text-[#9E764E] transition-colors">${item.name}</h3>
-                            <p class="text-[11px] leading-relaxed text-[#241B15]/60 line-clamp-2">${item.description}</p>
+                            <p id="desc-${item.id}" class="text-[11px] leading-relaxed text-[#241B15]/60 line-clamp-2">${item.description}</p>
                             <p class="text-[10px] font-bold text-[#9E764E] mt-2 uppercase tracking-widest" id="unit-price-label-${item.id}">
                                 R$ ${initialPrice.toFixed(2)} ${unitSuffix}
                             </p>
@@ -1912,7 +1912,7 @@
                             ${hasFlavors ? `
                             <div class="space-y-2">
                                 <label class="text-[9px] font-black uppercase tracking-widest text-[#9E764E]">Sabor/Tipo</label>
-                                <select id="flavor-${item.id}" class="w-full bg-[#F3EEE8] border border-[#9E764E]/10 rounded-xl px-4 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-[#9E764E]/20 appearance-none text-[#241B15]">
+                                <select id="flavor-${item.id}" onchange="onFlavorChange('${item.id}')" class="w-full bg-[#F3EEE8] border border-[#9E764E]/10 rounded-xl px-4 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-[#9E764E]/20 appearance-none text-[#241B15]">
                                     ${item.flavors.map(f => `<option value="${f}">${f}</option>`).join('')}
                                 </select>
                             </div>
@@ -2202,6 +2202,34 @@ function getItemImages(id) {
   // Suporta tanto item.images quanto item.image antigo
   return (item.images && item.images.length) ? item.images : (item.image ? [item.image] : []);
 }
+function onFlavorChange(id) {
+  const item = MENU_ITEMS.find(i => i.id === id);
+  if (!item) return;
+
+  const select = document.getElementById(`flavor-${id}`);
+  const flavor = select ? select.value : null;
+
+  // se não tiver variante, não faz nada
+  if (!item.variants || !flavor || !item.variants[flavor]) return;
+
+  const variant = item.variants[flavor];
+
+  // 1) troca descrição no card
+  const descEl = document.getElementById(`desc-${id}`);
+  if (descEl && variant.description) descEl.textContent = variant.description;
+
+  // 2) troca imagens do item (suporta variant.images ou variant.image)
+  const newImages = (variant.images && variant.images.length)
+    ? variant.images
+    : (variant.image ? [variant.image] : null);
+
+  if (newImages && newImages.length) {
+    item.images = newImages;     // passa a valer pro getItemImages()
+    delete item.image;           // opcional: evita conflito com item.image
+    imageIndexById[id] = 0;      // reseta pra primeira foto
+    setImage(id, 0);             // atualiza imagem + bolinhas
+  }
+
 
 function setImage(id, idx) {
   const imgs = getItemImages(id);
