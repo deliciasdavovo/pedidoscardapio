@@ -1967,6 +1967,14 @@
             selectedBtn.classList.add('bg-[#9E764E]', 'text-white');
             selectedBtn.classList.remove('text-[#9E764E]/60');
             updatePricePreview(id);
+            const item = MENU_ITEMS.find(i => i.id === id);
+if (!item || !item.sizes) return;
+
+const desc = document.getElementById(`desc-${id}`);
+if (desc && item.sizes[index].description) {
+    desc.innerText = item.sizes[index].description;
+}
+
         }
 
         function changeQtyUI(id, delta) {
