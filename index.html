@@ -1105,23 +1105,43 @@
   flavors: ['Doce de Leite', 'Goiabada']
 },
 {
-  id: 'bc_vulcao_ninho',
-  name: 'Bolo Vulcão Ninho',
-  description: 'Bolo de chocomousse com recheio de Nutella e cobertura de Ninho.',
+  id: 'bc_bolo_vulcao',
+  name: 'Bolo Vulcão',
+  description: 'Bol caseiro vilcão com bastante recheio.',
   category: 'Bolos caseiros',
+
+  // imagem inicial neutra (vai trocar automaticamente)
   image: 'https://res.cloudinary.com/ds53z2vv8/image/upload/v1770141280/4F1F43E2-921A-48E0-A1B6-2E786E526435_sjrjnf.png',
-  price: 47.00,
-  units: ['un']
-},
-{
-  id: 'bc_vulcao_cenoura',
-  name: 'Bolo Vulcão Cenoura',
-  description: 'Bolo de cenoura recheado e com cobertura de brigadeiro.',
-  category: 'Bolos caseiros',
-  image: 'https://images.unsplash.com/photo-1563729784474-d77dbb933a9f?auto=format&fit=crop&q=80&w=900',
+
   price: 42.00,
-  units: ['un']
+  units: ['un'],
+
+  // apenas nomes para o select
+  flavors: [
+    'Ninho com Nutella',
+    'Cenoura com Brigadeiro'
+  ],
+
+  // AQUI fica o produto real
+  variants: {
+    'Ninho com Nutella': {
+      price: 47.00,
+      description: 'Bolo de chocomousse com recheio de Nutella e cobertura de Ninho.',
+      images: [
+        'https://res.cloudinary.com/ds53z2vv8/image/upload/v1770141280/4F1F43E2-921A-48E0-A1B6-2E786E526435_sjrjnf.png'
+      ]
+    },
+
+    'Cenoura com Brigadeiro': {
+      price: 42.00,
+      description: 'Bolo de cenoura recheado e com cobertura de brigadeiro.',
+      images: [
+        'https://images.unsplash.com/photo-1563729784474-d77dbb933a9f?auto=format&fit=crop&q=80&w=900'
+      ]
+    }
+  }
 },
+
             // =====================
 // DOCINHOS FESTA
 // =====================
