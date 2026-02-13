@@ -554,25 +554,27 @@
   flavors: ['Presunto e Queijo', 'Frango', 'Queijo', 'Peito de Peru']
 },
 {
-  id: 'sa_folhado unitário',
+  id: 'sa_folhado_unitario',
   name: 'Folhado unitário',
-  description: 'Massa folha recheada de peito de peru e queijo branco, chapéu de napoleão ou trouxão de frango .',
+  description: 'Massa folha recheada de peito de peru e queijo branco, chapéu de napoleão ou trouxão de frango.',
   category: 'Salgados assados',
   image: 'https://images.unsplash.com/photo-1604908177453-7462950a6a8a?auto=format&fit=crop&q=80&w=900',
   price: 8.50,
   priceKg: 59.00,
-  flavors: ['Napoleão', 'Truxão de frango'],
-     variants: {
+  units: ['un', 'kg'],
+  flavors: ['Napoleão', 'Trouxão de frango'],
+  variants: {
     'Napoleão': {
       description: 'Folhado de peito de peru e queijo branco',
       images: ['URL_PRESUNTO_1', 'URL_PRESUNTO_2']
     },
-    'Truxão de frango': {
-      description: 'Folhado de frango  com tempero caseiro.',
+    'Trouxão de frango': {
+      description: 'Folhado de frango com tempero caseiro.',
       images: ['URL_FRANGO_1', 'URL_FRANGO_2']
     }
-  units: ['un', 'kg']
+  }
 },
+
 {
   id: 'sa_pizza_enrolada',
   name: 'Pizza Enrolada',
