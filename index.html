@@ -395,15 +395,27 @@
   name: 'Mini folhados',
   description: 'Mini salgados na massa folhada recheada.',
   category: 'Mini salgados',
-  images: ['https://res.cloudinary.com/ds53z2vv8/image/upload/v1769889248/mini_croissant_oi6jig.jpg', 
-          'https://res.cloudinary.com/ds53z2vv8/image/upload/v1769891765/mini_sonho_1_bz8dwc.png'],
+  image:'https://res.cloudinary.com/ds53z2vv8/image/upload/v1771007409/mini_folhados_ew9aec.png',
   price: 2.50,
   priceKg: 69.00,
   units: ['un', 'kg'],
   flavors: ['Presunto', 'Frango', 'Queijo', 'Peito de peru', 'Palmito com milho', 'Brócolis', 'Alho poró'],
   sizes: [
-    { label: 'Croissant', price: 2.50 }, { label: 'Trouxinha', price: 2.20 },{ label: 'Cortadinho', price: 1.80 } ]
+    { label: 'Cortadinho', price: 1.80 }, { label: 'Trouxinha', price: 2.20 },{ label: 'Hungáro', price: 2.20 } ],
+     variants: {
+    'Cortadinho': {
+      images: ['URL_PRESUNTO_1']
+    },
+    'Trouxinha': {
+      images: ['https://res.cloudinary.com/ds53z2vv8/image/upload/v1769891765/mini_sonho_1_bz8dwc.png']
+    },
+    'Hungáro'': { 
+      images: ['https://res.cloudinary.com/ds53z2vv8/image/upload/v1769899615/IMG_2871_sbheqq.jpg']
+    }
+  }
+    
         },
+            
 {
   id: 'ms_quiche',
   name: 'Mini Quiche',
