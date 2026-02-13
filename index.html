@@ -1972,11 +1972,7 @@ ${getFlavorList(item).map(f => `<option value="${f.label}">${f.label}</option>`)
   selectedBtn.classList.remove('text-[#9E764E]/60');
 
   updatePricePreview(id);
-            const flavorData = getSelectedFlavorData(id);
-if (flavorData) {
-  if (unit === 'kg' && typeof flavorData.priceKg === 'number') price = flavorData.priceKg;
-  if (unit !== 'kg' && typeof flavorData.price === 'number') price = flavorData.price;
-}
+           
 
 
   // atualizar imagem ao trocar tamanho
@@ -2050,6 +2046,16 @@ else if (item.sizes && item.sizes.length > 0) {
 } 
 else {
     price = item.price;
+}
+// preço específico por sabor (FLAVOR PRICE)
+const flavorData = getSelectedFlavorData(id);
+if (flavorData) {
+  if (unit === 'kg' && typeof flavorData.priceKg === 'number') {
+    price = flavorData.priceKg;
+  }
+  if (unit !== 'kg' && typeof flavorData.price === 'number') {
+    price = flavorData.price;
+  }
 }
 
             document.getElementById('unit-price-label-' + id).innerText = 'R$ ' + price.toFixed(2) + ' ' + suffix;
@@ -2265,7 +2271,7 @@ function onFlavorChange(id) {
     imageIndexById[id] = 0;      // reseta pra primeira foto
     setImage(id, 0);             // atualiza imagem + bolinhas
   }
-    function onFlavorChange(id) {
+  function onFlavorChange(id) {
   const item = MENU_ITEMS.find(i => i.id === id);
   if (!item) return;
 
@@ -2273,15 +2279,13 @@ function onFlavorChange(id) {
   const flavor = select ? select.value : null;
   if (!flavor) return;
 
-  // ✅ 1) Se tiver variants (seu sistema atual), usa elas
+  // Se usar variants (descrição/imagens por sabor)
   if (item.variants && item.variants[flavor]) {
     const variant = item.variants[flavor];
 
-    // descrição
     const descEl = document.getElementById(`desc-${id}`);
     if (descEl && variant.description) descEl.textContent = variant.description;
 
-    // imagens
     const newImages = (variant.images && variant.images.length)
       ? variant.images
       : (variant.image ? [variant.image] : null);
@@ -2294,9 +2298,10 @@ function onFlavorChange(id) {
     }
   }
 
-  // ✅ 2) SEMPRE atualiza preço/preview quando trocar sabor
+  // ✅ sempre atualiza preço
   updatePricePreview(id);
 }
+
 
 }
 
