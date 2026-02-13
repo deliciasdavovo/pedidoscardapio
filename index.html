@@ -2296,9 +2296,11 @@ function onFlavorChange(id) {
   const flavor = select ? select.value : null;
   if (!flavor) return;
 
-  // Se usar variants (descrição/imagens por sabor)
+  let variant = null;
+
+  // Se usar variants (descrição/imagens/preço por sabor)
   if (item.variants && item.variants[flavor]) {
-    const variant = item.variants[flavor];
+    variant = item.variants[flavor];
 
     // 1) descrição
     const descEl = document.getElementById(`desc-${id}`);
@@ -2317,16 +2319,10 @@ function onFlavorChange(id) {
     }
   }
 
-  // 3) preço (flavorData)
+  // 3) preço (flavorData / variant)
   updatePricePreview(id);
-    // atualizar preço se a variante tiver preço próprio
-if (variant.price) {
-  const priceEl = document.getElementById(`price-${id}`);
-  if (priceEl) {
-    priceEl.innerText = `R$ ${variant.price.toFixed(2).replace('.', ',')}`;
-  }
 }
-}
+
 
 
 function setImage(id, idx) {
