@@ -487,17 +487,6 @@
   flavors: ['Presunto', 'Calabresa', 'Frango', 'Peito de Peru', 'Queijo', 'Salsicha']
 },
 {
-  id: 'ms_cortadinho_folhado',
-  name: 'Cortadinho Folhado',
-  description: 'Mini folhado com recheios variados.',
-  category: 'Mini salgados',
-  image: 'https://images.unsplash.com/photo-1604908177254-5a2b4b0a2d68?auto=format&fit=crop&q=80&w=900',
-  price: 1.80,
-  priceKg: 69.00,
-  units: ['un', 'kg'],
-  flavors: ['Presunto', 'Calabresa', 'Frango', 'Peito de Peru', 'Queijo', 'Salsicha']
-},
-{
   id: 'ms_brusquetas',
   name: 'Brusquetas',
   description: 'Torradas com tomate, parmesão e manjericão.',
@@ -572,7 +561,16 @@
   image: 'https://images.unsplash.com/photo-1604908177453-7462950a6a8a?auto=format&fit=crop&q=80&w=900',
   price: 8.50,
   priceKg: 59.00,
-  flavors: ['Napoleão - Peito de peru e queijo branco', 'Truxão de frango'],
+  flavors: ['Napoleão', 'Truxão de frango'],
+     variants: {
+    'Napoleão': {
+      description: 'Folhado de peito de peru e queijo branco',
+      images: ['URL_PRESUNTO_1', 'URL_PRESUNTO_2']
+    },
+    'Truxão de frango': {
+      description: 'Folhado de frango  com tempero caseiro.',
+      images: ['URL_FRANGO_1', 'URL_FRANGO_2']
+    }
   units: ['un', 'kg']
 },
 {
