@@ -2084,15 +2084,20 @@ else if (item.sizes && item.sizes.length > 0) {
 else {
     price = item.price;
 }
-// preço específico por sabor (FLAVOR PRICE)
-const flavorData = getSelectedFlavorData(id);
-if (flavorData) {
-  if (unit === 'kg' && typeof flavorData.priceKg === 'number') {
-    price = flavorData.priceKg;
-  }
-  if (unit !== 'kg' && typeof flavorData.price === 'number') {
-    price = flavorData.price;
-  }
+            // 🔥 preço por sabor SOMENTE se NÃO tiver sizes
+const select = document.getElementById(`flavor-${id}`);
+const selectedFlavor = select ? select.value : null;
+
+if (!item.sizes && selectedFlavor && item.variants && item.variants[selectedFlavor]) {
+    const variant = item.variants[selectedFlavor];
+
+    if (unit === 'kg' && typeof variant.priceKg === 'number') {
+        price = variant.priceKg;
+    }
+
+    if (unit !== 'kg' && typeof variant.price === 'number') {
+        price = variant.price;
+    }
 }
 
             document.getElementById('unit-price-label-' + id).innerText = 'R$ ' + price.toFixed(2) + ' ' + suffix;
