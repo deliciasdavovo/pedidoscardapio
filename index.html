@@ -2006,6 +2006,12 @@ if (desc && item.sizes[idx] && item.sizes[idx].description) {
                 btnUn.classList.remove('active', 'bg-[#241B15]', 'text-white'); btnUn.classList.add('text-[#9E764E]/50');
                 input.value = "0.5"; input.step = "0.1";
             }
+            const item = MENU_ITEMS.find(i => i.id === id);
+if (item && item.sizes && item.sizes[idx] && item.sizes[idx].image) {
+  const img = document.getElementById(`img-${id}`);
+  if (img) img.src = item.sizes[idx].image;
+}
+
             updatePricePreview(id);
         }
 
