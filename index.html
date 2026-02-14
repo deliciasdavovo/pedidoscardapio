@@ -753,7 +753,7 @@
   name: 'Torta de Liquidificador',
   description: 'Redonda ou quadrada. Cada pedaço ~100g (aprox.).',
   category: 'Tortas & Quiches',
-  image: 'https://images.unsplash.com/photo-1604908177225-6a9f6fb1adbf?auto=format&fit=crop&q=80&w=900',
+  image: 'https://res.cloudinary.com/ds53z2vv8/image/upload/v1771019881/IMG_1805_nbrkg3.jpg',
   price: 65.00, // referência (o que manda é sizes[0])
   units: ['un'],
   flavors: ['Frango com Catupiry', 'Presunto e Queijo com Catupiry'],
@@ -1464,7 +1464,7 @@
   name: 'Salada de Fruta no Pote',
   description: 'Frutas picadas no pote com açúcar e suco de laranja.',
   category: 'Sobremesas unitárias',
-  image: 'https://images.unsplash.com/photo-1540189549336-e6e99c3679fe?auto=format&fit=crop&q=80&w=900',
+  image: 'https://res.cloudinary.com/ds53z2vv8/image/upload/v1769897031/IMG_2668_pbihrs.jpg',
   price: 7.50,
   units: ['un'],
   sizes: [
@@ -1477,7 +1477,7 @@
   name: 'Bomba',
   description: 'Bomba recheada com opções clássicas.',
   category: 'Sobremesas unitárias',
-  image: 'https://images.unsplash.com/photo-1519869325930-281384150729?auto=format&fit=crop&q=80&w=900',
+  image: 'https://res.cloudinary.com/ds53z2vv8/image/upload/v1770002077/012DC3CB-5FA6-4525-9713-446F10A404A9_nalar0.png',
   price: 8.50,
   units: ['un'],
   flavors: ['Doce de Leite', 'Creme', 'Chocolate', 'Limão']
@@ -1494,50 +1494,75 @@
   flavors: ['Limão', 'Morango', 'Maçã', 'Maracujá']
 },
 {
-  id: 'su_mousse_pote',
-  name: 'Mousse no Potinho',
-  description: 'Mousse cremoso no potinho.',
+  id: 'su_doces_potinho',
+  name: 'Doces no Potinho',
+  description: 'Sobremesas artesanais servidas no potinho.',
   category: 'Sobremesas unitárias',
+
   image: 'https://images.unsplash.com/photo-1541976076758-347942db1974?auto=format&fit=crop&q=80&w=900',
+
   price: 9.50,
-  units: ['un']
+  units: ['un'],
+
+  flavors: [
+    'Mousse de Chocolate',
+    'Mousse de Maracujá',
+    'Mousse de Limão',
+    'Banoffee',
+    'Gelado de Abacaxi'
+  ],
+
+  variants: {
+
+    'Mousse de Chocolate': {
+      price: 9.50,
+      description: 'Mousse de chocolate cremoso no potinho.'
+    },
+
+    'Mousse de Maracujá': {
+      price: 9.50,
+      description: 'Mousse de maracujá leve e refrescante.'
+    },
+
+    'Mousse de Limão': {
+      price: 9.50,
+      description: 'Mousse de limão suave e equilibrado.'
+    },
+
+    'Banoffee': {
+      price: 9.80,
+      description: 'Doce de banana com doce de leite (leite condensado cozido) e chantilly.'
+    },
+
+    'Gelado de Abacaxi': {
+      price: 9.80,
+      description: 'Sobremesa gelada cremosa de abacaxi servida no potinho.'
+    }
+
+  }
 },
+
+
 {
   id: 'su_quindim',
   name: 'Quindim',
   description: 'Quindim tradicional.',
   category: 'Sobremesas unitárias',
-  image: 'https://images.unsplash.com/photo-1519869325930-281384150729?auto=format&fit=crop&q=80&w=900',
+  image: 'https://res.cloudinary.com/ds53z2vv8/image/upload/v1771019884/IMG_2481_schmji.jpg',
   price: 7.50,
   units: ['un']
 },
-{
-  id: 'su_banoffe_unit',
-  name: 'Banoffe Unitário',
-  description: 'Banoffe no potinho (unitário).',
-  category: 'Sobremesas unitárias',
-  image: 'https://images.unsplash.com/photo-1541976076758-347942db1974?auto=format&fit=crop&q=80&w=900',
-  price: 9.80,
-  units: ['un']
-},
-{
-  id: 'su_gelado_abacaxi',
-  name: 'Gelado de Abacaxi',
-  description: 'Sobremesa gelada de abacaxi (unitária).',
-  category: 'Sobremesas unitárias',
-  image: 'https://images.unsplash.com/photo-1540189549336-e6e99c3679fe?auto=format&fit=crop&q=80&w=900',
-  price: 9.80,
-  units: ['un']
-},
+
 {
   id: 'su_doce_potinho_caseiro',
-  name: 'Doce de Potinho Caseiro',
+  name: 'Doce Caseiro',
   description: 'Aprox. 160g.',
   category: 'Sobremesas unitárias',
   image: 'https://images.unsplash.com/photo-1541976076758-347942db1974?auto=format&fit=crop&q=80&w=900',
   price: 6.50,
-  units: ['un'],
-  flavors: ['Abóbora', 'Mamão']
+    priceKg: 62.00,
+  units: ['un','kg'],
+  flavors: ['Doce de Abóbora', 'Doce de Mamão', 'Sagu', 'Doce de abóbora com coco']
 },
 
 // =====================
@@ -1602,7 +1627,7 @@
 // TORTAS DOCES
 // =====================
 {
-  id: 'td_tortas_doces',
+  id: 'td_tortas_morango',
   name: 'Torta Morango',
   description: 'Tortas artesanais por encomenda — R$ 82,00/kg',
   category: 'Tortas doces',
@@ -1615,7 +1640,7 @@
   ]
 },
             {
-  id: 'td_tortas_doces',
+  id: 'td_tortas_limao',
   name: 'Torta Limão',
   description: 'Tortas artesanais por encomenda — R$ 82,00/kg',
   category: 'Tortas doces',
@@ -1628,7 +1653,7 @@
   ]
 },
             {
-  id: 'td_tortas_doces',
+  id: 'td_tortas_maracuja',
   name: 'Torta Maracujá',
   description: 'Tortas artesanais por encomenda — R$ 82,00/kg',
   category: 'Tortas doces',
@@ -1641,7 +1666,7 @@
   ]
 },
             {
-  id: 'td_tortas_doces',
+  id: 'td_tortas_maca',
   name: 'Torta Maçã',
   description: 'Tortas artesanais por encomenda — R$ 82,00/kg',
   category: 'Tortas doces',
