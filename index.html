@@ -490,7 +490,7 @@
   name: 'Mini Empada Massa',
   description: 'Empadinha amanteigada, clássica e delicada.',
   category: 'Mini salgados',
-  image: 'https://images.unsplash.com/photo-1604908177593-f74665b0def0?auto=format&fit=crop&q=80&w=900',
+  image: 'https://res.cloudinary.com/ds53z2vv8/image/upload/v1771092672/IMG_2887_zqaqbk.jpg',
   price: 2.50,
   units: ['un'],
   flavors: ['Massa Podre Palmito', 'Massa Podre Frango', 'Massa Fina Palmito', 'Massa Fina Frango']
@@ -1285,12 +1285,59 @@
 {
   id: 'bb_bolachinhas_artesanais',
   name: 'Bolachinhas Artesanais',
-  description: 'Bolachinhas artesanais (veja as opções).',
+  description: 'Selecione o tipo desejado.',
   category: 'Bolachas & biscoitos',
-  image: 'https://images.unsplash.com/photo-1541592106381-b31e9677c0e5?auto=format&fit=crop&q=80&w=900',
+
+  image: 'https://res.cloudinary.com/ds53z2vv8/image/upload/v1771093168/IMG_1467_a7evcw.jpg',
+
   price: 0.70,
   priceKg: 60.00,
-  units: ['un', 'kg']
+  units: ['un', 'kg'],
+
+  flavors: [
+    'Bolachinhas Artesanais',
+    'Mantecal',
+    'Ferradura',
+    'Sequilho',
+    'Beliscão'
+  ],
+
+  variants: {
+    'Bolachinhas Artesanais': {
+      description: 'Bolachinhas artesanais (veja as opções).',
+      price: 0.70,
+      priceKg: 60.00,
+      images: ['https://images.unsplash.com/photo-1541592106381-b31e9677c0e5?auto=format&fit=crop&q=80&w=900']
+    },
+
+    'Mantecal': {
+      description: 'Massa amanteigada com gota de goiabada ao centro.',
+      price: 0.70,
+      priceKg: 60.00,
+      images: ['https://images.unsplash.com/photo-1542826438-8b3e3d6a0d3f?auto=format&fit=crop&q=80&w=900']
+    },
+
+    'Ferradura': {
+      description: 'Formato de ferradura com pontas mergulhadas no chocolate.',
+      price: 0.70,
+      priceKg: 60.00,
+      images: ['https://images.unsplash.com/photo-1519869325930-281384150729?auto=format&fit=crop&q=80&w=900']
+    },
+
+    'Sequilho': {
+      description: 'Massa de sequilho com raspas de limão.',
+      price: 0.70,
+      priceKg: 60.00,
+      images: ['https://images.unsplash.com/photo-1542826438-8b3e3d6a0d3f?auto=format&fit=crop&q=80&w=900']
+    },
+
+    'Beliscão': {
+      description: 'Massa amanteigada recheada com pedaço de goiabada.',
+      price: 0.70,
+      priceKg: 70.00,
+      images: ['https://images.unsplash.com/photo-1542826438-8b3e3d6a0d3f?auto=format&fit=crop&q=80&w=900']
+    }
+  }
 },
 {
   id: 'bb_petit_four',
@@ -1305,7 +1352,7 @@
 },
 {
   id: 'bb_petit_four_decorado',
-  name: 'Petit Four Decorado',
+  name: 'Petit Four Decorado Natalino',
   description: 'Massa amanteigada de baunilha ou chocolate, confeitado com glacê.',
   category: 'Bolachas & biscoitos',
   image: 'https://images.unsplash.com/photo-1519869325930-281384150729?auto=format&fit=crop&q=80&w=900',
@@ -1330,36 +1377,8 @@
     'Chocolate + gotas (chocolate branco)'
   ]
 },
-{
-  id: 'bb_mantecal',
-  name: 'Mantecal',
-  description: 'Massa amanteigada com gota de goiabada ao centro.',
-  category: 'Bolachas & biscoitos',
-  image: 'https://images.unsplash.com/photo-1542826438-8b3e3d6a0d3f?auto=format&fit=crop&q=80&w=900',
-  price: 0.70,
-  priceKg: 60.00,
-  units: ['un', 'kg']
-},
-{
-  id: 'bb_ferradura',
-  name: 'Ferradura',
-  description: 'Formato de ferradura com pontas mergulhadas no chocolate.',
-  category: 'Bolachas & biscoitos',
-  image: 'https://images.unsplash.com/photo-1519869325930-281384150729?auto=format&fit=crop&q=80&w=900',
-  price: 0.70,
-  priceKg: 60.00,
-  units: ['un', 'kg']
-},
-{
-  id: 'bb_sequilho',
-  name: 'Sequilho',
-  description: 'Massa de sequilho com raspas de limão.',
-  category: 'Bolachas & biscoitos',
-  image: 'https://images.unsplash.com/photo-1542826438-8b3e3d6a0d3f?auto=format&fit=crop&q=80&w=900',
-  price: 0.70,
-  priceKg: 60.00,
-  units: ['un', 'kg']
-},
+
+
 {
   id: 'bb_broinha_fuba',
   name: 'Broinha de Fubá',
@@ -1371,55 +1390,55 @@
   units: ['un', 'kg'],
   flavors: ['Tradicional', 'Com gotas de Chocolate', 'Com Goiabada']
 },
-{
-  id: 'bb_belisca',
-  name: 'Beliscão',
-  description: 'Massa amanteigada recheada com pedaço de goiabada.',
-  category: 'Bolachas & biscoitos',
-  image: 'https://images.unsplash.com/photo-1542826438-8b3e3d6a0d3f?auto=format&fit=crop&q=80&w=900',
-  price: 0.70,
-  priceKg: 70.00,
-  units: ['un', 'kg']
-},
+
 
 // =====================
 // ESPECIAIS DE NATAL
 // =====================
 {
-  id: 'en_panetone',
-  name: 'Panetone',
-  description: 'Panetone caseiro com frutas cristalizadas.',
+  id: 'en_panetones',
+  name: 'Panetones Artesanais',
+  description: 'Panetones caseiros tradicionais ou com chocolate.',
   category: 'Especiais de Natal',
-  image: 'https://images.unsplash.com/photo-1541976076758-347942db1974?auto=format&fit=crop&q=80&w=900',
-  price: 16.80,
-  units: ['un']
-},
-{
-  id: 'en_chocotone',
-  name: 'Chocotone',
-  description: 'Chocotone caseiro com gotas de chocolate.',
-  category: 'Especiais de Natal',
+
   image: 'https://res.cloudinary.com/ds53z2vv8/image/upload/v1771019880/IMG_1453_ibc7br.jpg',
-  price: 17.80,
-  units: ['un']
-},
-{
-  id: 'en_mini_panetone',
-  name: 'Mini Panetone',
-  description: 'Mini panetone caseiro com frutas cristalizadas.',
-  category: 'Especiais de Natal',
-  image: 'https://images.unsplash.com/photo-1541976076758-347942db1974?auto=format&fit=crop&q=80&w=900',
-  price: 5.00,
-  units: ['un']
-},
-{
-  id: 'en_mini_chocotone',
-  name: 'Mini Chocotone',
-  description: 'Mini chocotone caseiro com gotas de chocolate.',
-  category: 'Especiais de Natal',
-  image: 'https://images.unsplash.com/photo-1608198093002-ad4e005484ec?auto=format&fit=crop&q=80&w=900',
-  price: 5.50,
-  units: ['un']
+
+  price: 16.80,
+  units: ['un'],
+
+  // primeiro o cliente escolhe o tipo
+  flavors: [
+    'Tradicional (Frutas cristalizadas)',
+    'Chocotone (Gotas de chocolate)'
+  ],
+
+  // depois escolhe o tamanho
+  sizes: [
+    { label: 'Grande', price: 16.80 },
+    { label: 'Mini', price: 5.00 }
+  ],
+
+  variants: {
+
+    'Tradicional (Frutas cristalizadas)': {
+      description: 'Panetone caseiro com frutas cristalizadas.',
+      images: ['https://images.unsplash.com/photo-1541976076758-347942db1974?auto=format&fit=crop&q=80&w=900'],
+      sizePrices: {
+        'Grande': 16.80,
+        'Mini': 5.00
+      }
+    },
+
+    'Chocotone (Gotas de chocolate)': {
+      description: 'Panetone caseiro com gotas de chocolate.',
+      images: ['https://res.cloudinary.com/ds53z2vv8/image/upload/v1771019880/IMG_1453_ibc7br.jpg'],
+      sizePrices: {
+        'Grande': 17.80,
+        'Mini': 5.50
+      }
+    }
+
+  }
 },
 {
   id: 'en_rabanada',
@@ -1461,7 +1480,7 @@
 // =====================
 {
   id: 'su_salada_fruta',
-  name: 'Salada de Fruta no Pote',
+  name: 'Salada de Fruta',
   description: 'Frutas picadas no pote com açúcar e suco de laranja.',
   category: 'Sobremesas unitárias',
   image: 'https://res.cloudinary.com/ds53z2vv8/image/upload/v1769897031/IMG_2668_pbihrs.jpg',
