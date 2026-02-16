@@ -2447,7 +2447,7 @@ if (!item.sizes && flavor && item.variants && item.variants[flavor]) {
             const deliveryText = activeFulfillment === 'Entrega' ? '\\nTaxa de Entrega: R$ ' + DELIVERY_FEE.toFixed(2) : '';
             if(activeFulfillment === 'Entrega') total += DELIVERY_FEE;
             const fulfillmentInfo = activeFulfillment === 'Entrega' ? 'Entrega: ' + document.getElementById('delivery-address').value : 'Retirada: ' + document.getElementById('pickup-location').value;
-            const message = 'Novo Pedido • Sabor & Arte\\n' + '__________________________\\n' + 'Cliente: ' + name + '\\n' + 'Tipo: ' + activeOrderType + '\\n' + fulfillmentInfo + deliveryText + '\\n\\n' + 'Seleção:\\n' + itemsText + '\\n\\n' + 'Total: R$ ' + total.toFixed(2) + '\\n' + '*(Sujeito a pesagem final)*';
+            const message = 'Novo Pedido • Delícias da Vovó\n' + '__________________________\n' + 'Cliente: ' + name + '\n' + 'Tipo: ' + activeOrderType + '\n' + fulfillmentInfo + deliveryText + '\n\n' + 'Seleção:\n' + itemsText + '\n\n' + 'Total: R$ ' + total.toFixed(2) + '\n' + '*(Sujeito a pesagem final)*';
             window.open('https://wa.me/' + WHATSAPP_NUMBER + '?text=' + encodeURIComponent(message), '_blank');
         }
         function configurarRestricoesEncomenda() {
