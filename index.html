@@ -1159,7 +1159,7 @@ variants: {
   name: 'Bolo Inglês',
   description: 'Rende mais ou menos 8 fatias.',
   category: 'Bolos caseiros',
-  image: 'https://res.cloudinary.com/ds53z2vv8/image/upload/v1771100447/IMG_3142_o7k31z_ltzydn.jpg',
+  images: ['https://res.cloudinary.com/ds53z2vv8/image/upload/v1771125756/B6B5B707-3F80-48A2-BAE1-AF3FD75DC79B_dhqg8z.png', 'https://res.cloudinary.com/ds53z2vv8/image/upload/v1771125755/8764EDA2-40E3-4475-8C76-54577769ECC0_cp00sm.png','https://res.cloudinary.com/ds53z2vv8/image/upload/v1771125754/08842B94-0D4F-4732-9AC5-723E1B74587A_pcs8h2.png'],
   price: 28.00,
   units: ['un'],
   flavors: ['Chocomousse', 'Cenoura', 'Limão', 'Laranja', 'Formigueiro', 'Coco com Amendoim', 'Indiano']
@@ -2444,7 +2444,7 @@ if (!item.sizes && flavor && item.variants && item.variants[flavor]) {
             if (activeFulfillment === 'Entrega' && !document.getElementById('delivery-address').value) return alert('Por favor, informe o endereço!');
             const itemsText = cart.map(i => '- ' + i.qty.toFixed(i.unit === 'kg' ? 1 : 0) + (i.unit === 'kg' ? 'kg' : 'un') + ' • ' + i.name + (i.size ? ' (' + i.size + ')' : '') + (i.flavor ? ' [' + i.flavor + ']' : '') + ' (R$ ' + i.finalPrice.toFixed(2) + '/' + (i.unit === 'kg' ? 'kg' : 'un') + ')').join('\\n');
             let total = cart.reduce((acc, item) => acc + (item.finalPrice * item.qty), 0);
-            const deliveryText = activeFulfillment === 'Entrega' ? '\\nTaxa de Entrega: R$ ' + DELIVERY_FEE.toFixed(2) : '';
+            const deliveryText = activeFulfillment === 'Entrega' ? '\nTaxa de Entrega: R$ ' + DELIVERY_FEE.toFixed(2) : '';
             if(activeFulfillment === 'Entrega') total += DELIVERY_FEE;
             const fulfillmentInfo = activeFulfillment === 'Entrega' ? 'Entrega: ' + document.getElementById('delivery-address').value : 'Retirada: ' + document.getElementById('pickup-location').value;
             const message = 'Novo Pedido • Delícias da Vovó\n' + '__________________________\n' + 'Cliente: ' + name + '\n' + 'Tipo: ' + activeOrderType + '\n' + fulfillmentInfo + deliveryText + '\n\n' + 'Seleção:\n' + itemsText + '\n\n' + 'Total: R$ ' + total.toFixed(2) + '\n' + '*(Sujeito a pesagem final)*';
