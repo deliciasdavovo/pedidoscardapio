@@ -845,7 +845,7 @@ variants: {
   name: 'Lanche Marroquino',
   description: 'Pão folha tipo wrap + cenoura, tomate, alface e maionese.',
   category: 'Lanches frios',
-  image: 'https://images.unsplash.com/photo-1523986371872-9d3ba2e2f642?auto=format&fit=crop&q=80&w=900',
+  image: 'https://res.cloudinary.com/ds53z2vv8/image/upload/v1772047514/WhatsApp_Image_2026-02-24_at_20.00.19_lmrqmq.jpg',
   price: 35.00,
   priceKg: 62.00,
   units: ['un', 'kg'],
@@ -1221,14 +1221,14 @@ variants: {
   name: 'Bolo Redondo',
   description: 'Pequeno - 6 fatias\nVitrine - 8 fatias\nTam. Família - 20 fatias',
   category: 'Bolos caseiros',
-  image: 'https://res.cloudinary.com/ds53z2vv8/image/upload/v1771447746/ChatGPT_Image_13_de_fev._de_2026_14_20_37_ozswek.png',
+  image: 'https://res.cloudinary.com/ds53z2vv8/image/upload/v1772047518/WhatsApp_Image_2026-02-24_at_19.59.58_sk7iwq.jpg',
   price: 18.00,
   units: ['un'],
   flavors: ['Chocomousse', 'Cenoura', 'Limão', 'Laranja', 'Formigueiro', 'Coco com Amendoim', 'Indiano', 'Fubá', 'Fubá com Milho', 'Milho'],
     sizes: [
-                    { label: 'Pequeno', price: 18.00 },
-                    { label: 'Vitrine', price: 28.00 },
-                    { label: 'Tam. familia', price: 72.00 }
+                    { label: 'Pequeno', price: 18.00, description: 'Rende aprox. 6 fatias'},
+                    { label: 'Vitrine', price: 28.00, description: 'Rende aprox. 6 fatias' },
+                    { label: 'Tam. familia', price: 72.00, description: 'Rende aprox. 6 fatias' }
                 ]
 },
 {
@@ -1564,6 +1564,15 @@ variants: {
   price: 119.00,
   units: ['un']
 },
+            {
+  id: 'bg_papai_noel',
+  name: 'Bolo Papai Noel',
+  description: 'Bolo temático de Papai Noel recehado de brigadeiro branco e morangos frescos. Bolo da foto mais ou menos 1,2kg',
+  category: 'Especiais de Natal',
+  image: 'https://res.cloudinary.com/ds53z2vv8/image/upload/v1769882145/B2190346-444C-45BB-8548-62209323444B_qlecbu.png',
+  priceKg: 98.00,
+  units: ['kg']
+},
 
 // =====================
 // MINI SOBREMESAS
@@ -1702,23 +1711,16 @@ variants: {
 // =====================
 // BOLOS GELADOS
 // =====================
-{
-  id: 'bg_cenoura_cremoso',
-  name: 'Bolo de Cenoura Cremoso',
-  description: 'Bolo gelado cremoso.',
-  category: 'Bolos gelados',
-  image: 'https://images.unsplash.com/photo-1563729784474-d77dbb933a9f?auto=format&fit=crop&q=80&w=900',
-  priceKg: 62.00,
-  units: ['kg']
-},
+
 {
   id: 'bg_milho_cremoso',
-  name: 'Bolo de Milho Cremoso',
+  name: 'Bolo Cremoso',
   description: 'Bolo gelado cremoso.',
   category: 'Bolos gelados',
-  image: 'https://images.unsplash.com/photo-1563729784474-d77dbb933a9f?auto=format&fit=crop&q=80&w=900',
+  image: 'https://res.cloudinary.com/ds53z2vv8/image/upload/v1771972393/ChatGPT_Image_24_de_fev._de_2026_19_29_30_hvnmwt.png',
   priceKg: 62.00,
-  units: ['kg']
+  units: ['kg'] ,
+  flavors: ['Bolo de milho cremoso', 'Bolo de cenoura cremoso']
 },
 {
   id: 'bg_gelado_embrulhado',
@@ -1730,17 +1732,8 @@ variants: {
   units: ['kg']
 },
 {
-  id: 'bg_papai_noel',
-  name: 'Bolo Papai Noel',
-  description: 'Bolo temático.',
-  category: 'Bolos gelados',
-  image: 'https://res.cloudinary.com/ds53z2vv8/image/upload/v1769882145/B2190346-444C-45BB-8548-62209323444B_qlecbu.png',
-  priceKg: 98.00,
-  units: ['kg']
-},
-{
   id: 'bg_confeitado',
-  name: 'Bolo Confeitado (Sabores)',
+  name: 'Bolo Confeitado',
   description: 'Bolo confeitado com sabores variados.',
   category: 'Bolos gelados',
   image: 'https://images.unsplash.com/photo-1563729784474-d77dbb933a9f?auto=format&fit=crop&q=80&w=900',
