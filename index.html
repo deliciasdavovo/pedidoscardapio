@@ -1117,7 +1117,7 @@ price: 34.00,
   name: 'Queijadinha',
   description: 'Bolinho feito de coco e queijo.',
   category: 'Doces panificação',
-  image: 'https://res.cloudinary.com/ds53z2vv8/image/upload/v1772135359/WhatsApp_Image_2026-02-26_at_16.45.05_1_gcraqe.jpg',
+  image: 'https://res.cloudinary.com/ds53z2vv8/image/upload/v1772309140/ChatGPT_Image_28_de_fev._de_2026_17_05_27_lmnvox.png',
   price: 6.50,
   units: ['un']
 },
@@ -1789,10 +1789,10 @@ price: 34.00,
   category: 'Tortas doces',
   image: 'https://res.cloudinary.com/ds53z2vv8/image/upload/v1769886596/03F0D8C9-2631-4444-94A8-C84600A61191_n9ibtn.png',
   units: ['un'],
-  sizes: [
-    { label: 'Aro 15-/n até 1kg', price: 82.80 },
-    { label: 'Aro 21 -/n até 2kgs', price: 155.80 },
-    { label: 'Aro 25cm -/n até 3kg', price: 221.40 }
+   sizes: [
+    { label: 'Aro 15cm', price: 82.80, description: 'Até 1kg, rende aprox. 10 pedaços.'},
+    { label: 'Aro 21cm', price: 155.80, description: 'Até 2kg, rende aprox. 20 pedaços.' },
+    { label: 'Aro 25cm', price: 221.40, description: 'Até 3kg, rende aprox. 30 pedaços.' }
   ]
 },
             {
@@ -1802,10 +1802,10 @@ price: 34.00,
   category: 'Tortas doces',
   image: 'https://res.cloudinary.com/ds53z2vv8/image/upload/v1769885881/7E8F67F8-458B-450E-88B8-3239433BE04F_xjiwyo.png',
   units: ['un'],
-  sizes: [
-    { label: 'Aro 15-/n até 1kg', price: 82.80 },
-    { label: 'Aro 21 -/n até 2kgs', price: 155.80 },
-    { label: 'Aro 25cm -/n até 3kg', price: 221.40 }
+   sizes: [
+    { label: 'Aro 15cm', price: 82.80, description: 'Até 1kg, rende aprox. 10 pedaços.'},
+    { label: 'Aro 21cm', price: 155.80, description: 'Até 2kg, rende aprox. 20 pedaços.' },
+    { label: 'Aro 25cm', price: 221.40, description: 'Até 3kg, rende aprox. 30 pedaços.' }
   ]
 },
             {
@@ -1815,10 +1815,10 @@ price: 34.00,
   category: 'Tortas doces',
   image: 'https://res.cloudinary.com/ds53z2vv8/image/upload/v1769746120/52412be0-b7d4-408a-8c2d-15dfcad1471c_ankurz.jpg',
   units: ['un'],
-  sizes: [
-    { label: 'Aro 15-/n até 1kg', price: 82.80 },
-    { label: 'Aro 21 -/n até 2kgs', price: 155.80 },
-    { label: 'Aro 25cm -/n até 3kg', price: 221.40 }
+   sizes: [
+    { label: 'Aro 15cm', price: 82.80, description: 'Até 1kg, rende aprox. 10 pedaços.'},
+    { label: 'Aro 21cm', price: 155.80, description: 'Até 2kg, rende aprox. 20 pedaços.' },
+    { label: 'Aro 25cm', price: 221.40, description: 'Até 3kg, rende aprox. 30 pedaços.' }
   ]
 },
             
@@ -1826,29 +1826,41 @@ price: 34.00,
 {
   id: 'td_torta_holandesa',
   name: 'Torta Holandesa',
-  description: 'Torta holandesa artesanal.',
+  description: 'Torta holandesa artesanal — 82,00 R$/kg',
   category: 'Tortas doces',
   image: 'https://res.cloudinary.com/ds53z2vv8/image/upload/v1769882855/IMG_1407_vlmepz.jpg',
-  priceKg: 82.00,
-  units: ['kg']
+  units: ['un'],
+    sizes: [
+    { label: 'Aro 15cm', price: 82.80, description: 'Até 1kg, rende aprox. 10 pedaços.'},
+    { label: 'Aro 21cm', price: 155.80, description: 'Até 2kg, rende aprox. 20 pedaços.' },
+    { label: 'Aro 25cm', price: 221.40, description: 'Até 3kg, rende aprox. 30 pedaços.' }
+  ]
 },
 {
   id: 'td_chocolate_nozes',
   name: 'Chocolate com Nozes',
-  description: 'Torta/Doce de chocolate com nozes.',
+  description: 'Torta/Doce de chocolate com nozes — R$ 94,00/kg',
   category: 'Tortas doces',
   image: 'https://images.unsplash.com/photo-1606313564200-e75d5e30476c?auto=format&fit=crop&q=80&w=900',
-  priceKg: 94.00,
-  units: ['kg']
+  units: ['un'],
+    sizes: [
+    { label: 'Aro 15cm', price: 94.00, description: 'Até 1kg, rende aprox. 10 pedaços.'},
+    { label: 'Aro 21cm', price: 188.00, description: 'Até 2kg, rende aprox. 20 pedaços.' },
+    { label: 'Aro 25cm', price: 268.00, description: 'Até 3kg, rende aprox. 30 pedaços.' }
+  ]
 },
 {
   id: 'td_damasco_ganache',
   name: 'Damasco com Ganache',
-  description: 'Torta/Doce de damasco com ganache.',
+  description: 'Torta/Doce de damasco com ganache — R$ 94,00/kg',
   category: 'Tortas doces',
   image: 'https://images.unsplash.com/photo-1606313564200-e75d5e30476c?auto=format&fit=crop&q=80&w=900',
-  priceKg: 94.00,
-  units: ['kg']
+  units: ['un'],
+   sizes: [
+    { label: 'Aro 15cm', price: 94.00, description: 'Até 1kg, rende aprox. 10 pedaços.'},
+    { label: 'Aro 21cm', price: 188.00, description: 'Até 2kg, rende aprox. 20 pedaços.' },
+    { label: 'Aro 25cm', price: 268.00, description: 'Até 3kg, rende aprox. 30 pedaços.' }
+  ]
 },
 
 
@@ -1914,7 +1926,7 @@ price: 34.00,
   name: 'Charlotte',
   description: 'Charlotte artesanal — R$ 82,00/kg',
   category: 'Sobremesas clássicas',
-  image: 'https://images.unsplash.com/photo-1606313564200-e75d5e30476c?auto=format&fit=crop&q=80&w=900',
+  image: 'https://res.cloudinary.com/ds53z2vv8/image/upload/v1772309163/ChatGPT_Image_28_de_fev._de_2026_17_05_23_jrr415.png',
   units: ['un'],
   flavors: ['Morango', 'Chocolate', 'Frutas'],
   sizes: [
