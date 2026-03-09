@@ -950,24 +950,36 @@ variants: {
 // DOCES PANIFICAÇÃO
 // =====================
 {
-  id: 'dp_paodoce',
-  name: 'Bisnaguinha com Glacê',
-  description: 'Pão doce com açúcar derretido por cima.',
+  id: 'dp_paes_doces',
+  name: 'Pães Doces',
+  description: 'Escolha o tipo desejado.',
   category: 'Doces panificação',
-  image: '.',
+
+  image: 'https://images.unsplash.com/photo-1608198093002-ad4e005484ec?auto=format&fit=crop&q=80&w=900',
+
   price: 3.00,
   priceKg: 52.00,
-  units: ['un', 'kg']
-},
-{
-  id: 'dp_tranca_doce',
-  name: 'Trança Doce',
-  description: 'Pão doce polvilhado no açúcar.',
-  category: 'Doces panificação',
-  image: 'https://images.unsplash.com/photo-1608198093002-ad4e005484ec?auto=format&fit=crop&q=80&w=900',
-  price: 7.50,
-  priceKg: 52.00,
-  units: ['un', 'kg']
+  units: ['un', 'kg'],
+
+  flavors: [
+    'Bisnaguinha com Glacê',
+    'Trança Doce'
+  ],
+
+  variants: {
+    'Bisnaguinha com Glacê': {
+      price: 3.00,
+      priceKg: 52.00,
+      description: 'Pão doce macio com glacê por cima.'
+    },
+
+    'Trança Doce': {
+      price: 7.50,
+      priceKg: 52.00,
+      description: 'Pão doce trançado, polvilhado no açúcar.'
+    
+    }
+  }
 },
 {
   id: 'dp_hungaro',
@@ -975,7 +987,7 @@ variants: {
   description: 'Escolha a massa e o recheio.',
   category: 'Doces panificação',
 
-  image: 'https://res.cloudinary.com/ds53z2vv8/image/upload/v1772215852/WhatsApp_Image_2026-02-27_at_14.23.27_2_p2vuu8.jpg',
+  image: 'https://res.cloudinary.com/ds53z2vv8/image/upload/v1771019901/IMG_2639_h3sq1a.jpg',
 
   price: 4.50,
   priceKg: 52.00,
@@ -1024,7 +1036,7 @@ variants: {
   name: 'Cupcake',
   description: 'Bolinho recheado, perfeito para presentear.',
   category: 'Doces panificação',
-  image: 'https://res.cloudinary.com/ds53z2vv8/image/upload/v1772213424/WhatsApp_Image_2026-02-27_at_14.23.26_2_jfvkas.jpg',
+  image: 'https://res.cloudinary.com/ds53z2vv8/image/upload/v1772213436/WhatsApp_Image_2026-02-27_at_14.23.25_kyeksf.jpg',
   price: 7.50,
   units: ['un'],
   flavors: ['Cenoura', 'Limão', 'Chocolate', 'Maracujá', 'Red Velvet']
@@ -1096,7 +1108,7 @@ price: 34.00,
   name: 'Bolinho de Chuva',
   description: 'Polvilhado no açúcar e canela.',
   category: 'Doces panificação',
-  image: 'https://images.unsplash.com/photo-1541976076758-347942db1974?auto=format&fit=crop&q=80&w=900',
+  image: 'https://res.cloudinary.com/ds53z2vv8/image/upload/v1773079365/bolinho_de_chuva_2_t8gcn5.png',
   price: 1.50,
   priceKg: 58.00,
   units: ['un', 'kg'],
@@ -1340,7 +1352,7 @@ price: 34.00,
   name: 'Camafeu',
   description: 'Doce de nozes com leite condensado coberto com fina camada de açúcar derretido.',
   category: 'Docinhos festa',
-  image: 'https://images.unsplash.com/photo-1519869325930-281384150729?auto=format&fit=crop&q=80&w=900',
+  image: 'https://res.cloudinary.com/ds53z2vv8/image/upload/v1773079349/camafeu_igvril.png',
   price: 3.50,
   units: ['un'],
       sizes: [
@@ -1352,10 +1364,46 @@ price: 34.00,
   name: 'Mini Docinhos',
   description: 'Mini docinhos clássicos para festas.',
   category: 'Docinhos festa',
-  image: 'https://images.unsplash.com/photo-1541976076758-347942db1974?auto=format&fit=crop&q=80&w=900',
+  image: 'https://res.cloudinary.com/ds53z2vv8/image/upload/v1773080543/IMG_2879_1_ml56l2.jpg',
   price: 2.30,
   units: ['un'],
-  flavors: ['Brigadeiro', 'Bicho de Pé (morango)', 'Beijinho']
+
+  flavors: [
+    'Brigadeiro',
+    'Bicho de Pé (morango)',
+    'Beijinho',
+    'Ninho com Nutella',
+    'Olho de Sogra'
+  ],
+
+  variants: {
+
+    'Brigadeiro': {
+      price: 2.30,
+      description: 'Mini brigadeiro tradicional.'
+    },
+
+    'Bicho de Pé (morango)': {
+      price: 2.30,
+      description: 'Mini docinho de morango.'
+    },
+
+    'Beijinho': {
+      price: 2.30,
+      description: 'Mini beijinho de coco.'
+    },
+
+    'Ninho com Nutella': {
+      price: 4.20,
+      description: 'Mini docinho de leite ninho recheado com Nutella.'
+    },
+
+    'Olho de Sogra': {
+      price: 4.20,
+      description: 'Mini doce de coco com ameixa.'
+    }
+
+  }
 },
 {
   id: 'df_brigadeiro',
@@ -1370,16 +1418,6 @@ price: 34.00,
     { label: 'Gourmet (chocolate belga)', price: 8.50 }
   ],
   flavors: ['Enrolado', 'Potinho (de colher)']
-},
-{
-  id: 'df_mini_docinhos_especiais',
-  name: 'Mini Docinhos Especiais',
-  description: 'Mini docinhos especiais para um toque premium.',
-  category: 'Docinhos festa',
-  image: 'https://images.unsplash.com/photo-1541976076758-347942db1974?auto=format&fit=crop&q=80&w=900',
-  price: 1.50,
-  units: ['un'],
-  flavors: ['Olho de Sogra', 'Ninho', 'Cajuzinho']
 },
 {
   id: 'df_mini_pao_de_mel',
@@ -1683,6 +1721,16 @@ price: 34.00,
   ]
 },
 {
+  id: 'su_coxinhademorango',
+  name: 'Coxinha de morango',
+  description: 'Brigadeiro recheado com morango',
+  category: 'Sobremesas unitárias',
+  image: 'https://res.cloudinary.com/ds53z2vv8/image/upload/v1770002740/6EA6531D-FED2-43B9-A2A9-19AF66E1B1B7_ha1zav.png',
+  price: 9.90,
+  units: ['un']
+},
+            
+{
   id: 'su_bomba',
   name: 'Bomba',
   description: 'Bomba recheada com opções clássicas.',
@@ -1896,7 +1944,7 @@ price: 34.00,
   name: 'Chocolate com Nozes',
   description: 'Torta/Doce de chocolate com nozes — R$ 94,00/kg',
   category: 'Tortas doces',
-  image: 'https://images.unsplash.com/photo-1606313564200-e75d5e30476c?auto=format&fit=crop&q=80&w=900',
+  image: '.',
   units: ['un'],
     sizes: [
     { label: 'Aro 15cm', price: 94.00, description: 'Até 1kg, rende aprox. 10 pedaços.'},
@@ -1909,7 +1957,7 @@ price: 34.00,
   name: 'Damasco com Ganache',
   description: 'Torta/Doce de damasco com ganache — R$ 94,00/kg',
   category: 'Tortas doces',
-  image: 'https://images.unsplash.com/photo-1606313564200-e75d5e30476c?auto=format&fit=crop&q=80&w=900',
+  image: '.',
   units: ['un'],
    sizes: [
     { label: 'Aro 15cm', price: 94.00, description: 'Até 1kg, rende aprox. 10 pedaços.'},
