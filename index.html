@@ -1309,7 +1309,7 @@ price: 34.00,
 {
   id: 'bc_redondo',
   name: 'Bolo Redondo',
-  description: 'Pequeno - 6 fatias\nVitrine - 8 fatias\nTam. Família - 20 fatias',
+  description: 'Bolo caseiro, selecione o tamanho e sabor ;)',
   category: 'Bolos caseiros',
   image: 'https://res.cloudinary.com/ds53z2vv8/image/upload/v1772047518/WhatsApp_Image_2026-02-24_at_19.59.58_sk7iwq.jpg',
   price: 18.00,
@@ -1517,7 +1517,6 @@ price: 34.00,
   units: ['un', 'kg'],
 
   flavors: [
-    'Bolachinhas Artesanais',
     'Mantecal',
     'Ferradura',
     'Sequilho',
@@ -1525,12 +1524,6 @@ price: 34.00,
   ],
 
   variants: {
-    'Bolachinhas Artesanais': {
-      description: 'Bolachinhas artesanais (veja as opções).',
-      price: 0.70,
-      priceKg: 60.00,
-      images: ['.']
-    },
 
     'Mantecal': {
       description: 'Massa amanteigada com gota de goiabada ao centro.',
@@ -2859,7 +2852,7 @@ if (!item.sizes && flavor && item.variants && item.variants[flavor]) {
                 configurarRestricoesEncomenda();
                 if (!validarDataEncomenda(true, true) || !validarHorarioEncomenda(true, true)) return;
             }
-            const itemsText = cart.map(i => '- ' + i.qty.toFixed(i.unit === 'kg' ? 1 : 0) + (i.unit === 'kg' ? 'kg' : 'un') + ' • ' + i.name + (i.size ? ' (' + i.size + ')' : '') + (i.flavor ? ' [' + i.flavor + ']' : '') + ' (R$ ' + i.finalPrice.toFixed(2) + '/' + (i.unit === 'kg' ? 'kg' : 'un') + ')').join('\\n');
+            const itemsText = cart.map(i => '- ' + i.qty.toFixed(i.unit === 'kg' ? 1 : 0) + (i.unit === 'kg' ? 'kg' : 'un') + ' • ' + i.name + (i.size ? ' (' + i.size + ')' : '') + (i.flavor ? ' [' + i.flavor + ']' : '') + ' (R$ ' + i.finalPrice.toFixed(2) + '/' + (i.unit === 'kg' ? 'kg' : 'un') + ')').join('\n');
             let total = cart.reduce((acc, item) => acc + (item.finalPrice * item.qty), 0);
             const deliveryText = activeFulfillment === 'Entrega' ? '\nTaxa de Entrega: R$ ' + DELIVERY_FEE.toFixed(2) : '';
             if(activeFulfillment === 'Entrega') total += DELIVERY_FEE;
