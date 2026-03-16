@@ -398,16 +398,94 @@
             { 
                 id: 'cb1', 
                 name: 'Coffee Simples', 
-                description: 'Pão de queijo, Mini Esfirra e Bolo.', 
+                description: 'Sugestão para coffee break com 1,5 pão de queijo por pessoa, 1,5 mini esfirra por pessoa e 1,5 pedaço de bolo por pessoa.', 
                 category: 'Coffee Breaks', 
                 image: 'https://res.cloudinary.com/ds53z2vv8/image/upload/v1771093168/IMG_2877_fzpqwi.jpg', 
                 price: 25.50, 
                 units: ['pessoas'], 
                 isKit: true,
                 composition: [
-                    { id: 'paodequeijo', multiplier: 1.5},
+                    { id: 'paodequeijo', multiplier: 1.5 },
                     { id: 'ms_esfirra', multiplier: 1.5 },
                     { id: 'bc_pedaco_bolo', multiplier: 1.5 }
+                ]
+            },
+            {
+                id: 'cb2',
+                name: 'Coffee Clássico 1',
+                description: 'Inclui 2 pedaços de lanche na baguete por pessoa, com mínimo de 1 baguete inteira, 2 mini pães de queijo por pessoa, 1,5 mini croissant por pessoa, 1 mini sonho por pessoa e bolo redondo sugerido em aprox. 1 fatia por pessoa. Até 8 pessoas vai bolo redondo vitrine; acima disso, bolo redondo tamanho família, com combinação automática conforme a quantidade.',
+                category: 'Coffee Breaks',
+                image: 'https://res.cloudinary.com/ds53z2vv8/image/upload/v1770058831/B0831590-43D0-48B8-80DC-BF637D97AD64_ihgvmr.png',
+                price: 39.90,
+                units: ['pessoas'],
+                isKit: true,
+                composition: [
+                    { id: 'lf_baguete', piecesPerPerson: 2, totalPiecesPerUnit: 22, minQty: 1, flavor: 'Presunto e Queijo' },
+                    { id: 'paodequeijo', multiplier: 2 },
+                    { id: 'ms_croissant', multiplier: 1.5, flavor: 'Presunto e Queijo' },
+                    { type: 'cake', baseId: 'bc_redondo', slicesPerPerson: 1, flavor: 'Chocomousse' },
+                    { id: 'dp_mini_sonho', multiplier: 1, flavor: 'Creme' }
+                ]
+            },
+            {
+                id: 'cb3',
+                name: 'Coffee Clássico 2',
+                description: 'Inclui bolo redondo sugerido em aprox. 1,5 fatia por pessoa, com escolha automática entre vitrine e tamanho família, mais 1 lanchinho no pão de batata por pessoa, 1 mini empada por pessoa, 1 pão de queijo de parmesão por pessoa e 1 pão de mandioquinha de peito de peru por pessoa.',
+                category: 'Coffee Breaks',
+                image: 'https://res.cloudinary.com/ds53z2vv8/image/upload/v1771093168/IMG_2877_fzpqwi.jpg',
+                price: 44.90,
+                units: ['pessoas'],
+                isKit: true,
+                composition: [
+                    { type: 'cake', baseId: 'bc_redondo', slicesPerPerson: 1.5, flavor: 'Chocomousse' },
+                    { id: 'lf_pao_batata', multiplier: 1, flavor: 'Presunto e Queijo' },
+                    { id: 'ms_empada_podre', multiplier: 1, flavor: 'Massa Podre Frango' },
+                    { id: 'paodequeijoespeciais', multiplier: 1, flavor: 'Parmesão' },
+                    { id: 'ms_pao_mandioquinha', multiplier: 1, flavor: 'Peito de Peru' }
+                ]
+            },
+            {
+                id: 'cb4',
+                name: 'Coffee Premium',
+                description: 'Inclui 2 pedaços de lanche na baguete por pessoa, com mínimo de 1 baguete inteira, 1,5 pão de queijo de parmesão por pessoa, 1,5 mini quiche por pessoa, 1 brusqueta por pessoa, 1,5 pão de mandioquinha por pessoa, bolo redondo sugerido em aprox. 1,5 fatia por pessoa com combinação automática entre vitrine e tamanho família, e 1,5 carolinas por pessoa.',
+                category: 'Coffee Breaks',
+                image: 'https://res.cloudinary.com/ds53z2vv8/image/upload/v1772213436/WhatsApp_Image_2026-02-27_at_14.23.26_jrr2jj.jpg',
+                price: 56.90,
+                units: ['pessoas'],
+                isKit: true,
+                composition: [
+                    { id: 'lf_baguete', piecesPerPerson: 2, totalPiecesPerUnit: 22, minQty: 1, flavor: 'Peito de Peru e Queijo Branco' },
+                    { id: 'paodequeijoespeciais', multiplier: 1.5, flavor: 'Parmesão' },
+                    { id: 'ms_quiche', multiplier: 1.5, flavor: 'Quatro Queijos' },
+                    { id: 'ms_brusquetas', multiplier: 1 },
+                    { id: 'ms_pao_mandioquinha', multiplier: 1.5, flavor: 'Peito de Peru' },
+                    { type: 'cake', baseId: 'bc_redondo', slicesPerPerson: 1.5, flavor: 'Chocomousse' },
+                    { id: 'ms_carolinas', multiplier: 1.5, flavor: 'Doce de Leite' }
+                ]
+            },
+            {
+                id: 'cb5',
+                name: 'Coffee Premium 2',
+                description: 'Base do Coffee Premium com reforço de 1 mini lanche no pão de batata por pessoa, 1 pão de ervas por pessoa, pão de bolinha salgado considerando 3 bolinhas por pessoa e sempre arredondando para cima, 1,5 mini pizza por pessoa, 1 mini cuscuz por pessoa, bolo redondo sugerido em aprox. 1,5 fatia por pessoa com combinação automática entre vitrine e tamanho família, e 1 salada de frutas por pessoa.',
+                category: 'Coffee Breaks',
+                image: 'https://res.cloudinary.com/ds53z2vv8/image/upload/v1772133245/WhatsApp_Image_2026-02-26_at_15.39.43_jjrymh.jpg',
+                price: 72.90,
+                units: ['pessoas'],
+                isKit: true,
+                composition: [
+                    { id: 'lf_baguete', piecesPerPerson: 2, totalPiecesPerUnit: 22, minQty: 1, flavor: 'Peito de Peru e Queijo Branco' },
+                    { id: 'paodequeijoespeciais', multiplier: 1.5, flavor: 'Parmesão' },
+                    { id: 'ms_quiche', multiplier: 1.5, flavor: 'Quatro Queijos' },
+                    { id: 'ms_brusquetas', multiplier: 1 },
+                    { id: 'ms_pao_mandioquinha', multiplier: 1.5, flavor: 'Peito de Peru' },
+                    { id: 'ms_carolinas', multiplier: 1.5, flavor: 'Doce de Leite' },
+                    { id: 'lf_pao_batata', multiplier: 1, flavor: 'Presunto e Queijo' },
+                    { id: 'sa_pao_ervas', multiplier: 1 },
+                    { id: 'pb_pao_bolinha_salgado', piecesPerPerson: 3, totalPiecesPerUnit: 30, minQty: 1, flavor: 'Frango' },
+                    { id: 'ms_pizza', multiplier: 1.5, flavor: 'Presunto e Queijo' },
+                    { id: 'ms_cuscuz', multiplier: 1, flavor: 'Frango' },
+                    { type: 'cake', baseId: 'bc_redondo', slicesPerPerson: 1.5, flavor: 'Chocomousse' },
+                    { id: 'sb_salada_frutas', multiplier: 1 }
                 ]
             },
             {
@@ -1245,8 +1323,8 @@ price: 34.00,
   flavors: ['Chocomousse', 'Cenoura', 'Limão', 'Laranja', 'Formigueiro', 'Coco com Amendoim', 'Indiano', 'Fubá', 'Fubá com Milho', 'Milho'],
     sizes: [
                     { label: 'Pequeno', price: 18.00, description: 'Rende aprox. 6 fatias'},
-                    { label: 'Vitrine', price: 28.00, description: 'Rende aprox. 6 fatias' },
-                    { label: 'Tam. familia', price: 72.00, description: 'Rende aprox. 6 fatias' }
+                    { label: 'Vitrine', price: 28.00, description: 'Rende aprox. 8 fatias' },
+                    { label: 'Tam. familia', price: 72.00, description: 'Rende aprox. 20 fatias' }
                 ]
 },
 {
@@ -1682,6 +1760,15 @@ price: 34.00,
   priceKg: 69.00,
   units: ['un', 'kg'],
   flavors: ['Doce de Leite', 'Creme', 'Chocolate', 'Limão']
+},
+{
+  id: 'sb_salada_frutas',
+  name: 'Salada de Frutas',
+  description: 'Porção individual de salada de frutas fresca.',
+  category: 'Sobremesas',
+  image: 'https://images.unsplash.com/photo-1490474418585-ba9bad8fd0ea?auto=format&fit=crop&q=80&w=900',
+  price: 8.50,
+  units: ['un']
 },
 {
   id: 'ms_mini_tortinha_doce',
@@ -2208,7 +2295,9 @@ flavors: ['Sonho de Valsa', 'Ouro branco', 'Ninho trufado', 'Pessêgo', 'Amendoi
             const hasFlavors = item.flavors && item.flavors.length > 0;
             
             const initialQty = item.isKit ? 10 : (item.units[0] === 'kg' ? 0.5 : 1);
-            const initialPrice = hasSizes ? item.sizes[0].price : (item.units[0] === 'kg' ? item.priceKg : item.price);
+            const initialPrice = item.isKit
+                ? (getKitComputedTotal(item, initialQty) / initialQty)
+                : (hasSizes ? item.sizes[0].price : (item.units[0] === 'kg' ? item.priceKg : item.price));
             const unitSuffix = item.isKit ? '/pessoa' : (item.units[0] === 'kg' ? '/kg' : '/un');
 
             return `
@@ -2441,6 +2530,13 @@ ${getFlavorList(item).map(f => `<option value="${f.label}">${f.label}</option>`)
             const unit = getSelectedUnit(id);
             let price;
             let suffix = item.isKit ? '/pessoa' : (unit === 'kg' ? '/kg' : '/un');
+if (item.isKit) {
+    const total = getKitComputedTotal(item, qty);
+    const unitPrice = qty > 0 ? total / qty : 0;
+    document.getElementById('unit-price-label-' + id).innerText = 'R$ ' + unitPrice.toFixed(2) + ' ' + suffix;
+    document.getElementById('price-preview-' + id).innerText = 'R$ ' + total.toFixed(2);
+    return;
+}
 if (unit === 'kg') {
     price = item.priceKg;
 } 
@@ -2489,6 +2585,140 @@ if (!item.sizes && selectedFlavor && item.variants && item.variants[selectedFlav
             setTimeout(() => { document.getElementById('cart-modal').classList.add('invisible'); document.body.classList.remove('cart-open'); }, 500);
         }
 
+        function getUnitPriceForSelection(item, unit = 'un', flavor = null, size = null) {
+            let price = unit === 'kg' ? item.priceKg : item.price;
+
+            if (size && item.sizes && item.sizes.length > 0) {
+                const selectedSize = item.sizes.find(s => s.label === size);
+                if (selectedSize && typeof selectedSize.price === 'number') {
+                    price = selectedSize.price;
+                }
+            } else if (flavor && item.variants && item.variants[flavor]) {
+                const variant = item.variants[flavor];
+                if (unit === 'kg' && typeof variant.priceKg === 'number') price = variant.priceKg;
+                if (unit !== 'kg' && typeof variant.price === 'number') price = variant.price;
+            }
+
+            return price;
+        }
+
+        function getImageForSelection(item, flavor = null, size = null) {
+            if (size && item.sizes && item.sizes.length > 0) {
+                const selectedSize = item.sizes.find(s => s.label === size);
+                if (selectedSize && selectedSize.image) return selectedSize.image;
+            }
+
+            if (flavor && item.variants && item.variants[flavor]) {
+                const variant = item.variants[flavor];
+                if (variant.images && variant.images.length) return variant.images[0];
+                if (variant.image) return variant.image;
+            }
+
+            if (item.images && item.images.length) return item.images[0];
+            return item.image;
+        }
+
+        function buildCakeComposition(comp, peopleQty) {
+            const item = MENU_ITEMS.find(i => i.id === comp.baseId);
+            if (!item || !item.sizes) return [];
+
+            const vitrineSize = item.sizes.find(s => s.label === 'Vitrine');
+            const familySize = item.sizes.find(s => s.label === 'Tam. familia');
+            const vitrinePrice = vitrineSize?.price || 28;
+            const familyPrice = familySize?.price || 72;
+
+            const requiredSlices = Math.max(1, Math.ceil(peopleQty * (comp.slicesPerPerson || 1)));
+            let bestPlan = null;
+            const maxFamily = Math.ceil(requiredSlices / 20) + 1;
+            const minFamily = requiredSlices > 8 ? 1 : 0;
+
+            for (let familyQty = minFamily; familyQty <= maxFamily; familyQty += 1) {
+                const servedByFamily = familyQty * 20;
+                const remainingSlices = Math.max(0, requiredSlices - servedByFamily);
+                const vitrineQty = remainingSlices === 0 ? 0 : Math.ceil(remainingSlices / 8);
+                const totalSlices = servedByFamily + (vitrineQty * 8);
+                const overage = totalSlices - requiredSlices;
+                const totalCakes = familyQty + vitrineQty;
+                const totalPrice = (familyQty * familyPrice) + (vitrineQty * vitrinePrice);
+
+                const candidate = { familyQty, vitrineQty, overage, totalCakes, totalPrice };
+                const isBetter =
+                    !bestPlan ||
+                    candidate.overage < bestPlan.overage ||
+                    (candidate.overage === bestPlan.overage && candidate.totalCakes < bestPlan.totalCakes) ||
+                    (candidate.overage === bestPlan.overage && candidate.totalCakes === bestPlan.totalCakes && candidate.totalPrice < bestPlan.totalPrice);
+
+                if (isBetter) bestPlan = candidate;
+            }
+
+            const entries = [];
+            if (bestPlan?.vitrineQty) {
+                entries.push({
+                    id: comp.baseId,
+                    unit: 'un',
+                    qty: bestPlan.vitrineQty,
+                    flavor: comp.flavor || 'Chocomousse',
+                    size: 'Vitrine'
+                });
+            }
+            if (bestPlan?.familyQty) {
+                entries.push({
+                    id: comp.baseId,
+                    unit: 'un',
+                    qty: bestPlan.familyQty,
+                    flavor: comp.flavor || 'Chocomousse',
+                    size: 'Tam. familia'
+                });
+            }
+
+            return entries;
+        }
+
+        function resolveKitComposition(item, peopleQty) {
+            const resolvedItems = [];
+
+            item.composition.forEach(comp => {
+                if (comp.type === 'cake') {
+                    resolvedItems.push(...buildCakeComposition(comp, peopleQty));
+                    return;
+                }
+
+                const baseItem = MENU_ITEMS.find(si => si.id === comp.id);
+                if (!baseItem) return;
+
+                let qty = 0;
+                if (typeof comp.piecesPerPerson === 'number' && typeof comp.totalPiecesPerUnit === 'number' && comp.totalPiecesPerUnit > 0) {
+                    qty = Math.ceil((peopleQty * comp.piecesPerPerson) / comp.totalPiecesPerUnit);
+                } else {
+                    qty = Math.ceil(peopleQty * (comp.multiplier || 1));
+                }
+
+                qty = Math.max(comp.minQty || 0, qty);
+                if (qty <= 0) return;
+
+                resolvedItems.push({
+                    id: comp.id,
+                    unit: comp.unit || 'un',
+                    qty,
+                    flavor: comp.flavor || null,
+                    size: comp.size || null
+                });
+            });
+
+            return resolvedItems;
+        }
+
+        function getKitComputedTotal(item, peopleQty) {
+            if (!item.isKit || !item.composition) return 0;
+
+            return resolveKitComposition(item, peopleQty).reduce((sum, comp) => {
+                const subItem = MENU_ITEMS.find(si => si.id === comp.id);
+                if (!subItem) return sum;
+
+                return sum + (getUnitPriceForSelection(subItem, comp.unit, comp.flavor, comp.size) * comp.qty);
+            }, 0);
+        }
+
         function addToCart(id) {
             const item = MENU_ITEMS.find(i => i.id === id);
             const qty = parseFloat(document.getElementById('qty-' + id).value);
@@ -2504,9 +2734,12 @@ if (!item.sizes && selectedFlavor && item.variants && item.variants[selectedFlav
             }
 
             if (item.isKit && item.composition) {
-                item.composition.forEach(comp => {
+                resolveKitComposition(item, qty).forEach(comp => {
                     const subItem = MENU_ITEMS.find(si => si.id === comp.id);
-                    if (subItem) addIndividualToCart(subItem.id, 'un', Math.ceil(qty * comp.multiplier), null, null);
+                    if (!subItem) return;
+                    const resolvedPrice = getUnitPriceForSelection(subItem, comp.unit, comp.flavor, comp.size);
+                    const resolvedImage = getImageForSelection(subItem, comp.flavor, comp.size);
+                    addIndividualToCart(comp.id, comp.unit, comp.qty, comp.flavor, comp.size, resolvedPrice, resolvedImage);
                 });
             } else {
                 if (unit === 'kg') price = item.priceKg;
@@ -2522,18 +2755,18 @@ if (!item.sizes && flavor && item.variants && item.variants[flavor]) {
         price = v.price;
     }
 }
-                addIndividualToCart(id, unit, qty, flavor, size, price);
+                addIndividualToCart(id, unit, qty, flavor, size, price, getImageForSelection(item, flavor, size));
             }
             updateCartSummary();
             openCart();
         }
 
-        function addIndividualToCart(id, unit, qty, flavor, size, price) {
+        function addIndividualToCart(id, unit, qty, flavor, size, price, imageOverride = null) {
             const item = MENU_ITEMS.find(i => i.id === id);
             const finalPrice = price || (unit === 'kg' ? item.priceKg : item.price);
             const existing = cart.find(c => c.id === id && c.unit === unit && c.flavor === flavor && c.size === size);
             if (existing) { existing.qty += qty; }
-            else { cart.push({ ...item, qty, unit, flavor, size, finalPrice }); }
+            else { cart.push({ ...item, qty, unit, flavor, size, finalPrice, image: imageOverride || item.image }); }
         }
 
         function updateCartSummary() {
