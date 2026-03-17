@@ -984,7 +984,7 @@ variants: {
   name: 'Quiches Grandes',
   description: 'Quiche redonda. Cada pedaço ~100g (aprox.).',
   category: 'Tortas & Quiches',
-  image: 'https://res.cloudinary.com/ds53z2vv8/image/upload/v1771972402/ChatGPT_Image_24_de_fev._de_2026_19_29_14_mkqi3c.png',
+  image: 'https://res.cloudinary.com/ds53z2vv8/image/upload/v1771447987/quiche_3_rlgcbp.png',
   price: 69.00,
   units: ['un'],
   flavors: ['Quatro Queijos', 'Alho Poró', 'Abobrinha', 'Queijo com Bacon', 'Peito de Peru', 'Espinafre'],
@@ -1220,7 +1220,7 @@ price: 34.00,
   name: 'Samantha & Carolinas Cristalizadas',
   description: 'Massa de carolina, polvilhada no açúcar.',
   category: 'Doces panificação',
-  image: 'https://res.cloudinary.com/ds53z2vv8/image/upload/v1772591627/F9661EED-F4FF-4F44-8E4C-7DD35189B1C3_zflk6y.png',
+  image: 'https://res.cloudinary.com/ds53z2vv8/image/upload/v1773694883/ChatGPT_Image_16_de_mar._de_2026_17_55_44_yfcbqx.png',
   price: 5.50,
   priceKg: 60.00,
   units: ['un', 'kg'],
@@ -2865,7 +2865,7 @@ if (!item.sizes && flavor && item.variants && item.variants[flavor]) {
             const prontaEntregaInfoText = activeOrderType === 'Pronta entrega'
                 ? '\nAtendimento: Vamos consultar a disponibilidade imediata para você e confirmar em seguida.'
                 : '';
-            const message = 'Novo Pedido • Delícias da Vovó\n' + '__________________________\n' + 'Cliente: ' + name + '\n' + 'Tipo: ' + activeOrderType + encomendaDateTimeText + prontaEntregaInfoText + '\n' + fulfillmentInfo + deliveryText + '\n\n' + 'Seleção:\n' + itemsText + '\n\n' + 'Total: R$ ' + total.toFixed(2) + '\n' + '*(Sujeito a pesagem final)*';
+            const message = 'Novo Pedido • Delícias da Vovó\n' + '__________________________\n' + 'Cliente: ' + name + '\n' + 'Tipo: ' + activeOrderType + encomendaDateTimeText + prontaEntregaInfoText + '\n' + fulfillmentInfo + deliveryText + '\n\n' + 'Seleção:\n' + itemsText + '\n\n' + 'Total aproximado: R$ ' + total.toFixed(2);
             window.open('https://wa.me/' + WHATSAPP_NUMBER + '?text=' + encodeURIComponent(message), '_blank');
         }
 
