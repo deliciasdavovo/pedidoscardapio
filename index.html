@@ -2867,7 +2867,7 @@ if (!item.sizes && flavor && item.variants && item.variants[flavor]) {
             const prontaEntregaInfoText = activeOrderType === 'Pronta entrega'
                 ? '\nAtendimento: Vamos consultar a disponibilidade imediata para você e confirmar em seguida.'
                 : '';
-            const message = 'Novo Pedido • Delícias da Vovó\n' + '__________________________\n' + 'Cliente: ' + name + '\n' + 'Tipo: ' + activeOrderType + encomendaDateTimeText + prontaEntregaInfoText + '\n' + fulfillmentInfo + deliveryText + '\n\n' + 'Seleção:\n' + itemsText + '\n\n' + 'Total aproximado: R$ ' + total.toFixed(2);
+            const message = 'Olá, gostaria de fazer um pedido, aguardo confirmação\n'+'Pedido • Delícias da Vovó\n' + '__________________________\n' + 'Cliente: ' + name + '\n' + 'Tipo: ' + activeOrderType + encomendaDateTimeText + prontaEntregaInfoText + '\n' + fulfillmentInfo + deliveryText + '\n\n' + 'Seleção:\n' + itemsText + '\n\n' + 'Total aproximado: R$ ' + total.toFixed(2);
             window.open('https://wa.me/' + WHATSAPP_NUMBER + '?text=' + encodeURIComponent(message), '_blank');
         }
 
