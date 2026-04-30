@@ -236,6 +236,35 @@
         </button>
     </div>
 
+    <!-- Pop-up de Sabores do Coffee Break -->
+    <div id="kit-flavor-modal" class="fixed inset-0 z-[70] invisible">
+        <div class="absolute inset-0 bg-[#241B15]/70 backdrop-blur-md opacity-0 transition-opacity duration-300" onclick="closeKitFlavorModal()"></div>
+        <div class="absolute inset-x-4 top-1/2 -translate-y-1/2 mx-auto w-auto max-w-3xl max-h-[88vh] bg-[#FCFAF7] rounded-[2rem] shadow-2xl border border-white/60 overflow-hidden scale-95 opacity-0 transition-all duration-300 flex flex-col">
+            <div class="bg-white px-6 py-5 sm:px-8 border-b border-[#9E764E]/10 flex items-start justify-between gap-4">
+                <div>
+                    <p class="text-[9px] uppercase font-black tracking-[0.25em] text-[#9E764E] mb-1">Coffee Break</p>
+                    <h2 id="kit-flavor-title" class="serif-font text-2xl text-[#241B15]">Escolha os sabores</h2>
+                    <p id="kit-flavor-subtitle" class="text-xs text-[#241B15]/55 mt-1 leading-relaxed">Revise os itens calculados e ajuste os sabores antes de enviar para o carrinho.</p>
+                </div>
+                <button onclick="closeKitFlavorModal()" class="shrink-0 text-[#9E764E] w-10 h-10 flex items-center justify-center rounded-full hover:bg-[#F3EEE8] transition-all">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+            <div id="kit-flavor-items" class="flex-grow min-h-0 overflow-y-auto p-5 sm:p-7 space-y-4 custom-scrollbar">
+                <!-- Itens do kit -->
+            </div>
+            <div class="bg-white px-6 py-5 sm:px-8 border-t border-[#9E764E]/10 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div>
+                    <p class="text-[9px] uppercase font-black tracking-[0.22em] text-[#9E764E]">Total estimado</p>
+                    <p id="kit-flavor-total" class="serif-font text-3xl text-[#241B15]">R$ 0,00</p>
+                </div>
+                <button onclick="confirmKitFlavorSelection()" class="btn-primary px-7 py-4 rounded-[1.5rem] text-[10px] uppercase tracking-[0.2em] font-black active:scale-95 flex items-center justify-center gap-3">
+                    <i class="fas fa-shopping-basket"></i> Adicionar ao Carrinho
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- Carrinho Lateral (Modal) -->
     <div id="cart-modal" class="fixed inset-0 z-[60] invisible">
         <div class="absolute inset-0 bg-[#241B15]/70 backdrop-blur-md opacity-0 transition-opacity duration-500" onclick="closeCart()"></div>
@@ -2222,6 +2251,7 @@ flavors: ['Sonho de Valsa', 'Ouro branco', 'Ninho trufado', 'Pessêgo', 'Amendoi
         let currentSearch = '';
         let toastAutoHideTimer = null;
         let toastCleanupTimer = null;
+        let pendingKitSelection = null;
 
         window.onload = () => {
             renderCategories();
@@ -2611,6 +2641,260 @@ if (!item.sizes && selectedFlavor && item.variants && item.variants[selectedFlav
             return item.image;
         }
 
+        function escapeHtml(value) {
+            return String(value ?? '')
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;');
+        }
+
+        function getDefaultFlavorForKitItem(item, comp) {
+            const flavors = getFlavorList(item);
+            if (!flavors.length) return comp.flavor || null;
+            if (comp.flavor && flavors.some(f => f.label === comp.flavor)) return comp.flavor;
+            return flavors[0].label;
+        }
+
+        function getKitModalRowQtyStep(comp) {
+            return comp.unit === 'kg' ? '0.1' : '1';
+        }
+
+        function formatKitQty(qty, unit) {
+            return Number(qty).toFixed(unit === 'kg' ? 1 : 0) + (unit === 'kg' ? 'kg' : 'un');
+        }
+
+        function openKitFlavorModal(item, peopleQty) {
+            const entries = resolveKitComposition(item, peopleQty)
+                .map((comp, idx) => {
+                    const baseItem = MENU_ITEMS.find(si => si.id === comp.id);
+                    if (!baseItem) return null;
+                    return {
+                        ...comp,
+                        idx,
+                        name: baseItem.name,
+                        image: getImageForSelection(baseItem, comp.flavor, comp.size),
+                        flavors: getFlavorList(baseItem),
+                        defaultFlavor: getDefaultFlavorForKitItem(baseItem, comp)
+                    };
+                })
+                .filter(Boolean);
+
+            if (!entries.length) {
+                showValidationPopup('Não encontramos itens para montar este coffee break.');
+                return;
+            }
+
+            pendingKitSelection = { item, peopleQty, entries };
+            document.getElementById('kit-flavor-title').innerText = item.name;
+            document.getElementById('kit-flavor-subtitle').innerText = `${peopleQty} ${peopleQty === 1 ? 'pessoa' : 'pessoas'} - escolha um sabor ou divida em sabores diferentes.`;
+            renderKitFlavorItems();
+
+            const modal = document.getElementById('kit-flavor-modal');
+            modal.classList.remove('invisible');
+            document.body.classList.add('cart-open');
+            setTimeout(() => {
+                modal.querySelector('.opacity-0').classList.add('opacity-100');
+                const panel = modal.querySelector('.scale-95');
+                panel.classList.remove('scale-95', 'opacity-0');
+                panel.classList.add('scale-100', 'opacity-100');
+            }, 10);
+        }
+
+        function closeKitFlavorModal() {
+            const modal = document.getElementById('kit-flavor-modal');
+            const overlay = modal.querySelector('.absolute.inset-0');
+            const panel = modal.querySelector('.absolute.inset-x-4');
+
+            overlay.classList.remove('opacity-100');
+            panel.classList.remove('scale-100', 'opacity-100');
+            panel.classList.add('scale-95', 'opacity-0');
+
+            setTimeout(() => {
+                modal.classList.add('invisible');
+                if (document.getElementById('cart-modal').classList.contains('invisible')) {
+                    document.body.classList.remove('cart-open');
+                }
+            }, 300);
+        }
+
+        function renderKitFlavorItems() {
+            const container = document.getElementById('kit-flavor-items');
+            if (!pendingKitSelection) return;
+
+            container.innerHTML = pendingKitSelection.entries.map(entry => {
+                const baseItem = MENU_ITEMS.find(si => si.id === entry.id);
+                const hasFlavors = entry.flavors.length > 0;
+                const sizeBadge = entry.size ? `<span class="text-[8px] bg-[#9E764E]/10 text-[#9E764E] px-2 py-0.5 rounded-full font-bold uppercase">${escapeHtml(entry.size)}</span>` : '';
+                const fixedFlavorBadge = !hasFlavors && entry.flavor ? `<span class="text-[8px] bg-[#241B15]/5 text-[#241B15] px-2 py-0.5 rounded-full font-bold uppercase">${escapeHtml(entry.flavor)}</span>` : '';
+                const flavorOptions = hasFlavors
+                    ? entry.flavors.map(f => `<option value="${escapeHtml(f.label)}" ${f.label === entry.defaultFlavor ? 'selected' : ''}>${escapeHtml(f.label)}</option>`).join('')
+                    : '';
+
+                return `
+                    <div class="bg-white rounded-[1.75rem] border border-[#9E764E]/10 p-4 sm:p-5 shadow-sm" data-kit-entry="${entry.idx}">
+                        <div class="flex gap-4">
+                            <img src="${escapeHtml(entry.image)}" class="w-16 h-16 object-cover rounded-2xl shadow-md bg-[#F3EEE8]">
+                            <div class="flex-grow min-w-0">
+                                <div class="flex items-start justify-between gap-3">
+                                    <div class="min-w-0">
+                                        <h3 class="serif-font text-base font-semibold text-[#241B15] truncate">${escapeHtml(entry.name)}</h3>
+                                        <div class="flex flex-wrap gap-2 mt-1">${sizeBadge}${fixedFlavorBadge}</div>
+                                        <p class="text-[9px] text-[#9E764E]/70 font-black uppercase tracking-widest mt-2">${formatKitQty(entry.qty, entry.unit)} calculado para o kit</p>
+                                    </div>
+                                    <p class="text-sm font-bold text-[#241B15] whitespace-nowrap" id="kit-entry-total-${entry.idx}">R$ 0,00</p>
+                                </div>
+
+                                ${hasFlavors ? `
+                                    <div class="kit-flavor-rows-${entry.idx} mt-4 space-y-2">
+                                        ${renderKitFlavorRow(entry.idx, 0, entry.qty, entry.defaultFlavor, baseItem, entry)}
+                                    </div>
+                                    <button onclick="addKitFlavorRow(${entry.idx})" class="mt-3 text-[10px] font-black uppercase tracking-[0.18em] text-[#9E764E] hover:text-[#7D5C3D] flex items-center gap-2">
+                                        <i class="fas fa-plus-circle"></i> Dividir em outro sabor
+                                    </button>
+                                ` : `
+                                    <p class="mt-4 text-xs text-[#241B15]/55 leading-relaxed">Este item não tem seleção de sabor no cardápio.</p>
+                                `}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            updateKitModalTotal();
+        }
+
+        function renderKitFlavorRow(entryIdx, rowIdx, qty, selectedFlavor, baseItem, entry) {
+            const options = getFlavorList(baseItem).map(f => `
+                <option value="${escapeHtml(f.label)}" ${f.label === selectedFlavor ? 'selected' : ''}>${escapeHtml(f.label)}</option>
+            `).join('');
+            const canRemove = rowIdx > 0;
+
+            return `
+                <div class="kit-flavor-row-${entryIdx} grid grid-cols-[82px_1fr_34px] gap-2 items-center" data-row="${rowIdx}">
+                    <input type="number" value="${qty}" min="${entry.unit === 'kg' ? '0.1' : '1'}" step="${getKitModalRowQtyStep(entry)}" oninput="updateKitModalTotal()" class="w-full bg-[#F3EEE8] border border-[#9E764E]/10 rounded-xl px-3 py-2 text-xs font-bold text-center focus:outline-none focus:ring-2 focus:ring-[#9E764E]/20">
+                    <select onchange="updateKitModalTotal()" class="w-full bg-[#F3EEE8] border border-[#9E764E]/10 rounded-xl px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-[#9E764E]/20 appearance-none text-[#241B15]">
+                        ${options}
+                    </select>
+                    ${canRemove ? `
+                        <button onclick="removeKitFlavorRow(${entryIdx}, this)" class="w-8 h-8 rounded-full text-red-300 hover:text-red-600 hover:bg-red-50 transition-all flex items-center justify-center">
+                            <i class="fas fa-trash-alt text-xs"></i>
+                        </button>
+                    ` : `<span></span>`}
+                </div>
+            `;
+        }
+
+        function getKitEntry(entryIdx) {
+            if (!pendingKitSelection) return null;
+            return pendingKitSelection.entries.find(entry => entry.idx === entryIdx) || null;
+        }
+
+        function collectKitFlavorRows(entryIdx) {
+            const entry = getKitEntry(entryIdx);
+            const baseItem = entry ? MENU_ITEMS.find(si => si.id === entry.id) : null;
+            if (!entry || !baseItem) return [];
+
+            if (!entry.flavors.length) {
+                return [{ qty: entry.qty, flavor: entry.flavor || null }];
+            }
+
+            return Array.from(document.querySelectorAll(`.kit-flavor-row-${entryIdx}`)).map(row => {
+                const qtyInput = row.querySelector('input');
+                const flavorSelect = row.querySelector('select');
+                return {
+                    qty: parseFloat(qtyInput.value) || 0,
+                    flavor: flavorSelect.value
+                };
+            }).filter(row => row.qty > 0);
+        }
+
+        function addKitFlavorRow(entryIdx) {
+            const entry = getKitEntry(entryIdx);
+            const baseItem = entry ? MENU_ITEMS.find(si => si.id === entry.id) : null;
+            if (!entry || !baseItem) return;
+
+            const rowsContainer = document.querySelector(`.kit-flavor-rows-${entryIdx}`);
+            const currentRows = collectKitFlavorRows(entryIdx);
+            const usedFlavors = currentRows.map(row => row.flavor);
+            const nextFlavor = entry.flavors.find(f => !usedFlavors.includes(f.label))?.label || entry.flavors[0].label;
+            const rowIdx = rowsContainer.children.length;
+            const step = entry.unit === 'kg' ? 0.1 : 1;
+            let remainingQty = entry.qty - currentRows.reduce((sum, row) => sum + row.qty, 0);
+
+            if (remainingQty < step) {
+                const firstQtyInput = rowsContainer.querySelector('input');
+                const firstQty = parseFloat(firstQtyInput.value) || 0;
+                if (firstQty > step) {
+                    firstQtyInput.value = (firstQty - step).toFixed(entry.unit === 'kg' ? 1 : 0);
+                    remainingQty = step;
+                }
+            }
+
+            remainingQty = Math.max(step, remainingQty);
+
+            rowsContainer.insertAdjacentHTML('beforeend', renderKitFlavorRow(entryIdx, rowIdx, remainingQty, nextFlavor, baseItem, entry));
+            updateKitModalTotal();
+        }
+
+        function removeKitFlavorRow(entryIdx, button) {
+            const row = button.closest(`.kit-flavor-row-${entryIdx}`);
+            if (row) row.remove();
+            updateKitModalTotal();
+        }
+
+        function updateKitModalTotal() {
+            if (!pendingKitSelection) return;
+
+            let total = 0;
+            pendingKitSelection.entries.forEach(entry => {
+                const baseItem = MENU_ITEMS.find(si => si.id === entry.id);
+                if (!baseItem) return;
+
+                const entryTotal = collectKitFlavorRows(entry.idx).reduce((sum, row) => {
+                    return sum + (getUnitPriceForSelection(baseItem, entry.unit, row.flavor, entry.size) * row.qty);
+                }, 0);
+
+                total += entryTotal;
+                const entryTotalEl = document.getElementById(`kit-entry-total-${entry.idx}`);
+                if (entryTotalEl) entryTotalEl.innerText = 'R$ ' + entryTotal.toFixed(2);
+            });
+
+            document.getElementById('kit-flavor-total').innerText = 'R$ ' + total.toFixed(2);
+        }
+
+        function confirmKitFlavorSelection() {
+            if (!pendingKitSelection) return;
+
+            for (const entry of pendingKitSelection.entries) {
+                const rows = collectKitFlavorRows(entry.idx);
+                const selectedTotal = rows.reduce((sum, row) => sum + row.qty, 0);
+                const expectedTotal = entry.qty;
+
+                if (Math.abs(selectedTotal - expectedTotal) > 0.001) {
+                    showValidationPopup(`Ajuste ${entry.name}: a soma dos sabores precisa dar ${formatKitQty(expectedTotal, entry.unit)}.`);
+                    return;
+                }
+            }
+
+            pendingKitSelection.entries.forEach(entry => {
+                const baseItem = MENU_ITEMS.find(si => si.id === entry.id);
+                if (!baseItem) return;
+
+                collectKitFlavorRows(entry.idx).forEach(row => {
+                    const resolvedPrice = getUnitPriceForSelection(baseItem, entry.unit, row.flavor, entry.size);
+                    const resolvedImage = getImageForSelection(baseItem, row.flavor, entry.size);
+                    addIndividualToCart(entry.id, entry.unit, row.qty, row.flavor, entry.size, resolvedPrice, resolvedImage);
+                });
+            });
+
+            pendingKitSelection = null;
+            closeKitFlavorModal();
+            updateCartSummary();
+            openCart();
+        }
+
         function buildCakeComposition(comp, peopleQty) {
             const item = MENU_ITEMS.find(i => i.id === comp.baseId);
             if (!item || !item.sizes) return [];
@@ -2727,13 +3011,8 @@ if (!item.sizes && selectedFlavor && item.variants && item.variants[selectedFlav
             }
 
             if (item.isKit && item.composition) {
-                resolveKitComposition(item, qty).forEach(comp => {
-                    const subItem = MENU_ITEMS.find(si => si.id === comp.id);
-                    if (!subItem) return;
-                    const resolvedPrice = getUnitPriceForSelection(subItem, comp.unit, comp.flavor, comp.size);
-                    const resolvedImage = getImageForSelection(subItem, comp.flavor, comp.size);
-                    addIndividualToCart(comp.id, comp.unit, comp.qty, comp.flavor, comp.size, resolvedPrice, resolvedImage);
-                });
+                openKitFlavorModal(item, qty);
+                return;
             } else {
                 if (unit === 'kg') price = item.priceKg;
                 // aplicar preço do sabor (variant)
