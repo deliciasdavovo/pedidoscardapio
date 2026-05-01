@@ -164,6 +164,69 @@
 .site-toast-hide {
   animation: toastOut 0.18s ease-in forwards;
 }
+
+.kit-flavor-panel {
+  width: calc(100% - 2rem);
+}
+
+.kit-flavor-product-row {
+  display: flex;
+  gap: 1rem;
+}
+
+.kit-flavor-row {
+  display: grid;
+  grid-template-columns: 92px minmax(0, 1fr) 38px;
+  gap: 0.75rem;
+  align-items: center;
+}
+
+.kit-flavor-input,
+.kit-flavor-select {
+  min-height: 44px;
+}
+
+@media (max-width: 640px) {
+  .kit-flavor-panel {
+    inset: auto 0 0 0 !important;
+    top: auto !important;
+    width: 100%;
+    max-width: none;
+    max-height: 92vh;
+    border-radius: 1.75rem 1.75rem 0 0;
+    transform: translateY(16px) scale(0.98) !important;
+  }
+
+  .kit-flavor-panel.scale-100 {
+    transform: translateY(0) scale(1) !important;
+  }
+
+  .kit-flavor-product-row {
+    gap: 0.75rem;
+  }
+
+  .kit-flavor-product-row > img {
+    width: 3.5rem;
+    height: 3.5rem;
+  }
+
+  .kit-flavor-row {
+    grid-template-columns: 76px minmax(0, 1fr) 36px;
+    gap: 0.5rem;
+  }
+
+  .kit-flavor-select {
+    font-size: 13px;
+    line-height: 1.25rem;
+    padding-left: 0.85rem;
+    padding-right: 2rem;
+  }
+
+  #kit-flavor-items {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+}
     </style>
 </head>
 <body class="relative min-h-screen">
@@ -239,7 +302,7 @@
     <!-- Pop-up de Sabores do Coffee Break -->
     <div id="kit-flavor-modal" class="fixed inset-0 z-[70] invisible">
         <div class="absolute inset-0 bg-[#241B15]/70 backdrop-blur-md opacity-0 transition-opacity duration-300" onclick="closeKitFlavorModal()"></div>
-        <div class="absolute inset-x-4 top-1/2 -translate-y-1/2 mx-auto w-auto max-w-3xl max-h-[88vh] bg-[#FCFAF7] rounded-[2rem] shadow-2xl border border-white/60 overflow-hidden scale-95 opacity-0 transition-all duration-300 flex flex-col">
+        <div class="kit-flavor-panel absolute inset-x-4 top-1/2 -translate-y-1/2 mx-auto w-auto max-w-3xl max-h-[88vh] bg-[#FCFAF7] rounded-[2rem] shadow-2xl border border-white/60 overflow-hidden scale-95 opacity-0 transition-all duration-300 flex flex-col">
             <div class="bg-white px-6 py-5 sm:px-8 border-b border-[#9E764E]/10 flex items-start justify-between gap-4">
                 <div>
                     <p class="text-[9px] uppercase font-black tracking-[0.25em] text-[#9E764E] mb-1">Coffee Break</p>
@@ -2734,7 +2797,7 @@ if (!item.sizes && selectedFlavor && item.variants && item.variants[selectedFlav
 
                 return `
                     <div class="bg-white rounded-[1.75rem] border border-[#9E764E]/10 p-4 sm:p-5 shadow-sm" data-kit-entry="${entry.idx}">
-                        <div class="flex gap-4">
+                        <div class="kit-flavor-product-row">
                             <img src="${escapeHtml(entry.image)}" class="w-16 h-16 object-cover rounded-2xl shadow-md bg-[#F3EEE8]">
                             <div class="flex-grow min-w-0">
                                 <div class="flex items-start justify-between gap-3">
@@ -2772,9 +2835,9 @@ if (!item.sizes && selectedFlavor && item.variants && item.variants[selectedFlav
             const canRemove = rowIdx > 0;
 
             return `
-                <div class="kit-flavor-row-${entryIdx} grid grid-cols-[82px_1fr_34px] gap-2 items-center" data-row="${rowIdx}">
-                    <input type="number" value="${qty}" min="${entry.unit === 'kg' ? '0.1' : '1'}" step="${getKitModalRowQtyStep(entry)}" oninput="updateKitModalTotal()" class="w-full bg-[#F3EEE8] border border-[#9E764E]/10 rounded-xl px-3 py-2 text-xs font-bold text-center focus:outline-none focus:ring-2 focus:ring-[#9E764E]/20">
-                    <select onchange="updateKitModalTotal()" class="w-full bg-[#F3EEE8] border border-[#9E764E]/10 rounded-xl px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-[#9E764E]/20 appearance-none text-[#241B15]">
+                <div class="kit-flavor-row kit-flavor-row-${entryIdx}" data-row="${rowIdx}">
+                    <input type="number" value="${qty}" min="${entry.unit === 'kg' ? '0.1' : '1'}" step="${getKitModalRowQtyStep(entry)}" oninput="updateKitModalTotal()" class="kit-flavor-input w-full bg-[#F3EEE8] border border-[#9E764E]/10 rounded-xl px-3 py-2 text-xs font-bold text-center focus:outline-none focus:ring-2 focus:ring-[#9E764E]/20">
+                    <select onchange="updateKitModalTotal()" class="kit-flavor-select w-full bg-[#F3EEE8] border border-[#9E764E]/10 rounded-xl px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-[#9E764E]/20 appearance-none text-[#241B15]">
                         ${options}
                     </select>
                     ${canRemove ? `
@@ -3074,7 +3137,7 @@ if (!item.sizes && flavor && item.variants && item.variants[flavor]) {
                                 <h4 class="serif-font text-sm font-semibold truncate">${item.name}</h4>
                                 <div class="flex flex-wrap gap-2 mt-1">
                                     ${item.size ? `<span class="text-[8px] bg-[#9E764E]/10 text-[#9E764E] px-2 py-0.5 rounded-full font-bold uppercase">${item.size}</span>` : ''}
-                                    ${item.flavor ? `<span class="text-[8px] bg-[#241B15]/5 text-[#241B15] px-2 py-0.5 rounded-full font-bold uppercase">${item.flavor}</span>` : ''}
+                                    ${item.flavor ? `<span class="text-[10px] bg-[#241B15]/5 text-[#241B15] px-2.5 py-1 rounded-full font-bold">Sabor: ${item.flavor}</span>` : ''}
                                 </div>
                                 <p class="text-[9px] text-[#9E764E]/70 font-bold mt-1 uppercase tracking-widest">R$ ${item.finalPrice.toFixed(2)} /${unitLabel}</p>
                             </div>
@@ -3121,6 +3184,39 @@ if (!item.sizes && flavor && item.variants && item.variants[flavor]) {
             updateCartSummary();
         }
 
+        function formatWhatsAppCartItem(item) {
+            const qtyText = item.qty.toFixed(item.unit === 'kg' ? 1 : 0) + (item.unit === 'kg' ? 'kg' : 'un');
+            const unitText = item.unit === 'kg' ? 'kg' : 'un';
+            const lines = ['- ' + qtyText + ' - ' + item.name];
+
+            if (item.size) lines.push('  Tamanho: ' + item.size);
+            if (item.flavor) lines.push('  Sabor: ' + item.flavor);
+            lines.push('  Valor: R$ ' + item.finalPrice.toFixed(2) + '/' + unitText);
+            lines.push('  Subtotal: R$ ' + (item.finalPrice * item.qty).toFixed(2));
+
+            return lines.join('\n');
+        }
+
+        function formatWhatsAppOrderDate(value) {
+            const date = parseDateInputValue(value);
+            if (!date) return value;
+
+            const dd = String(date.getDate()).padStart(2, '0');
+            const mm = String(date.getMonth() + 1).padStart(2, '0');
+            const yy = String(date.getFullYear()).slice(-2);
+            const weekdays = [
+                'domingo',
+                'segunda-feira',
+                'terça-feira',
+                'quarta-feira',
+                'quinta-feira',
+                'sexta-feira',
+                'sábado'
+            ];
+
+            return `${dd}/${mm}/${yy}, ${weekdays[date.getDay()]}`;
+        }
+
         function sendWhatsAppOrder() {
             const name = document.getElementById('order-name').value;
             if (!name) {
@@ -3137,7 +3233,7 @@ if (!item.sizes && flavor && item.variants && item.variants[flavor]) {
                 configurarRestricoesEncomenda();
                 if (!validarDataEncomenda(true, true) || !validarHorarioEncomenda(true, true)) return;
             }
-            const itemsText = cart.map(i => '- ' + i.qty.toFixed(i.unit === 'kg' ? 1 : 0) + (i.unit === 'kg' ? 'kg' : 'un') + ' • ' + i.name + (i.size ? ' (' + i.size + ')' : '') + (i.flavor ? ' [' + i.flavor + ']' : '') + ' (R$ ' + i.finalPrice.toFixed(2) + '/' + (i.unit === 'kg' ? 'kg' : 'un') + ')').join('\n');
+            const itemsText = cart.map(formatWhatsAppCartItem).join('\n\n');
             let total = cart.reduce((acc, item) => acc + (item.finalPrice * item.qty), 0);
             const deliveryText = activeFulfillment === 'Entrega' ? '\nTaxa de Entrega: R$ ' + DELIVERY_FEE.toFixed(2) : '';
             if(activeFulfillment === 'Entrega') total += DELIVERY_FEE;
@@ -3145,7 +3241,7 @@ if (!item.sizes && flavor && item.variants && item.variants[flavor]) {
             const selectedDate = document.getElementById('order-date').value;
             const selectedTime = document.getElementById('order-time').value;
             const encomendaDateTimeText = activeOrderType === 'Encomenda'
-                ? '\nData da encomenda: ' + selectedDate + '\nHorário da encomenda: ' + selectedTime
+                ? '\nData da encomenda: ' + formatWhatsAppOrderDate(selectedDate) + '\nHorário da encomenda: ' + selectedTime
                 : '';
             const prontaEntregaInfoText = activeOrderType === 'Pronta entrega'
                 ? '\nAtendimento: Vamos consultar a disponibilidade imediata para você e confirmar em seguida.'
