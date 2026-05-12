@@ -74,6 +74,35 @@
             box-shadow: 0 6px 14px rgba(74, 50, 35, 0.18);
             transform: scale(1.05);
         }
+        .category-btn[aria-current="true"]::after {
+            content: "";
+            position: absolute;
+            left: 50%;
+            bottom: -6px;
+            width: 18px;
+            height: 2px;
+            border-radius: 2px;
+            background: #4A3223;
+            transform: translateX(-50%);
+        }
+        .category-btn { position: relative; }
+
+        .category-nav-fade {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            width: 32px;
+            pointer-events: none;
+            z-index: 1;
+        }
+        .category-nav-fade-left {
+            left: 0;
+            background: linear-gradient(to right, rgba(255,255,255,0.95), rgba(255,255,255,0));
+        }
+        .category-nav-fade-right {
+            right: 0;
+            background: linear-gradient(to left, rgba(255,255,255,0.95), rgba(255,255,255,0));
+        }
 
         /* Botão de Cesta no Header */
         .header-cart-btn {
@@ -165,8 +194,28 @@
   animation: toastOut 0.18s ease-in forwards;
 }
 
+@keyframes badgePulse {
+  0%   { transform: scale(1); }
+  35%  { transform: scale(1.35); }
+  70%  { transform: scale(0.92); }
+  100% { transform: scale(1); }
+}
+.badge-pulse { animation: badgePulse 0.45s cubic-bezier(0.34, 1.56, 0.64, 1); }
+
 .kit-flavor-panel {
   width: calc(100% - 2rem);
+}
+
+#kit-flavor-items {
+  position: relative;
+  background:
+    linear-gradient(#FCFAF7 30%, rgba(252, 250, 247, 0)) center top,
+    linear-gradient(rgba(252, 250, 247, 0), #FCFAF7 70%) center bottom,
+    radial-gradient(farthest-side at 50% 0, rgba(36, 27, 21, 0.12), rgba(0, 0, 0, 0)) center top,
+    radial-gradient(farthest-side at 50% 100%, rgba(36, 27, 21, 0.12), rgba(0, 0, 0, 0)) center bottom;
+  background-repeat: no-repeat;
+  background-size: 100% 28px, 100% 28px, 100% 12px, 100% 12px;
+  background-attachment: local, local, scroll, scroll;
 }
 
 .kit-flavor-product-row {
@@ -260,7 +309,9 @@
         </header>
 
         <!-- Navegação por Categorias -->
-        <nav class="bg-white/95 backdrop-blur-xl border-b border-[#9E764E]/10 overflow-hidden">
+        <nav class="relative bg-white/95 backdrop-blur-xl border-b border-[#9E764E]/10 overflow-hidden">
+            <div class="category-nav-fade category-nav-fade-left" aria-hidden="true"></div>
+            <div class="category-nav-fade category-nav-fade-right" aria-hidden="true"></div>
             <div id="category-nav" class="flex items-center gap-3 overflow-x-auto no-scrollbar py-4 px-6 scroll-smooth">
                 <!-- Injetado via JS -->
             </div>
@@ -270,9 +321,13 @@
     <!-- Overlay de Busca -->
     <div id="search-bar" class="max-h-0 opacity-0 overflow-hidden transition-all duration-700 bg-white/60 backdrop-blur-md border-b border-[#9E764E]/10">
         <div class="max-w-2xl mx-auto p-6">
+            <label for="search-input" class="sr-only">Buscar produtos no cardápio</label>
             <div class="relative group">
                 <i class="fas fa-search absolute left-5 top-1/2 -translate-y-1/2 text-[#9E764E]"></i>
-                <input type="text" id="search-input" oninput="handleSearch(this.value)" placeholder="Encontre a sua delícia preferida..." class="w-full pl-14 pr-6 py-5 bg-white/80 border border-[#9E764E]/20 rounded-3xl focus:outline-none focus:ring-4 focus:ring-[#9E764E]/10 italic shadow-inner text-lg transition-all">
+                <input type="text" id="search-input" oninput="handleSearch(this.value)" placeholder="Encontre a sua delícia preferida..." class="w-full pl-14 pr-16 py-5 bg-white/80 border border-[#9E764E]/20 rounded-3xl focus:outline-none focus:ring-4 focus:ring-[#9E764E]/10 italic shadow-inner text-lg transition-all">
+                <button id="search-clear-btn" type="button" onclick="clearSearch()" aria-label="Limpar busca" class="hidden absolute right-3 top-1/2 -translate-y-1/2 w-11 h-11 rounded-full text-[#9E764E] hover:bg-[#F3EEE8] flex items-center justify-center transition-all active:scale-90">
+                    <i class="fas fa-times text-base"></i>
+                </button>
             </div>
         </div>
     </div>
@@ -346,12 +401,19 @@
                 <!-- Itens do carrinho aqui -->
             </div>
 
-            <div id="cart-footer" class="hidden shrink-0 p-6 sm:p-8 bg-white border-t border-[#9E764E]/10 space-y-4 sm:space-y-6 overflow-y-auto max-h-[60%] custom-scrollbar">
+            <div id="cart-footer" class="hidden shrink-0 bg-white border-t border-[#9E764E]/10 overflow-y-auto max-h-[60%] custom-scrollbar">
+                <div id="cart-footer-summary" class="sticky top-0 z-10 bg-white/95 backdrop-blur-md px-6 sm:px-8 py-3 border-b border-[#9E764E]/10 flex items-center justify-between gap-3">
+                    <p class="text-[10px] uppercase tracking-[0.2em] font-bold text-[#9E764E]">
+                        <span id="cart-footer-count">0</span> <span id="cart-footer-count-label">itens</span>
+                    </p>
+                    <p class="text-sm font-bold text-[#241B15] serif-font" id="cart-footer-summary-total">R$ 0,00</p>
+                </div>
+                <div class="p-6 sm:p-8 space-y-4 sm:space-y-6">
                 <!-- Formulário de Checkout -->
                 <div class="space-y-4 sm:space-y-6">
                     <div class="space-y-2">
-                        <label class="text-[10px] uppercase font-bold text-[#9E764E] ml-2 tracking-[0.2em]">Identificação </label>
-                        <input type="text" id="order-name" placeholder="Como podemos te chamar?" class="w-full bg-[#F3EEE8]/50 border border-[#9E764E]/10 rounded-2xl px-5 py-3 text-sm focus:outline-none focus:ring-4 focus:ring-[#9E764E]/5 transition-all">
+                        <label for="order-name" class="text-[10px] uppercase font-bold text-[#9E764E] ml-2 tracking-[0.2em]">Identificação <span class="text-[#9E764E]" aria-hidden="true">*</span></label>
+                        <input type="text" id="order-name" required aria-required="true" placeholder="Como podemos te chamar?" class="w-full bg-[#F3EEE8]/50 border border-[#9E764E]/10 rounded-2xl px-5 py-3 text-sm focus:outline-none focus:ring-4 focus:ring-[#9E764E]/5 transition-all">
                     </div>
                     
                     <div class="space-y-2">
@@ -364,12 +426,12 @@
 
                     <div id="sched-fields" class="hidden grid grid-cols-2 gap-3 animate-fade">
                         <div class="space-y-1">
-                            <label class="text-[9px] uppercase font-bold text-[#9E764E] ml-2">Data</label>
-                            <input type="date" id="order-date" class="w-full bg-[#F3EEE8]/50 rounded-xl px-4 py-2 text-xs border border-[#9E764E]/10 outline-none">
+                            <label for="order-date" class="text-[9px] uppercase font-bold text-[#9E764E] ml-2">Data <span class="text-[#9E764E]" aria-hidden="true">*</span></label>
+                            <input type="date" id="order-date" aria-required="true" class="w-full bg-[#F3EEE8]/50 rounded-xl px-4 py-2 text-xs border border-[#9E764E]/10 outline-none">
                         </div>
                         <div class="space-y-1">
-                            <label class="text-[9px] uppercase font-bold text-[#9E764E] ml-2">Horário</label>
-                            <input type="time" id="order-time" class="w-full bg-[#F3EEE8]/50 rounded-xl px-4 py-2 text-xs border border-[#9E764E]/10 outline-none">
+                            <label for="order-time" class="text-[9px] uppercase font-bold text-[#9E764E] ml-2">Horário <span class="text-[#9E764E]" aria-hidden="true">*</span></label>
+                            <input type="time" id="order-time" aria-required="true" class="w-full bg-[#F3EEE8]/50 rounded-xl px-4 py-2 text-xs border border-[#9E764E]/10 outline-none">
                         </div>
                     </div>
 
@@ -383,15 +445,15 @@
 
                     <div id="fulfillment-details" class="animate-fade">
                         <div id="pickup-location-container" class="space-y-2">
-                            <label class="text-[9px] uppercase font-bold text-[#9E764E] ml-2 block">Unidade Escolhida</label>
+                            <label for="pickup-location" class="text-[9px] uppercase font-bold text-[#9E764E] ml-2 block">Unidade Escolhida</label>
                             <select id="pickup-location" class="w-full bg-[#F3EEE8]/50 border border-[#9E764E]/10 rounded-2xl px-5 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#9E764E]/20 appearance-none text-[#241B15]">
                                 <option value="Matriz">Unidade Matriz - Centro</option>
                                 <option value="Vila Nova">Unidade Vila Nova - Unicenter</option>
                             </select>
                         </div>
                         <div id="delivery-address-container" class="hidden space-y-2">
-                            <label class="text-[9px] uppercase font-bold text-[#9E764E] ml-2 block">Endereço para Entrega</label>
-                            <input type="text" id="delivery-address" placeholder="Rua, número, bairro e apto/casa" class="w-full bg-[#F3EEE8]/50 border border-[#9E764E]/10 rounded-2xl px-5 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#9E764E]/20 transition-all">
+                            <label for="delivery-address" class="text-[9px] uppercase font-bold text-[#9E764E] ml-2 block">Endereço para Entrega <span class="text-[#9E764E]" aria-hidden="true">*</span></label>
+                            <input type="text" id="delivery-address" aria-required="true" placeholder="Rua, número, bairro e apto/casa" class="w-full bg-[#F3EEE8]/50 border border-[#9E764E]/10 rounded-2xl px-5 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#9E764E]/20 transition-all">
                         </div>
                     </div>
                 </div>
@@ -413,6 +475,7 @@
                 <button onclick="sendWhatsAppOrder()" class="w-full bg-[#1F8F7A] hover:bg-[#176E60] text-white py-4 sm:py-6 rounded-[2rem] font-bold uppercase tracking-[0.25em] text-[10px] sm:text-[11px] transition-all shadow-2xl flex items-center justify-center gap-4 active:scale-95 group">
                     <i class="fab fa-whatsapp text-xl sm:text-2xl group-hover:rotate-12 transition-transform"></i> Finalizar WhatsApp
                 </button>
+                </div>
             </div>
         </div>
     </div>
@@ -2322,7 +2385,18 @@ flavors: ['Sonho de Valsa', 'Ouro branco', 'Ninho trufado', 'Pessêgo', 'Amendoi
             setOrderType('Pronta entrega');
             setFulfillment('Retirada');
             setTimeout(() => scrollToCategory(CATEGORIES[0]), 120);
+            document.addEventListener('keydown', handleGlobalKeydown);
         };
+
+        function handleGlobalKeydown(e) {
+            if (e.key !== 'Escape') return;
+            const kitModal = document.getElementById('kit-flavor-modal');
+            const cartModal = document.getElementById('cart-modal');
+            const searchBar = document.getElementById('search-bar');
+            if (kitModal && !kitModal.classList.contains('invisible')) { closeKitFlavorModal(); return; }
+            if (cartModal && !cartModal.classList.contains('invisible')) { closeCart(); return; }
+            if (searchBar && !searchBar.classList.contains('opacity-0')) { toggleSearch(); return; }
+        }
 
         function renderCategories() {
             const nav = document.getElementById('category-nav');
@@ -2336,20 +2410,22 @@ flavors: ['Sonho de Valsa', 'Ouro branco', 'Ninho trufado', 'Pessêgo', 'Amendoi
         function renderMenu() {
             const container = document.getElementById('menu-container');
             container.innerHTML = '';
+            let totalMatched = 0;
 
             CATEGORIES.forEach(cat => {
                 const items = MENU_ITEMS.filter(item => {
                     const matchesCategory = item.category === cat;
-                    const matchesSearch = item.name.toLowerCase().includes(currentSearch.toLowerCase()) || 
+                    const matchesSearch = item.name.toLowerCase().includes(currentSearch.toLowerCase()) ||
                                          item.description.toLowerCase().includes(currentSearch.toLowerCase());
                     return matchesCategory && matchesSearch;
                 });
 
                 if (items.length > 0) {
+                    totalMatched += items.length;
                     const section = document.createElement('section');
                     section.id = sanitizeId(cat);
                     section.className = 'animate-slide-up';
-                    
+
                     let html = `
                         <div class="flex flex-col items-center mb-12">
                             <h2 class="text-3xl italic serif-font mb-4 tracking-tight">${cat}</h2>
@@ -2372,7 +2448,40 @@ flavors: ['Sonho de Valsa', 'Ouro branco', 'Ninho trufado', 'Pessêgo', 'Amendoi
                 }
             });
 
+            if (totalMatched === 0 && currentSearch.trim()) {
+                const safeQuery = escapeHtml(currentSearch);
+                container.innerHTML = `
+                    <div class="min-h-[40vh] flex items-center justify-center px-2 animate-fade">
+                        <div class="w-full max-w-md bg-white border border-[#9E764E]/10 rounded-[2rem] px-6 py-10 text-center shadow-sm">
+                            <div class="mx-auto mb-5 w-20 h-20 rounded-full bg-[#F3EEE8] border border-[#9E764E]/10 flex items-center justify-center">
+                                <i class="fas fa-search text-2xl text-[#9E764E]"></i>
+                            </div>
+                            <p class="serif-font text-2xl text-[#241B15]">Nenhuma delícia encontrada</p>
+                            <p class="mt-2 text-sm leading-relaxed text-[#241B15]/55">Não achamos nada para "<strong>${safeQuery}</strong>". Tente outro termo ou volte para o cardápio completo.</p>
+                            <button onclick="clearSearch()" class="mt-7 inline-flex items-center justify-center gap-3 bg-[#241B15] text-white px-6 py-4 rounded-2xl text-[10px] uppercase tracking-[0.2em] font-black active:scale-95 transition-all">
+                                <i class="fas fa-times text-xs"></i> Limpar busca
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }
+
             requestAnimationFrame(refreshAllDescriptionToggles);
+        }
+
+        function clearSearch() {
+            const input = document.getElementById('search-input');
+            if (input) input.value = '';
+            currentSearch = '';
+            updateSearchClearButton();
+            renderMenu();
+        }
+
+        function updateSearchClearButton() {
+            const btn = document.getElementById('search-clear-btn');
+            const input = document.getElementById('search-input');
+            if (!btn || !input) return;
+            btn.classList.toggle('hidden', !input.value);
         }
 
         function createProductCard(item) {
@@ -2389,17 +2498,18 @@ flavors: ['Sonho de Valsa', 'Ouro branco', 'Ninho trufado', 'Pessêgo', 'Amendoi
             return `
                 <div class="product-card group flex flex-col h-full overflow-hidden">
                     <div class="relative h-56 overflow-hidden">
-  <img 
-    id="img-${item.id}" 
+  <img
+    id="img-${item.id}"
     src="${(item.images && item.images.length ? item.images[0] : item.image)}"
+    alt="${escapeHtml(item.name)}"
     class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-[1s]"
   >
 
   ${((item.images && item.images.length > 1) ? `
-    <button onclick="prevImage('${item.id}')" class="absolute left-3 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white text-[#241B15] w-9 h-9 rounded-full shadow-md flex items-center justify-center active:scale-95">
+    <button onclick="prevImage('${item.id}')" aria-label="Imagem anterior de ${escapeHtml(item.name)}" class="absolute left-3 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white text-[#241B15] w-11 h-11 rounded-full shadow-md flex items-center justify-center active:scale-95">
       <i class="fas fa-chevron-left text-xs"></i>
     </button>
-    <button onclick="nextImage('${item.id}')" class="absolute right-3 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white text-[#241B15] w-9 h-9 rounded-full shadow-md flex items-center justify-center active:scale-95">
+    <button onclick="nextImage('${item.id}')" aria-label="Próxima imagem de ${escapeHtml(item.name)}" class="absolute right-3 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white text-[#241B15] w-11 h-11 rounded-full shadow-md flex items-center justify-center active:scale-95">
       <i class="fas fa-chevron-right text-xs"></i>
     </button>
 
@@ -2407,8 +2517,10 @@ flavors: ['Sonho de Valsa', 'Ouro branco', 'Ninho trufado', 'Pessêgo', 'Amendoi
       ${item.images.map((_, idx) => `
         <button onclick="setImage('${item.id}', ${idx})"
           id="dot-${item.id}-${idx}"
-          class="w-2.5 h-2.5 rounded-full ${idx === 0 ? 'bg-white' : 'bg-white/40'} shadow"
-          aria-label="Imagem ${idx+1}">
+          class="relative w-9 h-9 flex items-center justify-center"
+          aria-label="Ver foto ${idx+1} de ${item.images.length} do produto ${escapeHtml(item.name)}"
+          ${idx === 0 ? 'aria-current="true"' : ''}>
+          <span aria-hidden="true" class="block w-2.5 h-2.5 rounded-full ${idx === 0 ? 'bg-white' : 'bg-white/40'} shadow"></span>
         </button>
       `).join('')}
     </div>
@@ -2460,9 +2572,9 @@ ${getFlavorList(item).map(f => `<option value="${f.label}">${f.label}</option>`)
 
                             <div class="flex items-center justify-between">
                                 <div class="flex items-center gap-2 bg-[#F3EEE8] p-1 rounded-full">
-                                    <button onclick="changeQtyUI('${item.id}', -1)" class="w-9 h-9 rounded-full bg-white flex items-center justify-center text-[10px] shadow-sm hover:bg-[#241B15] hover:text-white transition-all"><i class="fas fa-minus"></i></button>
-                                    <input type="number" id="qty-${item.id}" value="${initialQty}" step="${item.units[0] === 'kg' ? '0.1' : '1'}" class="w-10 bg-transparent text-center text-sm font-bold text-[#241B15] focus:outline-none">
-                                    <button onclick="changeQtyUI('${item.id}', 1)" class="w-9 h-9 rounded-full bg-white flex items-center justify-center text-[10px] shadow-sm hover:bg-[#241B15] hover:text-white transition-all"><i class="fas fa-plus"></i></button>
+                                    <button onclick="changeQtyUI('${item.id}', -1)" aria-label="Diminuir quantidade" class="w-11 h-11 rounded-full bg-white flex items-center justify-center text-[10px] shadow-sm hover:bg-[#241B15] hover:text-white transition-all"><i class="fas fa-minus"></i></button>
+                                    <input type="number" id="qty-${item.id}" aria-label="Quantidade de ${escapeHtml(item.name)}" value="${initialQty}" step="${item.units[0] === 'kg' ? '0.1' : '1'}" class="w-10 bg-transparent text-center text-sm font-bold text-[#241B15] focus:outline-none">
+                                    <button onclick="changeQtyUI('${item.id}', 1)" aria-label="Aumentar quantidade" class="w-11 h-11 rounded-full bg-white flex items-center justify-center text-[10px] shadow-sm hover:bg-[#241B15] hover:text-white transition-all"><i class="fas fa-plus"></i></button>
                                 </div>
                                 <div class="text-right">
                                     <p class="text-xl serif-font font-semibold tracking-tighter" id="price-preview-${item.id}">R$ ${(initialPrice * initialQty).toFixed(2)}</p>
@@ -2471,7 +2583,7 @@ ${getFlavorList(item).map(f => `<option value="${f.label}">${f.label}</option>`)
                             </div>
                             
                             <button onclick="addToCart('${item.id}')" class="btn-primary w-full py-4 rounded-[1.5rem] text-[10px] uppercase tracking-[0.2em] font-black active:scale-95">
-                                ${item.isKit ? 'Montar Kit' : 'Adicionar à Cesta'}
+                                ${item.isKit ? 'Personalizar e Adicionar' : 'Adicionar à Cesta'}
                             </button>
                         </div>
                     </div>
@@ -2487,12 +2599,23 @@ ${getFlavorList(item).map(f => `<option value="${f.label}">${f.label}</option>`)
             else { bar.classList.add('max-h-0', 'opacity-0'); bar.classList.remove('max-h-52', 'opacity-100'); }
         }
 
-        function handleSearch(val) { currentSearch = val; renderMenu(); }
+        function handleSearch(val) { currentSearch = val; updateSearchClearButton(); renderMenu(); }
 
         function scrollToCategory(cat) {
+            let activeBtn = null;
             document.querySelectorAll('.category-btn').forEach(btn => {
-                if(btn.innerText === cat) btn.classList.add('active'); else btn.classList.remove('active');
+                const isActive = btn.innerText === cat;
+                btn.classList.toggle('active', isActive);
+                if (isActive) {
+                    btn.setAttribute('aria-current', 'true');
+                    activeBtn = btn;
+                } else {
+                    btn.removeAttribute('aria-current');
+                }
             });
+            if (activeBtn && typeof activeBtn.scrollIntoView === 'function') {
+                activeBtn.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+            }
             if (cat === 'Todos') { window.scrollTo({ top: 0, behavior: 'smooth' }); return; }
             const el = document.getElementById(sanitizeId(cat));
             if (el) window.scrollTo({ top: el.getBoundingClientRect().top + window.pageYOffset - 180, behavior: 'smooth' });
@@ -2751,7 +2874,8 @@ if (!item.sizes && selectedFlavor && item.variants && item.variants[selectedFlav
 
             pendingKitSelection = { item, peopleQty, entries };
             document.getElementById('kit-flavor-title').innerText = item.name;
-            document.getElementById('kit-flavor-subtitle').innerText = `${peopleQty} ${peopleQty === 1 ? 'pessoa' : 'pessoas'} - escolha um sabor ou divida em sabores diferentes.`;
+            const peopleLabel = `${peopleQty} ${peopleQty === 1 ? 'pessoa' : 'pessoas'}`;
+            document.getElementById('kit-flavor-subtitle').innerText = `Calculamos a porção certa para ${peopleLabel} (você verá o cálculo em cada item). Escolha um sabor ou divida em sabores diferentes.`;
             renderKitFlavorItems();
 
             const modal = document.getElementById('kit-flavor-modal');
@@ -2804,7 +2928,7 @@ if (!item.sizes && selectedFlavor && item.variants && item.variants[selectedFlav
                                     <div class="min-w-0">
                                         <h3 class="serif-font text-base font-semibold text-[#241B15] truncate">${escapeHtml(entry.name)}</h3>
                                         <div class="flex flex-wrap gap-2 mt-1">${sizeBadge}${fixedFlavorBadge}</div>
-                                        <p class="text-[9px] text-[#9E764E]/70 font-black uppercase tracking-widest mt-2">${formatKitQty(entry.qty, entry.unit)} calculado para o kit</p>
+                                        <p class="text-[9px] text-[#9E764E]/70 font-black uppercase tracking-widest mt-2" title="Cálculo feito automaticamente para sua quantidade de pessoas">${escapeHtml(formatKitBreakdown(entry, pendingKitSelection.peopleQty))}</p>
                                     </div>
                                     <p class="text-sm font-bold text-[#241B15] whitespace-nowrap" id="kit-entry-total-${entry.idx}">R$ 0,00</p>
                                 </div>
@@ -2952,10 +3076,11 @@ if (!item.sizes && selectedFlavor && item.variants && item.variants[selectedFlav
                 });
             });
 
+            const kitName = pendingKitSelection.item ? pendingKitSelection.item.name : 'Kit';
             pendingKitSelection = null;
             closeKitFlavorModal();
             updateCartSummary();
-            openCart();
+            notifyItemAdded(`${kitName} adicionado à cesta`);
         }
 
         function buildCakeComposition(comp, peopleQty) {
@@ -3041,11 +3166,30 @@ if (!item.sizes && selectedFlavor && item.variants && item.variants[selectedFlav
                     unit: comp.unit || 'un',
                     qty,
                     flavor: comp.flavor || null,
-                    size: comp.size || null
+                    size: comp.size || null,
+                    multiplier: comp.multiplier || null,
+                    piecesPerPerson: comp.piecesPerPerson || null,
+                    totalPiecesPerUnit: comp.totalPiecesPerUnit || null,
+                    minQty: comp.minQty || null
                 });
             });
 
             return resolvedItems;
+        }
+
+        function formatKitBreakdown(entry, peopleQty) {
+            const peopleLabel = `${peopleQty} ${peopleQty === 1 ? 'pessoa' : 'pessoas'}`;
+            const qtyLabel = formatKitQty(entry.qty, entry.unit);
+            if (typeof entry.piecesPerPerson === 'number' && typeof entry.totalPiecesPerUnit === 'number' && entry.totalPiecesPerUnit > 0) {
+                const perPersonText = `${entry.piecesPerPerson} ${entry.piecesPerPerson === 1 ? 'pedaço' : 'pedaços'}/pessoa`;
+                return `${peopleLabel} × ${perPersonText} → ${qtyLabel}`;
+            }
+            if (typeof entry.multiplier === 'number') {
+                const mult = entry.multiplier.toLocaleString('pt-BR');
+                const perPerson = entry.multiplier === 1 ? 'porção' : 'porções';
+                return `${peopleLabel} × ${mult} ${perPerson}/pessoa → ${qtyLabel}`;
+            }
+            return `Calculado para ${peopleLabel}: ${qtyLabel}`;
         }
 
         function getKitComputedTotal(item, peopleQty) {
@@ -3093,7 +3237,7 @@ if (!item.sizes && flavor && item.variants && item.variants[flavor]) {
                 addIndividualToCart(id, unit, qty, flavor, size, price, getImageForSelection(item, flavor, size));
             }
             updateCartSummary();
-            openCart();
+            notifyItemAdded(`${item.name} adicionado à cesta`);
         }
 
         function addIndividualToCart(id, unit, qty, flavor, size, price, imageOverride = null) {
@@ -3102,6 +3246,21 @@ if (!item.sizes && flavor && item.variants && item.variants[flavor]) {
             const existing = cart.find(c => c.id === id && c.unit === unit && c.flavor === flavor && c.size === size);
             if (existing) { existing.qty += qty; }
             else { cart.push({ ...item, qty, unit, flavor, size, finalPrice, image: imageOverride || item.image }); }
+        }
+
+        function pulseCartBadge() {
+            ['cart-badge', 'sticky-cart-count'].forEach(id => {
+                const el = document.getElementById(id);
+                if (!el) return;
+                el.classList.remove('badge-pulse');
+                void el.offsetWidth;
+                el.classList.add('badge-pulse');
+            });
+        }
+
+        function notifyItemAdded(message = 'Adicionado à cesta') {
+            showValidationPopup(message);
+            pulseCartBadge();
         }
 
         function updateCartSummary() {
@@ -3115,6 +3274,12 @@ if (!item.sizes && flavor && item.variants && item.variants[flavor]) {
             document.getElementById('sticky-total').innerText = 'R$ ' + total.toFixed(2);
             document.getElementById('cart-final-total').innerText = 'R$ ' + total.toFixed(2);
             document.getElementById('sticky-cart-count').innerText = count;
+            const footerCount = document.getElementById('cart-footer-count');
+            const footerCountLabel = document.getElementById('cart-footer-count-label');
+            const footerSummaryTotal = document.getElementById('cart-footer-summary-total');
+            if (footerCount) footerCount.innerText = count;
+            if (footerCountLabel) footerCountLabel.innerText = count === 1 ? 'item' : 'itens';
+            if (footerSummaryTotal) footerSummaryTotal.innerText = 'R$ ' + total.toFixed(2);
             const bar = document.getElementById('sticky-cart-bar');
             if (count > 0) bar.classList.remove('translate-y-40'); else bar.classList.add('translate-y-40');
             document.getElementById('cart-footer').classList.toggle('hidden', count === 0);
@@ -3143,7 +3308,7 @@ if (!item.sizes && flavor && item.variants && item.variants[flavor]) {
                 const unitLabel = item.unit === 'kg' ? 'kg' : 'un';
                 return `
                 <div class="bg-white p-4 sm:p-5 rounded-[2rem] border border-[#9E764E]/10 flex gap-4 sm:gap-5 animate-fade shadow-sm">
-                    <img src="${item.image}" class="w-14 h-14 sm:w-16 sm:h-16 object-cover rounded-2xl shadow-md">
+                    <img src="${item.image}" alt="${escapeHtml(item.name)}" class="w-14 h-14 sm:w-16 sm:h-16 object-cover rounded-2xl shadow-md">
                     <div class="flex-grow min-w-0">
                         <div class="flex justify-between items-start mb-1">
                             <div>
@@ -3160,9 +3325,9 @@ if (!item.sizes && flavor && item.variants && item.variants[flavor]) {
                         </div>
                         <div class="flex justify-between items-end mt-2">
                             <div class="flex items-center gap-3 bg-[#F3EEE8] px-2 py-1 rounded-full border border-[#9E764E]/5">
-                                <button onclick="updateCartQty(${idx}, -1)" class="text-[10px] text-[#9E764E] w-6 h-6 flex items-center justify-center bg-white rounded-full shadow-sm"><i class="fas fa-minus"></i></button>
+                                <button onclick="updateCartQty(${idx}, -1)" aria-label="Diminuir quantidade de ${escapeHtml(item.name)}" class="text-[10px] text-[#9E764E] w-9 h-9 flex items-center justify-center bg-white rounded-full shadow-sm"><i class="fas fa-minus"></i></button>
                                 <span class="text-xs font-bold text-[#241B15]">${item.qty.toFixed(item.unit === 'kg' ? 1 : 0)}${unitLabel}</span>
-                                <button onclick="updateCartQty(${idx}, 1)" class="text-[10px] text-[#9E764E] w-6 h-6 flex items-center justify-center bg-white rounded-full shadow-sm"><i class="fas fa-plus"></i></button>
+                                <button onclick="updateCartQty(${idx}, 1)" aria-label="Aumentar quantidade de ${escapeHtml(item.name)}" class="text-[10px] text-[#9E764E] w-9 h-9 flex items-center justify-center bg-white rounded-full shadow-sm"><i class="fas fa-plus"></i></button>
                             </div>
                             <span class="text-base font-bold text-[#241B15]">R$ ${(item.finalPrice * item.qty).toFixed(2)}</span>
                         </div>
@@ -3227,6 +3392,10 @@ if (!item.sizes && flavor && item.variants && item.variants[flavor]) {
         }
 
         function sendWhatsAppOrder() {
+            if (cart.length === 0) {
+                showValidationPopup('Adicione itens à cesta antes de enviar o pedido!');
+                return;
+            }
             const name = document.getElementById('order-name').value;
             if (!name) {
                 showValidationPopup('Por favor, informe seu nome!');
@@ -3257,6 +3426,47 @@ if (!item.sizes && flavor && item.variants && item.variants[flavor]) {
                 : '';
             const message = 'Olá, gostaria de fazer um pedido, aguardo confirmação\n'+'Pedido • Delícias da Vovó\n' + '__________________________\n' + 'Cliente: ' + name + '\n' + 'Tipo: ' + activeOrderType + encomendaDateTimeText + prontaEntregaInfoText + '\n' + fulfillmentInfo + deliveryText + '\n\n' + 'Pedido\n' + itemsText + '\n\n' + 'Total aproximado: R$ ' + total.toFixed(2);
             window.open('https://wa.me/' + WHATSAPP_NUMBER + '?text=' + encodeURIComponent(message), '_blank');
+            showOrderSentState();
+        }
+
+        function showOrderSentState() {
+            const container = document.getElementById('cart-items-list');
+            const footer = document.getElementById('cart-footer');
+            if (footer) footer.classList.add('hidden');
+            if (!container) return;
+            container.innerHTML = `
+                <div class="min-h-[55vh] flex items-center justify-center px-2 animate-fade">
+                    <div class="w-full bg-white border border-[#9E764E]/10 rounded-[2rem] px-6 py-10 text-center shadow-sm">
+                        <div class="mx-auto mb-5 w-20 h-20 rounded-full bg-[#E6F4EF] border border-[#1F8F7A]/20 flex items-center justify-center">
+                            <i class="fab fa-whatsapp text-3xl text-[#1F8F7A]"></i>
+                        </div>
+                        <p class="serif-font text-2xl text-[#241B15]">Pedido enviado para o WhatsApp</p>
+                        <p class="mt-2 text-sm leading-relaxed text-[#241B15]/55">Confira a conversa que abrimos em outra aba e aguarde nossa confirmação. Caso a aba não tenha aberto, verifique se o navegador bloqueou o pop-up.</p>
+                        <div class="mt-7 flex flex-col sm:flex-row gap-3 justify-center">
+                            <button onclick="closeCart()" class="inline-flex items-center justify-center gap-3 bg-[#241B15] text-white px-6 py-4 rounded-2xl text-[10px] uppercase tracking-[0.2em] font-black active:scale-95 transition-all">
+                                <i class="fas fa-arrow-left text-xs"></i> Voltar ao cardápio
+                            </button>
+                            <button onclick="startNewOrder()" class="inline-flex items-center justify-center gap-3 bg-[#9E764E] text-white px-6 py-4 rounded-2xl text-[10px] uppercase tracking-[0.2em] font-black active:scale-95 transition-all">
+                                <i class="fas fa-rotate-right text-xs"></i> Iniciar novo pedido
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function startNewOrder() {
+            cart = [];
+            const nameInput = document.getElementById('order-name');
+            const addressInput = document.getElementById('delivery-address');
+            const dateInput = document.getElementById('order-date');
+            const timeInput = document.getElementById('order-time');
+            if (nameInput) nameInput.value = '';
+            if (addressInput) addressInput.value = '';
+            if (dateInput) dateInput.value = '';
+            if (timeInput) timeInput.value = '';
+            updateCartSummary();
+            renderCartItems();
         }
 
         function formatDateLocalISO(date) {
@@ -3459,10 +3669,14 @@ function setImage(id, idx) {
   // Atualiza bolinhas
   imgs.forEach((_, i) => {
     const dot = document.getElementById(`dot-${id}-${i}`);
-    if (dot) {
-      dot.classList.toggle('bg-white', i === clamped);
-      dot.classList.toggle('bg-white/40', i !== clamped);
+    if (!dot) return;
+    const visual = dot.querySelector('span');
+    if (visual) {
+      visual.classList.toggle('bg-white', i === clamped);
+      visual.classList.toggle('bg-white/40', i !== clamped);
     }
+    if (i === clamped) dot.setAttribute('aria-current', 'true');
+    else dot.removeAttribute('aria-current');
   });
 }
 
