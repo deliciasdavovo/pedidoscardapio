@@ -353,6 +353,11 @@
                         <label class="text-[10px] uppercase font-bold text-[#9E764E] ml-2 tracking-[0.2em]">Identificação </label>
                         <input type="text" id="order-name" placeholder="Como podemos te chamar?" class="w-full bg-[#F3EEE8]/50 border border-[#9E764E]/10 rounded-2xl px-5 py-3 text-sm focus:outline-none focus:ring-4 focus:ring-[#9E764E]/5 transition-all">
                     </div>
+
+                    <div class="space-y-2">
+                        <label class="text-[10px] uppercase font-bold text-[#9E764E] ml-2 tracking-[0.2em]">Telefone <span class="font-normal normal-case text-[#241B15]/30">(opcional)</span></label>
+                        <input type="tel" id="order-phone" placeholder="(99) 99999-9999" class="w-full bg-[#F3EEE8]/50 border border-[#9E764E]/10 rounded-2xl px-5 py-3 text-sm focus:outline-none focus:ring-4 focus:ring-[#9E764E]/5 transition-all">
+                    </div>
                     
                     <div class="space-y-2">
                         <label class="text-[10px] uppercase font-bold text-[#9E764E] ml-2 tracking-[0.2em]">Disponibilidade</label>
@@ -408,6 +413,11 @@
                         </div>
                         <span class="text-3xl sm:text-4xl serif-font text-[#241B15] tracking-tighter" id="cart-final-total">R$ 0,00</span>
                     </div>
+                </div>
+
+                <div class="space-y-2">
+                    <label class="text-[10px] uppercase font-bold text-[#9E764E] ml-2 tracking-[0.2em]">Observações gerais <span class="font-normal normal-case text-[#241B15]/30">(opcional)</span></label>
+                    <textarea id="order-obs" rows="2" placeholder="Alergias, restrições ou outros detalhes..." class="w-full bg-[#F3EEE8]/50 border border-[#9E764E]/10 rounded-2xl px-5 py-3 text-sm focus:outline-none focus:ring-4 focus:ring-[#9E764E]/5 transition-all resize-none"></textarea>
                 </div>
 
                 <button onclick="sendWhatsAppOrder()" class="w-full bg-[#1F8F7A] hover:bg-[#176E60] text-white py-4 sm:py-6 rounded-[2rem] font-bold uppercase tracking-[0.25em] text-[10px] sm:text-[11px] transition-all shadow-2xl flex items-center justify-center gap-4 active:scale-95 group">
@@ -2317,10 +2327,12 @@ flavors: ['Sonho de Valsa', 'Ouro branco', 'Ninho trufado', 'Pessêgo', 'Amendoi
         let pendingKitSelection = null;
 
         window.onload = () => {
+            loadCart();
             renderCategories();
             renderMenu();
             setOrderType('Pronta entrega');
             setFulfillment('Retirada');
+            updateCartSummary();
             setTimeout(() => scrollToCategory(CATEGORIES[0]), 120);
         };
 
@@ -2389,9 +2401,10 @@ flavors: ['Sonho de Valsa', 'Ouro branco', 'Ninho trufado', 'Pessêgo', 'Amendoi
             return `
                 <div class="product-card group flex flex-col h-full overflow-hidden">
                     <div class="relative h-56 overflow-hidden">
-  <img 
-    id="img-${item.id}" 
+  <img
+    id="img-${item.id}"
     src="${(item.images && item.images.length ? item.images[0] : item.image)}"
+    loading="lazy"
     class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-[1s]"
   >
 
@@ -2487,7 +2500,11 @@ ${getFlavorList(item).map(f => `<option value="${f.label}">${f.label}</option>`)
             else { bar.classList.add('max-h-0', 'opacity-0'); bar.classList.remove('max-h-52', 'opacity-100'); }
         }
 
-        function handleSearch(val) { currentSearch = val; renderMenu(); }
+        let _searchTimer;
+        function handleSearch(val) {
+            clearTimeout(_searchTimer);
+            _searchTimer = setTimeout(() => { currentSearch = val; renderMenu(); }, 300);
+        }
 
         function scrollToCategory(cat) {
             document.querySelectorAll('.category-btn').forEach(btn => {
@@ -2751,7 +2768,7 @@ if (!item.sizes && selectedFlavor && item.variants && item.variants[selectedFlav
 
             pendingKitSelection = { item, peopleQty, entries };
             document.getElementById('kit-flavor-title').innerText = item.name;
-            document.getElementById('kit-flavor-subtitle').innerText = `${peopleQty} ${peopleQty === 1 ? 'pessoa' : 'pessoas'} - escolha um sabor ou divida em sabores diferentes.`;
+            document.getElementById('kit-flavor-subtitle').innerText = `${peopleQty} ${peopleQty === 1 ? 'pessoa' : 'pessoas'} — escolha um sabor por item ou clique em "Misturar sabores" para dividir.`;
             renderKitFlavorItems();
 
             const modal = document.getElementById('kit-flavor-modal');
@@ -2810,12 +2827,29 @@ if (!item.sizes && selectedFlavor && item.variants && item.variants[selectedFlav
                                 </div>
 
                                 ${hasFlavors ? `
-                                    <div class="kit-flavor-rows-${entry.idx} mt-4 space-y-2">
-                                        ${renderKitFlavorRow(entry.idx, 0, entry.qty, entry.defaultFlavor, baseItem, entry)}
+                                    <div class="mt-4 space-y-3">
+                                        <div class="flex gap-2">
+                                            <button onclick="setKitFlavorMode(${entry.idx}, 'single')" id="kit-mode-single-${entry.idx}" class="flex-1 text-[10px] font-black uppercase tracking-[0.15em] py-2 px-3 rounded-xl border border-[#9E764E]/30 bg-[#9E764E] text-white transition-all">
+                                                Um sabor
+                                            </button>
+                                            <button onclick="setKitFlavorMode(${entry.idx}, 'split')" id="kit-mode-split-${entry.idx}" class="flex-1 text-[10px] font-black uppercase tracking-[0.15em] py-2 px-3 rounded-xl border border-[#9E764E]/20 text-[#9E764E] bg-white transition-all">
+                                                Misturar sabores
+                                            </button>
+                                        </div>
+                                        <div id="kit-single-${entry.idx}">
+                                            <select onchange="updateKitModalTotal()" id="kit-single-select-${entry.idx}" class="w-full bg-[#F3EEE8] border border-[#9E764E]/10 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#9E764E]/20 appearance-none text-[#241B15]">
+                                                ${flavorOptions}
+                                            </select>
+                                        </div>
+                                        <div id="kit-split-${entry.idx}" class="hidden space-y-2">
+                                            <div class="kit-flavor-rows-${entry.idx} space-y-2">
+                                                ${renderKitFlavorRow(entry.idx, 0, entry.qty, entry.defaultFlavor, baseItem, entry)}
+                                            </div>
+                                            <button onclick="addKitFlavorRow(${entry.idx})" class="mt-1 text-[10px] font-black uppercase tracking-[0.18em] text-[#9E764E] hover:text-[#7D5C3D] flex items-center gap-2">
+                                                <i class="fas fa-plus-circle"></i> Adicionar sabor
+                                            </button>
+                                        </div>
                                     </div>
-                                    <button onclick="addKitFlavorRow(${entry.idx})" class="mt-3 text-[10px] font-black uppercase tracking-[0.18em] text-[#9E764E] hover:text-[#7D5C3D] flex items-center gap-2">
-                                        <i class="fas fa-plus-circle"></i> Dividir em outro sabor
-                                    </button>
                                 ` : `
                                     <p class="mt-4 text-xs text-[#241B15]/55 leading-relaxed">Este item não tem seleção de sabor no cardápio.</p>
                                 `}
@@ -2849,6 +2883,30 @@ if (!item.sizes && selectedFlavor && item.variants && item.variants[selectedFlav
             `;
         }
 
+        function setKitFlavorMode(entryIdx, mode) {
+            const singleBtn = document.getElementById('kit-mode-single-' + entryIdx);
+            const splitBtn = document.getElementById('kit-mode-split-' + entryIdx);
+            const singleDiv = document.getElementById('kit-single-' + entryIdx);
+            const splitDiv = document.getElementById('kit-split-' + entryIdx);
+            if (!singleBtn || !splitBtn) return;
+            if (mode === 'single') {
+                singleBtn.classList.add('bg-[#9E764E]', 'text-white');
+                singleBtn.classList.remove('bg-white', 'text-[#9E764E]');
+                splitBtn.classList.add('bg-white', 'text-[#9E764E]');
+                splitBtn.classList.remove('bg-[#9E764E]', 'text-white');
+                singleDiv.classList.remove('hidden');
+                splitDiv.classList.add('hidden');
+            } else {
+                splitBtn.classList.add('bg-[#9E764E]', 'text-white');
+                splitBtn.classList.remove('bg-white', 'text-[#9E764E]');
+                singleBtn.classList.add('bg-white', 'text-[#9E764E]');
+                singleBtn.classList.remove('bg-[#9E764E]', 'text-white');
+                splitDiv.classList.remove('hidden');
+                singleDiv.classList.add('hidden');
+            }
+            updateKitModalTotal();
+        }
+
         function getKitEntry(entryIdx) {
             if (!pendingKitSelection) return null;
             return pendingKitSelection.entries.find(entry => entry.idx === entryIdx) || null;
@@ -2861,6 +2919,13 @@ if (!item.sizes && selectedFlavor && item.variants && item.variants[selectedFlav
 
             if (!entry.flavors.length) {
                 return [{ qty: entry.qty, flavor: entry.flavor || null }];
+            }
+
+            const splitDiv = document.getElementById('kit-split-' + entryIdx);
+            const isSplitMode = splitDiv && !splitDiv.classList.contains('hidden');
+            if (!isSplitMode) {
+                const singleSelect = document.getElementById('kit-single-select-' + entryIdx);
+                return [{ qty: entry.qty, flavor: singleSelect ? singleSelect.value : entry.defaultFlavor }];
             }
 
             return Array.from(document.querySelectorAll(`.kit-flavor-row-${entryIdx}`)).map(row => {
@@ -3096,12 +3161,28 @@ if (!item.sizes && flavor && item.variants && item.variants[flavor]) {
             openCart();
         }
 
+        function saveCart() {
+            try { localStorage.setItem('vovo_cart', JSON.stringify(cart)); } catch(e) {}
+        }
+
+        function loadCart() {
+            try {
+                const raw = localStorage.getItem('vovo_cart');
+                if (raw) cart = JSON.parse(raw);
+            } catch(e) { cart = []; }
+        }
+
         function addIndividualToCart(id, unit, qty, flavor, size, price, imageOverride = null) {
             const item = MENU_ITEMS.find(i => i.id === id);
             const finalPrice = price || (unit === 'kg' ? item.priceKg : item.price);
             const existing = cart.find(c => c.id === id && c.unit === unit && c.flavor === flavor && c.size === size);
             if (existing) { existing.qty += qty; }
-            else { cart.push({ ...item, qty, unit, flavor, size, finalPrice, image: imageOverride || item.image }); }
+            else { cart.push({ ...item, qty, unit, flavor, size, finalPrice, image: imageOverride || item.image, obs: '' }); }
+            saveCart();
+        }
+
+        function updateCartObs(idx, val) {
+            if (cart[idx]) { cart[idx].obs = val; saveCart(); }
         }
 
         function updateCartSummary() {
@@ -3166,6 +3247,13 @@ if (!item.sizes && flavor && item.variants && item.variants[flavor]) {
                             </div>
                             <span class="text-base font-bold text-[#241B15]">R$ ${(item.finalPrice * item.qty).toFixed(2)}</span>
                         </div>
+                        <input
+                            type="text"
+                            placeholder="Observação (opcional)"
+                            value="${item.obs || ''}"
+                            oninput="updateCartObs(${idx}, this.value)"
+                            class="mt-2 w-full bg-[#F3EEE8]/60 border border-[#9E764E]/10 rounded-xl px-3 py-1.5 text-[11px] placeholder-[#9E764E]/40 focus:outline-none focus:ring-2 focus:ring-[#9E764E]/10"
+                        >
                     </div>
                 </div>
             `}).join('');
@@ -3174,10 +3262,10 @@ if (!item.sizes && flavor && item.variants && item.variants[flavor]) {
         function updateCartQty(idx, delta) {
             const item = cart[idx]; const step = item.unit === 'kg' ? 0.1 : 1;
             item.qty += (delta * step); if (item.qty <= 0) cart.splice(idx, 1);
-            updateCartSummary(); renderCartItems();
+            saveCart(); updateCartSummary(); renderCartItems();
         }
 
-        function removeFromCart(idx) { cart.splice(idx, 1); updateCartSummary(); renderCartItems(); }
+        function removeFromCart(idx) { cart.splice(idx, 1); saveCart(); updateCartSummary(); renderCartItems(); }
 
         function setOrderType(type) {
             activeOrderType = type;
@@ -3202,8 +3290,9 @@ if (!item.sizes && flavor && item.variants && item.variants[flavor]) {
             const unitText = item.unit === 'kg' ? 'kg' : 'un';
             const details = [item.size, item.flavor].filter(Boolean).join(' - ');
             const itemName = details ? item.name + ' - ' + details : item.name;
+            const obsLine = item.obs ? '\n  ↳ Obs: ' + item.obs : '';
 
-            return '- ' + qtyText + ' • ' + itemName + ' (R$ ' + item.finalPrice.toFixed(2) + '/' + unitText + ')';
+            return '- ' + qtyText + ' • ' + itemName + ' (R$ ' + item.finalPrice.toFixed(2) + '/' + unitText + ')' + obsLine;
         }
 
         function formatWhatsAppOrderDate(value) {
@@ -3255,8 +3344,25 @@ if (!item.sizes && flavor && item.variants && item.variants[flavor]) {
             const prontaEntregaInfoText = activeOrderType === 'Pronta entrega'
                 ? '\nAtendimento: Vamos consultar a disponibilidade imediata para você e confirmar em seguida.'
                 : '';
-            const message = 'Olá, gostaria de fazer um pedido, aguardo confirmação\n'+'Pedido • Delícias da Vovó\n' + '__________________________\n' + 'Cliente: ' + name + '\n' + 'Tipo: ' + activeOrderType + encomendaDateTimeText + prontaEntregaInfoText + '\n' + fulfillmentInfo + deliveryText + '\n\n' + 'Pedido\n' + itemsText + '\n\n' + 'Total aproximado: R$ ' + total.toFixed(2);
+            const phone = (document.getElementById('order-phone').value || '').trim();
+            const generalObs = (document.getElementById('order-obs').value || '').trim();
+            const phoneText = phone ? '\nTelefone: ' + phone : '';
+            const generalObsText = generalObs ? '\n\nObservações: ' + generalObs : '';
+            const message = 'Olá, gostaria de fazer um pedido, aguardo confirmação\n'+'Pedido • Delícias da Vovó\n' + '__________________________\n' + 'Cliente: ' + name + phoneText + '\n' + 'Tipo: ' + activeOrderType + encomendaDateTimeText + prontaEntregaInfoText + '\n' + fulfillmentInfo + deliveryText + '\n\n' + 'Pedido\n' + itemsText + generalObsText + '\n\n' + 'Total aproximado: R$ ' + total.toFixed(2);
             window.open('https://wa.me/' + WHATSAPP_NUMBER + '?text=' + encodeURIComponent(message), '_blank');
+            document.getElementById('order-success-overlay').classList.remove('hidden');
+        }
+
+        function closeOrderSuccess() {
+            document.getElementById('order-success-overlay').classList.add('hidden');
+            cart = [];
+            saveCart();
+            updateCartSummary();
+            renderCartItems();
+            closeCart();
+            document.getElementById('order-name').value = '';
+            document.getElementById('order-phone').value = '';
+            document.getElementById('order-obs').value = '';
         }
 
         function formatDateLocalISO(date) {
@@ -3502,5 +3608,17 @@ function getSelectedFlavorData(id) {
     
     
      </script>
+
+    <!-- Overlay de confirmação de pedido -->
+    <div id="order-success-overlay" class="hidden fixed inset-0 bg-white/97 backdrop-blur-sm z-[200] flex flex-col items-center justify-center px-8 text-center" style="backdrop-filter: blur(4px);">
+        <div class="w-24 h-24 rounded-full bg-[#1F8F7A]/10 flex items-center justify-center mb-6">
+            <i class="fab fa-whatsapp text-5xl text-[#1F8F7A]"></i>
+        </div>
+        <h2 class="serif-font text-3xl text-[#241B15] mb-3">Pedido enviado!</h2>
+        <p class="text-sm text-[#241B15]/60 leading-relaxed max-w-xs mb-8">Continue pelo WhatsApp para confirmar o pedido com a loja. Aguarde a confirmação antes de finalizar.</p>
+        <button onclick="closeOrderSuccess()" class="bg-[#241B15] text-white px-8 py-4 rounded-2xl text-[10px] uppercase tracking-[0.2em] font-black active:scale-95 transition-all">
+            Fazer novo pedido
+        </button>
+    </div>
 </body>
 </html>
