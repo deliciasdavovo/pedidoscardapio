@@ -2326,6 +2326,30 @@ flavors: ['Sonho de Valsa', 'Ouro branco', 'Ninho trufado', 'Pessêgo', 'Amendoi
         let toastCleanupTimer = null;
         let pendingKitSelection = null;
 
+        const CATEGORY_COLORS = {
+            'Pão de bolinha':           '#C4773B',
+            'Coffee Breaks':            '#5C4033',
+            'Bolos caseiros':           '#D4845A',
+            'Lanches frios':            '#7A9E7E',
+            'Mini salgados':            '#B5651D',
+            'Tortas & Quiches':         '#8B6357',
+            'Doces panificação':        '#C4884A',
+            'Bebidas':                  '#4A8FA8',
+            'Bolachas & biscoitos':     '#A0785A',
+            'Mini sobremesas':          '#C49A5A',
+            'Sobremesas unitárias':     '#8B6A4A',
+            'Bolos gelados':            '#6B8EA0',
+            'Tortas doces':             '#B8734A',
+            'Sobremesas clássicas':     '#7A8A5A',
+            'Docinhos festa':           '#C47A4A',
+            'Salgados assados':         '#8B7355',
+            'Cestas de café da manhã':  '#A0845C',
+            'Especiais de Natal':       '#C45A4A',
+        };
+        function categoryColor(cat) { return CATEGORY_COLORS[cat] || '#9E764E'; }
+
+        let activeCategory = null;
+
         window.onload = () => {
             loadCart();
             renderCategories();
@@ -2333,16 +2357,48 @@ flavors: ['Sonho de Valsa', 'Ouro branco', 'Ninho trufado', 'Pessêgo', 'Amendoi
             setOrderType('Pronta entrega');
             setFulfillment('Retirada');
             updateCartSummary();
-            setTimeout(() => scrollToCategory(CATEGORIES[0]), 120);
+            filterToCategory(CATEGORIES[0]);
         };
 
         function renderCategories() {
             const nav = document.getElementById('category-nav');
-            let html = `<button onclick="scrollToCategory('Todos')" class="category-btn active px-7 py-2.5 rounded-full text-sm font-semibold serif-font transition-all whitespace-nowrap border border-transparent">Todos</button>`;
-            CATEGORIES.forEach(cat => {
-                html += `<button onclick="scrollToCategory('${cat}')" class="category-btn px-7 py-2.5 rounded-full text-sm font-medium serif-font transition-all whitespace-nowrap border border-transparent text-[#241B15]/50 hover:bg-[#F3EEE8]">${cat}</button>`;
-            });
+            let html = CATEGORIES.map((cat, i) => {
+                const color = categoryColor(cat);
+                return `<button onclick="filterToCategory('${cat}')" data-cat="${cat}" class="category-btn px-7 py-2.5 rounded-full text-sm font-medium serif-font transition-all whitespace-nowrap border border-transparent text-[#241B15]/50 hover:bg-[#F3EEE8]">${cat}</button>`;
+            }).join('');
             nav.innerHTML = html;
+        }
+
+        function filterToCategory(cat) {
+            activeCategory = cat;
+            const color = categoryColor(cat);
+            document.querySelectorAll('.category-btn').forEach(btn => {
+                const isActive = btn.dataset.cat === cat;
+                btn.classList.toggle('active', isActive);
+                if (isActive) {
+                    btn.style.backgroundColor = color + '22';
+                    btn.style.color = color;
+                    btn.style.borderColor = color;
+                    btn.style.boxShadow = `0 6px 14px ${color}30`;
+                } else {
+                    btn.style.backgroundColor = '';
+                    btn.style.color = '';
+                    btn.style.borderColor = '';
+                    btn.style.boxShadow = '';
+                }
+            });
+            document.querySelectorAll('#menu-container > section').forEach(section => {
+                const show = section.dataset.category === cat;
+                section.classList.toggle('hidden', !show);
+                if (show) {
+                    section.querySelectorAll('.product-card').forEach(card => {
+                        card.style.animation = 'none';
+                        card.offsetHeight; // reflow
+                        card.style.animation = '';
+                    });
+                }
+            });
+            window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
         function renderMenu() {
@@ -2352,7 +2408,8 @@ flavors: ['Sonho de Valsa', 'Ouro branco', 'Ninho trufado', 'Pessêgo', 'Amendoi
             CATEGORIES.forEach(cat => {
                 const items = MENU_ITEMS.filter(item => {
                     const matchesCategory = item.category === cat;
-                    const matchesSearch = item.name.toLowerCase().includes(currentSearch.toLowerCase()) || 
+                    const matchesSearch = currentSearch === '' ||
+                                         item.name.toLowerCase().includes(currentSearch.toLowerCase()) ||
                                          item.description.toLowerCase().includes(currentSearch.toLowerCase());
                     return matchesCategory && matchesSearch;
                 });
@@ -2360,22 +2417,24 @@ flavors: ['Sonho de Valsa', 'Ouro branco', 'Ninho trufado', 'Pessêgo', 'Amendoi
                 if (items.length > 0) {
                     const section = document.createElement('section');
                     section.id = sanitizeId(cat);
+                    section.dataset.category = cat;
                     section.className = 'animate-slide-up';
-                    
+                    const color = categoryColor(cat);
+
                     let html = `
                         <div class="flex flex-col items-center mb-12">
-                            <h2 class="text-3xl italic serif-font mb-4 tracking-tight">${cat}</h2>
+                            <h2 class="text-3xl italic serif-font mb-4 tracking-tight" style="color:${color}">${cat}</h2>
                             <div class="flex items-center gap-4">
-                                <div class="w-16 h-[1px] bg-[#9E764E]/20"></div>
-                                <div class="w-2 h-2 rotate-45 border border-[#9E764E]/40"></div>
-                                <div class="w-16 h-[1px] bg-[#9E764E]/20"></div>
+                                <div class="w-16 h-[1px]" style="background:${color}33"></div>
+                                <div class="w-2 h-2 rotate-45 border" style="border-color:${color}66"></div>
+                                <div class="w-16 h-[1px]" style="background:${color}33"></div>
                             </div>
                         </div>
                         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-10">
                     `;
 
-                    items.forEach(item => {
-                        html += createProductCard(item);
+                    items.forEach((item, idx) => {
+                        html += createProductCard(item, idx);
                     });
 
                     html += `</div>`;
@@ -2384,10 +2443,19 @@ flavors: ['Sonho de Valsa', 'Ouro branco', 'Ninho trufado', 'Pessêgo', 'Amendoi
                 }
             });
 
+            // apply category visibility after rebuild
+            if (currentSearch !== '') {
+                document.querySelectorAll('#menu-container > section').forEach(s => s.classList.remove('hidden'));
+            } else if (activeCategory) {
+                document.querySelectorAll('#menu-container > section').forEach(section => {
+                    section.classList.toggle('hidden', section.dataset.category !== activeCategory);
+                });
+            }
+
             requestAnimationFrame(refreshAllDescriptionToggles);
         }
 
-        function createProductCard(item) {
+        function createProductCard(item, idx = 0) {
             const hasKg = item.units.includes('kg');
             const hasSizes = item.sizes && item.sizes.length > 0;
             const hasFlavors = item.flavors && item.flavors.length > 0;
@@ -2399,7 +2467,7 @@ flavors: ['Sonho de Valsa', 'Ouro branco', 'Ninho trufado', 'Pessêgo', 'Amendoi
             const unitSuffix = item.isKit ? '/pessoa' : (item.units[0] === 'kg' ? '/kg' : '/un');
 
             return `
-                <div class="product-card group flex flex-col h-full overflow-hidden">
+                <div class="product-card group flex flex-col h-full overflow-hidden animate-slide-up" style="animation-delay:${Math.min(idx * 0.06, 0.4)}s">
                     <div class="relative h-56 overflow-hidden">
   <img
     id="img-${item.id}"
@@ -2503,16 +2571,10 @@ ${getFlavorList(item).map(f => `<option value="${f.label}">${f.label}</option>`)
         let _searchTimer;
         function handleSearch(val) {
             clearTimeout(_searchTimer);
-            _searchTimer = setTimeout(() => { currentSearch = val; renderMenu(); }, 300);
-        }
-
-        function scrollToCategory(cat) {
-            document.querySelectorAll('.category-btn').forEach(btn => {
-                if(btn.innerText === cat) btn.classList.add('active'); else btn.classList.remove('active');
-            });
-            if (cat === 'Todos') { window.scrollTo({ top: 0, behavior: 'smooth' }); return; }
-            const el = document.getElementById(sanitizeId(cat));
-            if (el) window.scrollTo({ top: el.getBoundingClientRect().top + window.pageYOffset - 180, behavior: 'smooth' });
+            _searchTimer = setTimeout(() => {
+                currentSearch = val;
+                renderMenu();
+            }, 300);
         }
 
         function refreshDescriptionToggle(id) {
