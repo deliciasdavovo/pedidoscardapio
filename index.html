@@ -75,6 +75,19 @@
             transform: scale(1.05);
         }
 
+        .view-toggle-btn { color: rgba(158,118,78,0.35); }
+        .view-toggle-btn.active { background: #F3EEE8; color: #5A3E2B; }
+
+        .sidebar-cat-btn { text-align: left; }
+        .sidebar-cat-btn.active { background: #F3EEE8; font-weight: 600; }
+
+        .line-clamp-1 {
+            display: -webkit-box;
+            -webkit-line-clamp: 1;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
         /* Botão de Cesta no Header */
         .header-cart-btn {
             background: var(--primary);
@@ -260,9 +273,21 @@
         </header>
 
         <!-- Navegação por Categorias -->
-        <nav class="bg-white/95 backdrop-blur-xl border-b border-[#9E764E]/10 overflow-hidden">
-            <div id="category-nav" class="flex items-center gap-3 overflow-x-auto no-scrollbar py-4 px-6 scroll-smooth">
+        <nav class="bg-white/95 backdrop-blur-xl border-b border-[#9E764E]/10 overflow-hidden flex items-center">
+            <div id="category-nav" class="flex items-center gap-3 overflow-x-auto no-scrollbar py-4 px-6 scroll-smooth flex-1">
                 <!-- Injetado via JS -->
+            </div>
+            <div class="flex items-center gap-1 px-4 border-l border-[#9E764E]/15 shrink-0 py-4">
+                <button onclick="setViewMode('grid')" id="view-grid-btn"
+                    class="view-toggle-btn w-9 h-9 rounded-xl flex items-center justify-center transition-all"
+                    title="Vista em grade">
+                    <i class="fas fa-th-large text-sm"></i>
+                </button>
+                <button onclick="setViewMode('compact')" id="view-compact-btn"
+                    class="view-toggle-btn w-9 h-9 rounded-xl flex items-center justify-center transition-all"
+                    title="Vista compacta">
+                    <i class="fas fa-list text-sm"></i>
+                </button>
             </div>
         </nav>
     </div>
@@ -278,9 +303,16 @@
     </div>
 
     <!-- Conteúdo Principal -->
-    <main id="menu-container" class="max-w-7xl mx-auto px-6 py-12 space-y-24 pb-48">
-        <!-- Produtos injetados via JS -->
-    </main>
+    <div class="flex max-w-7xl mx-auto">
+        <aside id="category-sidebar"
+            class="hidden lg:flex flex-col gap-0.5 w-52 shrink-0 sticky self-start overflow-y-auto py-8 pl-6 pr-3 custom-scrollbar"
+            style="top: var(--header-h); max-height: calc(100vh - var(--header-h))">
+            <!-- Injetado via JS -->
+        </aside>
+        <main id="menu-container" class="flex-1 min-w-0 px-6 py-10 space-y-16 pb-48">
+            <!-- Produtos injetados via JS -->
+        </main>
+    </div>
 
     <!-- Barra de Carrinho Inferior (Mobile) -->
     <div id="sticky-cart-bar" class="fixed bottom-8 left-0 right-0 z-40 px-6 flex justify-center translate-y-40 transition-transform duration-700 pointer-events-none">
@@ -2349,11 +2381,17 @@ flavors: ['Sonho de Valsa', 'Ouro branco', 'Ninho trufado', 'Pessêgo', 'Amendoi
         function categoryColor(cat) { return CATEGORY_COLORS[cat] || '#9E764E'; }
 
         let activeCategory = null;
+        let viewMode = localStorage.getItem('viewMode') || 'grid';
 
         window.onload = () => {
             loadCart();
+            // calcular altura do header para posicionar sidebar
+            const stickyEl = document.querySelector('.sticky.top-0');
+            if (stickyEl) {
+                document.documentElement.style.setProperty('--header-h', stickyEl.offsetHeight + 'px');
+            }
             renderCategories();
-            renderMenu();
+            setViewMode(viewMode);
             setOrderType('Pronta entrega');
             setFulfillment('Retirada');
             updateCartSummary();
@@ -2362,11 +2400,17 @@ flavors: ['Sonho de Valsa', 'Ouro branco', 'Ninho trufado', 'Pessêgo', 'Amendoi
 
         function renderCategories() {
             const nav = document.getElementById('category-nav');
-            let html = CATEGORIES.map((cat, i) => {
-                const color = categoryColor(cat);
-                return `<button onclick="filterToCategory('${cat}')" data-cat="${cat}" class="category-btn px-7 py-2.5 rounded-full text-sm font-medium serif-font transition-all whitespace-nowrap border border-transparent text-[#241B15]/50 hover:bg-[#F3EEE8]">${cat}</button>`;
-            }).join('');
-            nav.innerHTML = html;
+            nav.innerHTML = CATEGORIES.map(cat =>
+                `<button onclick="filterToCategory('${cat}')" data-cat="${cat}" class="category-btn px-7 py-2.5 rounded-full text-sm font-medium serif-font transition-all whitespace-nowrap border border-transparent text-[#241B15]/50 hover:bg-[#F3EEE8]">${cat}</button>`
+            ).join('');
+
+            const sidebar = document.getElementById('category-sidebar');
+            if (sidebar) {
+                sidebar.innerHTML = CATEGORIES.map(cat =>
+                    `<button onclick="filterToCategory('${cat}')" data-sidecat="${cat}"
+                        class="sidebar-cat-btn w-full px-4 py-2.5 rounded-2xl text-sm font-medium serif-font transition-all text-[#241B15]/50 hover:bg-[#F3EEE8] hover:text-[#241B15]">${cat}</button>`
+                ).join('');
+            }
         }
 
         function filterToCategory(cat) {
@@ -2387,13 +2431,19 @@ flavors: ['Sonho de Valsa', 'Ouro branco', 'Ninho trufado', 'Pessêgo', 'Amendoi
                     btn.style.boxShadow = '';
                 }
             });
+            document.querySelectorAll('[data-sidecat]').forEach(btn => {
+                const isActive = btn.dataset.sidecat === cat;
+                btn.classList.toggle('active', isActive);
+                btn.style.color = isActive ? color : '';
+            });
+
             document.querySelectorAll('#menu-container > section').forEach(section => {
                 const show = section.dataset.category === cat;
                 section.classList.toggle('hidden', !show);
                 if (show) {
-                    section.querySelectorAll('.product-card').forEach(card => {
+                    section.querySelectorAll('.product-card, .compact-card').forEach(card => {
                         card.style.animation = 'none';
-                        card.offsetHeight; // reflow
+                        card.offsetHeight;
                         card.style.animation = '';
                     });
                 }
@@ -2421,8 +2471,13 @@ flavors: ['Sonho de Valsa', 'Ouro branco', 'Ninho trufado', 'Pessêgo', 'Amendoi
                     section.className = 'animate-slide-up';
                     const color = categoryColor(cat);
 
+                    const isCompact = viewMode === 'compact';
+                    const gridClass = isCompact
+                        ? 'flex flex-col divide-y divide-[#9E764E]/10 bg-white rounded-3xl overflow-hidden border border-[#9E764E]/08 shadow-sm'
+                        : 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-10';
+
                     let html = `
-                        <div class="flex flex-col items-center mb-12">
+                        <div class="flex flex-col items-center mb-8">
                             <h2 class="text-3xl italic serif-font mb-4 tracking-tight" style="color:${color}">${cat}</h2>
                             <div class="flex items-center gap-4">
                                 <div class="w-16 h-[1px]" style="background:${color}33"></div>
@@ -2430,11 +2485,11 @@ flavors: ['Sonho de Valsa', 'Ouro branco', 'Ninho trufado', 'Pessêgo', 'Amendoi
                                 <div class="w-16 h-[1px]" style="background:${color}33"></div>
                             </div>
                         </div>
-                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-10">
+                        <div class="${gridClass}">
                     `;
 
                     items.forEach((item, idx) => {
-                        html += createProductCard(item, idx);
+                        html += isCompact ? createCompactCard(item, idx) : createProductCard(item, idx);
                     });
 
                     html += `</div>`;
@@ -2453,6 +2508,82 @@ flavors: ['Sonho de Valsa', 'Ouro branco', 'Ninho trufado', 'Pessêgo', 'Amendoi
             }
 
             requestAnimationFrame(refreshAllDescriptionToggles);
+        }
+
+        function setViewMode(mode) {
+            viewMode = mode;
+            localStorage.setItem('viewMode', mode);
+            const gridBtn = document.getElementById('view-grid-btn');
+            const compactBtn = document.getElementById('view-compact-btn');
+            if (gridBtn) gridBtn.classList.toggle('active', mode === 'grid');
+            if (compactBtn) compactBtn.classList.toggle('active', mode === 'compact');
+            renderMenu();
+        }
+
+        function createCompactCard(item, idx = 0) {
+            const hasKg = item.units.includes('kg');
+            const hasSizes = item.sizes && item.sizes.length > 0;
+            const hasFlavors = item.flavors && item.flavors.length > 0;
+            const initialQty = item.isKit ? 10 : (item.units[0] === 'kg' ? 0.5 : 1);
+            const initialPrice = item.isKit
+                ? (getKitComputedTotal(item, initialQty) / initialQty)
+                : (hasSizes ? item.sizes[0].price : (item.units[0] === 'kg' ? item.priceKg : item.price));
+            const unitSuffix = item.isKit ? '/pessoa' : (item.units[0] === 'kg' ? '/kg' : '/un');
+            const thumb = item.images && item.images.length ? item.images[0] : item.image;
+
+            return `
+            <div class="compact-card flex items-center gap-4 px-4 py-4 hover:bg-[#FAF7F4] transition-colors animate-slide-up"
+                 style="animation-delay:${Math.min(idx * 0.04, 0.3)}s">
+                <img src="${thumb}" loading="lazy"
+                     class="w-20 h-20 rounded-2xl object-cover shrink-0 shadow-sm">
+                <div class="flex-1 min-w-0">
+                    <h3 class="font-semibold text-[#241B15] text-sm leading-snug mb-0.5">${item.name}</h3>
+                    <p class="text-xs text-[#241B15]/45 line-clamp-1 mb-1.5">${item.description}</p>
+                    ${hasSizes ? `
+                    <div class="flex gap-1 mb-1.5 flex-wrap">
+                        ${item.sizes.map((s, i) => `
+                        <button onclick="setCardSize('${item.id}', ${i})" id="size-${item.id}-${i}"
+                            class="size-btn text-[9px] font-bold uppercase px-2 py-0.5 rounded-lg border transition-all
+                            ${i === 0 ? 'bg-[#9E764E] text-white border-[#9E764E]' : 'text-[#9E764E]/60 border-[#9E764E]/20'}">${s.label}</button>
+                        `).join('')}
+                    </div>` : ''}
+                    ${hasFlavors ? `
+                    <select id="flavor-${item.id}" onchange="onFlavorChange('${item.id}')"
+                        class="w-full bg-[#F3EEE8] border border-[#9E764E]/10 rounded-xl px-3 py-1 text-xs mb-1.5 focus:outline-none appearance-none text-[#241B15]">
+                        ${getFlavorList(item).map(f => `<option value="${f.label}">${f.label}</option>`).join('')}
+                    </select>` : ''}
+                    ${hasKg ? `
+                    <div class="flex bg-[#F3EEE8] p-0.5 rounded-xl border border-[#9E764E]/5 w-fit gap-0.5 mb-1.5">
+                        <button onclick="setCardUnit('${item.id}', 'un')" id="unit-un-${item.id}" class="unit-btn active px-2 py-0.5 rounded-lg text-[9px] font-black uppercase bg-[#241B15] text-white">Un</button>
+                        <button onclick="setCardUnit('${item.id}', 'kg')" id="unit-kg-${item.id}" class="unit-btn px-2 py-0.5 rounded-lg text-[9px] font-black uppercase text-[#9E764E]/50">Kg</button>
+                    </div>` : ''}
+                    <p class="text-xs font-bold text-[#9E764E]" id="unit-price-label-${item.id}">
+                        R$ ${initialPrice.toFixed(2)} ${unitSuffix}
+                    </p>
+                </div>
+                <div class="flex flex-col items-end gap-2 shrink-0">
+                    <p class="text-base serif-font font-semibold tracking-tighter" id="price-preview-${item.id}">
+                        R$ ${(initialPrice * initialQty).toFixed(2)}
+                    </p>
+                    <div class="flex items-center gap-1 bg-[#F3EEE8] p-0.5 rounded-full">
+                        <button onclick="changeQtyUI('${item.id}', -1)"
+                            class="w-7 h-7 rounded-full bg-white flex items-center justify-center text-[9px] shadow-sm hover:bg-[#241B15] hover:text-white transition-all">
+                            <i class="fas fa-minus"></i>
+                        </button>
+                        <input type="number" id="qty-${item.id}" value="${initialQty}"
+                            step="${item.units[0] === 'kg' ? '0.1' : '1'}"
+                            class="w-8 bg-transparent text-center text-xs font-bold text-[#241B15] focus:outline-none">
+                        <button onclick="changeQtyUI('${item.id}', 1)"
+                            class="w-7 h-7 rounded-full bg-white flex items-center justify-center text-[9px] shadow-sm hover:bg-[#241B15] hover:text-white transition-all">
+                            <i class="fas fa-plus"></i>
+                        </button>
+                    </div>
+                    <button onclick="addToCart('${item.id}')"
+                        class="btn-primary px-4 py-2 rounded-2xl text-[9px] uppercase tracking-[0.15em] font-black active:scale-95 whitespace-nowrap">
+                        ${item.isKit ? 'Montar Kit' : 'Adicionar'}
+                    </button>
+                </div>
+            </div>`;
         }
 
         function createProductCard(item, idx = 0) {
