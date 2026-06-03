@@ -227,6 +227,42 @@
     padding-right: 1rem;
   }
 }
+
+/* Discovery Overlay */
+#discovery-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 60;
+    background-color: var(--bg);
+    overflow-y: auto;
+    transition: opacity 0.4s ease, transform 0.4s ease;
+}
+#discovery-overlay.hiding {
+    opacity: 0;
+    transform: scale(0.98);
+    pointer-events: none;
+}
+.discovery-card {
+    background: white;
+    border-radius: 1.5rem;
+    border: 1px solid rgba(158, 118, 78, 0.12);
+    padding: 1.5rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 16px rgba(90, 62, 43, 0.06);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    min-height: 90px;
+}
+.discovery-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 24px rgba(90, 62, 43, 0.12);
+    border-color: rgba(158, 118, 78, 0.3);
+}
+.discovery-card:active {
+    transform: scale(0.97);
+}
     </style>
 </head>
 <body class="relative min-h-screen">
@@ -247,6 +283,9 @@
                     <span class="text-[9px] uppercase font-bold tracking-[0.3em] text-[#9E764E]">Padaria Artesanal</span>
                 </div>
                 <div class="flex items-center gap-3">
+                    <button onclick="showDiscovery()" class="p-3 hover:bg-white/10 rounded-2xl transition-all active:scale-90" title="Menu inicial">
+                        <i class="fas fa-compass text-lg"></i>
+                    </button>
                     <button onclick="toggleSearch()" class="p-3 hover:bg-white/10 rounded-2xl transition-all active:scale-90">
                         <i class="fas fa-search text-lg"></i>
                     </button>
@@ -273,6 +312,25 @@
             <div class="relative group">
                 <i class="fas fa-search absolute left-5 top-1/2 -translate-y-1/2 text-[#9E764E]"></i>
                 <input type="text" id="search-input" oninput="handleSearch(this.value)" placeholder="Encontre a sua delícia preferida..." class="w-full pl-14 pr-6 py-5 bg-white/80 border border-[#9E764E]/20 rounded-3xl focus:outline-none focus:ring-4 focus:ring-[#9E764E]/10 italic shadow-inner text-lg transition-all">
+            </div>
+        </div>
+    </div>
+
+    <!-- Tela de Descoberta -->
+    <div id="discovery-overlay">
+        <div class="min-h-screen flex flex-col items-center justify-center px-6 py-14">
+            <div class="w-full max-w-md">
+                <div class="text-center mb-10">
+                    <p class="text-[10px] uppercase font-bold tracking-[0.3em] text-[#9E764E] mb-3">Delícias da Vovó</p>
+                    <h2 class="text-3xl sm:text-4xl serif-font italic text-[#241B15] leading-snug mb-3">O que você está buscando hoje?</h2>
+                    <p class="text-sm text-[#9E764E]/70">Escolha uma categoria para começar</p>
+                </div>
+                <div id="discovery-cards" class="grid grid-cols-2 gap-4 mb-5">
+                    <!-- Injetado via JS -->
+                </div>
+                <button onclick="hideDiscovery(null)" class="w-full py-4 rounded-2xl border border-[#9E764E]/20 text-[#9E764E] text-sm font-semibold tracking-wide hover:bg-[#9E764E]/5 transition-all active:scale-95">
+                    Ver cardápio completo
+                </button>
             </div>
         </div>
     </div>
@@ -425,6 +483,14 @@
         const ENCOMENDA_TIME_MIN = "07:30";
         const ENCOMENDA_TIME_MAX = "20:00";
         
+        const MACRO_GROUPS = [
+            { name: 'Coffees Sugeridos & Cestas', subtitle: 'Kits prontos para grupos e cestas especiais', categories: ['Coffee Breaks', 'Cestas de café da manhã', 'Bebidas'] },
+            { name: 'Salgados & Lanches', subtitle: 'Petiscos, lanches e salgadinhos', categories: ['Pão de bolinha', 'Mini salgados', 'Salgados assados', 'Lanches frios', 'Tortas & Quiches'] },
+            { name: 'Bolos & Doces', subtitle: 'Bolos, doces e quitutes', categories: ['Bolos caseiros', 'Doces panificação', 'Bolachas & biscoitos', 'Bolos gelados', 'Docinhos festa'] },
+            { name: 'Sobremesas', subtitle: 'Para se mimar com algo especial', categories: ['Mini sobremesas', 'Sobremesas unitárias', 'Tortas doces', 'Sobremesas clássicas'] },
+            { name: 'Especiais', subtitle: 'Edições limitadas e sazonais', categories: ['Especiais de Natal'] },
+        ];
+
         const CATEGORIES = [
             'Pão de bolinha', 'Coffee Breaks', 'Bolos caseiros', 'Lanches frios', 'Mini salgados', 'Tortas & Quiches', 'Doces panificação',
             
@@ -2319,10 +2385,37 @@ flavors: ['Sonho de Valsa', 'Ouro branco', 'Ninho trufado', 'Pessêgo', 'Amendoi
         window.onload = () => {
             renderCategories();
             renderMenu();
+            renderDiscovery();
             setOrderType('Pronta entrega');
             setFulfillment('Retirada');
-            setTimeout(() => scrollToCategory(CATEGORIES[0]), 120);
         };
+
+        function renderDiscovery() {
+            const container = document.getElementById('discovery-cards');
+            container.innerHTML = MACRO_GROUPS.map((group, i) => {
+                const isLastOdd = i === MACRO_GROUPS.length - 1 && MACRO_GROUPS.length % 2 !== 0;
+                const firstCat = group.categories[0].replace(/'/g, "\\'");
+                return `<div class="discovery-card ${isLastOdd ? 'col-span-2' : ''}" onclick="hideDiscovery('${firstCat}')">
+                    <h3 class="serif-font text-base font-semibold text-[#241B15] leading-tight mb-1">${group.name}</h3>
+                    <p class="text-xs text-[#9E764E]/80 italic leading-relaxed">${group.subtitle}</p>
+                </div>`;
+            }).join('');
+        }
+
+        function showDiscovery() {
+            const overlay = document.getElementById('discovery-overlay');
+            overlay.classList.remove('hiding');
+            overlay.style.display = '';
+        }
+
+        function hideDiscovery(firstCategory) {
+            const overlay = document.getElementById('discovery-overlay');
+            overlay.classList.add('hiding');
+            setTimeout(() => {
+                overlay.style.display = 'none';
+                if (firstCategory) scrollToCategory(firstCategory);
+            }, 400);
+        }
 
         function renderCategories() {
             const nav = document.getElementById('category-nav');
