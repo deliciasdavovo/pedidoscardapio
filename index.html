@@ -2378,6 +2378,7 @@ flavors: ['Sonho de Valsa', 'Ouro branco', 'Ninho trufado', 'Pessêgo', 'Amendoi
         let activeOrderType = 'Pronta entrega';
         let activeFulfillment = 'Retirada';
         let currentSearch = '';
+        let activeGroupCategories = null;
         let toastAutoHideTimer = null;
         let toastCleanupTimer = null;
         let pendingKitSelection = null;
@@ -2413,7 +2414,16 @@ flavors: ['Sonho de Valsa', 'Ouro branco', 'Ninho trufado', 'Pessêgo', 'Amendoi
             overlay.classList.add('hiding');
             setTimeout(() => {
                 overlay.style.display = 'none';
-                if (firstCategory) scrollToCategory(firstCategory);
+                if (firstCategory) {
+                    const group = MACRO_GROUPS.find(g => g.categories.includes(firstCategory));
+                    activeGroupCategories = group ? group.categories : null;
+                    renderMenu();
+                    scrollToCategory(firstCategory);
+                } else {
+                    activeGroupCategories = null;
+                    renderMenu();
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                }
             }, 400);
         }
 
@@ -2430,10 +2440,14 @@ flavors: ['Sonho de Valsa', 'Ouro branco', 'Ninho trufado', 'Pessêgo', 'Amendoi
             const container = document.getElementById('menu-container');
             container.innerHTML = '';
 
-            CATEGORIES.forEach(cat => {
+            const categoriesToRender = activeGroupCategories
+                ? CATEGORIES.filter(cat => activeGroupCategories.includes(cat))
+                : CATEGORIES;
+
+            categoriesToRender.forEach(cat => {
                 const items = MENU_ITEMS.filter(item => {
                     const matchesCategory = item.category === cat;
-                    const matchesSearch = item.name.toLowerCase().includes(currentSearch.toLowerCase()) || 
+                    const matchesSearch = item.name.toLowerCase().includes(currentSearch.toLowerCase()) ||
                                          item.description.toLowerCase().includes(currentSearch.toLowerCase());
                     return matchesCategory && matchesSearch;
                 });
@@ -2583,10 +2597,22 @@ ${getFlavorList(item).map(f => `<option value="${f.label}">${f.label}</option>`)
         function handleSearch(val) { currentSearch = val; renderMenu(); }
 
         function scrollToCategory(cat) {
+            if (cat === 'Todos') {
+                activeGroupCategories = null;
+                renderMenu();
+                document.querySelectorAll('.category-btn').forEach(btn => {
+                    if (btn.innerText === 'Todos') btn.classList.add('active'); else btn.classList.remove('active');
+                });
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+                return;
+            }
+            if (activeGroupCategories && !activeGroupCategories.includes(cat)) {
+                activeGroupCategories = null;
+                renderMenu();
+            }
             document.querySelectorAll('.category-btn').forEach(btn => {
                 if(btn.innerText === cat) btn.classList.add('active'); else btn.classList.remove('active');
             });
-            if (cat === 'Todos') { window.scrollTo({ top: 0, behavior: 'smooth' }); return; }
             const el = document.getElementById(sanitizeId(cat));
             if (el) window.scrollTo({ top: el.getBoundingClientRect().top + window.pageYOffset - 180, behavior: 'smooth' });
         }
