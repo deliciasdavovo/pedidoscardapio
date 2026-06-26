@@ -499,8 +499,12 @@
     <div id="product-detail-modal" class="fixed inset-0 z-[75] invisible">
         <div id="product-modal-overlay" class="absolute inset-0 bg-[#241B15]/60 backdrop-blur-sm opacity-0 transition-opacity duration-300" onclick="closeProductModal()"></div>
         <div id="product-modal-panel" class="absolute inset-x-0 bottom-0 bg-[#FCFAF7] rounded-t-[2rem] shadow-2xl max-h-[92vh] flex flex-col translate-y-full">
-            <div class="shrink-0 flex items-center justify-between px-6 pt-4 pb-2" onclick="closeProductModal()">
-                <div class="w-12 h-1.5 bg-[#9E764E]/20 rounded-full mx-auto cursor-pointer"></div>
+            <div id="product-modal-handle" class="shrink-0 flex items-center justify-between px-5 pt-3 pb-2">
+                <div class="w-8 h-8"></div>
+                <div class="w-12 h-1.5 bg-[#9E764E]/30 rounded-full cursor-pointer" onclick="closeProductModal()"></div>
+                <button onclick="closeProductModal()" class="w-8 h-8 rounded-full flex items-center justify-center text-[#9E764E]/50 hover:text-[#9E764E] hover:bg-[#F3EEE8] transition-all active:scale-90">
+                    <i class="fas fa-times text-base"></i>
+                </button>
             </div>
             <div id="product-modal-body" class="overflow-y-auto flex-grow custom-scrollbar pb-8">
                 <!-- populado via JS -->
@@ -2422,6 +2426,7 @@ flavors: ['Sonho de Valsa', 'Ouro branco', 'Ninho trufado', 'Pessêgo', 'Amendoi
             renderDiscovery();
             setOrderType('Pronta entrega');
             setFulfillment('Retirada');
+            initModalSwipe();
         };
 
         function renderDiscovery() {
@@ -3653,6 +3658,43 @@ function getSelectedFlavorData(id) {
   return list.find(f => f.label === select.value) || null;
 }
 
+// ===== SWIPE DOWN TO CLOSE MODAL =====
+
+function initModalSwipe() {
+    const panel = document.getElementById('product-modal-panel');
+    const body = document.getElementById('product-modal-body');
+    let startY = 0;
+    let startScrollTop = 0;
+    let dragging = false;
+
+    panel.addEventListener('touchstart', (e) => {
+        startY = e.touches[0].clientY;
+        startScrollTop = body.scrollTop;
+        dragging = false;
+        panel.style.transition = 'none';
+    }, { passive: true });
+
+    panel.addEventListener('touchmove', (e) => {
+        const delta = e.touches[0].clientY - startY;
+        if (delta > 8 && startScrollTop === 0) {
+            dragging = true;
+            panel.style.transform = `translateY(${delta}px)`;
+        }
+    }, { passive: true });
+
+    panel.addEventListener('touchend', (e) => {
+        panel.style.transition = '';
+        const delta = e.changedTouches[0].clientY - startY;
+        if (dragging && delta > 90) {
+            panel.style.transform = '';
+            closeProductModal();
+        } else {
+            panel.style.transform = '';
+        }
+        dragging = false;
+    });
+}
+
 // ===== MOBILE: LISTA DE PRODUTOS =====
 
 function createProductListItem(item) {
@@ -3760,6 +3802,9 @@ function buildProductModalContent(item) {
     return `
         <div class="relative h-56 overflow-hidden bg-[#F3EEE8]">
             <img id="modal-img" src="${escapeHtml(imgSrc)}" class="w-full h-full object-cover">
+            <button onclick="closeProductModal()" class="absolute top-3 right-3 w-10 h-10 bg-black/35 backdrop-blur-sm rounded-full flex items-center justify-center z-10 active:scale-90 transition-all">
+                <i class="fas fa-times text-white text-sm"></i>
+            </button>
             ${hasMultiImg ? `
                 <button onclick="modalPrevImage()" class="absolute left-3 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white w-9 h-9 rounded-full shadow-md flex items-center justify-center active:scale-90 transition-all">
                     <i class="fas fa-chevron-left text-xs text-[#241B15]"></i>
