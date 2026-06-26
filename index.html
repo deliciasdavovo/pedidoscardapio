@@ -263,6 +263,26 @@
 .discovery-card:active {
     transform: scale(0.97);
 }
+
+/* Mobile product list */
+.product-list-item {
+    background: white;
+    border-radius: 1.25rem;
+    border: 1px solid rgba(158, 118, 78, 0.08);
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    transition: background 0.12s ease, transform 0.12s ease;
+    user-select: none;
+}
+.product-list-item:active {
+    background: #FEFCFA;
+    transform: scale(0.984);
+}
+
+/* Product detail bottom sheet */
+#product-modal-panel {
+    transition: transform 0.45s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
     </style>
 </head>
 <body class="relative min-h-screen">
@@ -336,7 +356,7 @@
     </div>
 
     <!-- Conteúdo Principal -->
-    <main id="menu-container" class="max-w-7xl mx-auto px-6 py-12 space-y-24 pb-48">
+    <main id="menu-container" class="max-w-7xl mx-auto px-4 sm:px-6 py-8 sm:py-12 space-y-12 sm:space-y-24 pb-32 sm:pb-48">
         <!-- Produtos injetados via JS -->
     </main>
 
@@ -471,6 +491,19 @@
                 <button onclick="sendWhatsAppOrder()" class="w-full bg-[#1F8F7A] hover:bg-[#176E60] text-white py-4 sm:py-6 rounded-[2rem] font-bold uppercase tracking-[0.25em] text-[10px] sm:text-[11px] transition-all shadow-2xl flex items-center justify-center gap-4 active:scale-95 group">
                     <i class="fab fa-whatsapp text-xl sm:text-2xl group-hover:rotate-12 transition-transform"></i> Finalizar WhatsApp
                 </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Detalhe do Produto (Mobile) -->
+    <div id="product-detail-modal" class="fixed inset-0 z-[75] invisible">
+        <div id="product-modal-overlay" class="absolute inset-0 bg-[#241B15]/60 backdrop-blur-sm opacity-0 transition-opacity duration-300" onclick="closeProductModal()"></div>
+        <div id="product-modal-panel" class="absolute inset-x-0 bottom-0 bg-[#FCFAF7] rounded-t-[2rem] shadow-2xl max-h-[92vh] flex flex-col translate-y-full">
+            <div class="shrink-0 flex items-center justify-between px-6 pt-4 pb-2" onclick="closeProductModal()">
+                <div class="w-12 h-1.5 bg-[#9E764E]/20 rounded-full mx-auto cursor-pointer"></div>
+            </div>
+            <div id="product-modal-body" class="overflow-y-auto flex-grow custom-scrollbar pb-8">
+                <!-- populado via JS -->
             </div>
         </div>
     </div>
@@ -2429,9 +2462,9 @@ flavors: ['Sonho de Valsa', 'Ouro branco', 'Ninho trufado', 'Pessêgo', 'Amendoi
 
         function renderCategories() {
             const nav = document.getElementById('category-nav');
-            let html = `<button onclick="scrollToCategory('Todos')" class="category-btn active px-7 py-2.5 rounded-full text-sm font-semibold serif-font transition-all whitespace-nowrap border border-transparent">Todos</button>`;
+            let html = `<button onclick="scrollToCategory('Todos')" class="category-btn active px-3.5 py-1.5 sm:px-7 sm:py-2.5 rounded-full text-[11px] sm:text-sm font-semibold serif-font transition-all whitespace-nowrap border border-transparent">Todos</button>`;
             CATEGORIES.forEach(cat => {
-                html += `<button onclick="scrollToCategory('${cat}')" class="category-btn px-7 py-2.5 rounded-full text-sm font-medium serif-font transition-all whitespace-nowrap border border-transparent text-[#241B15]/50 hover:bg-[#F3EEE8]">${cat}</button>`;
+                html += `<button onclick="scrollToCategory('${cat}')" class="category-btn px-3.5 py-1.5 sm:px-7 sm:py-2.5 rounded-full text-[11px] sm:text-sm font-medium serif-font transition-all whitespace-nowrap border border-transparent text-[#241B15]/50 hover:bg-[#F3EEE8]">${cat}</button>`;
             });
             nav.innerHTML = html;
         }
@@ -2456,24 +2489,28 @@ flavors: ['Sonho de Valsa', 'Ouro branco', 'Ninho trufado', 'Pessêgo', 'Amendoi
                     const section = document.createElement('section');
                     section.id = sanitizeId(cat);
                     section.className = 'animate-slide-up';
-                    
+
+                    let mobileList = `<div class="sm:hidden space-y-2">`;
+                    items.forEach(item => { mobileList += createProductListItem(item); });
+                    mobileList += `</div>`;
+
+                    let desktopGrid = `<div class="hidden sm:grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-10">`;
+                    items.forEach(item => { desktopGrid += createProductCard(item); });
+                    desktopGrid += `</div>`;
+
                     let html = `
-                        <div class="flex flex-col items-center mb-12">
-                            <h2 class="text-3xl italic serif-font mb-4 tracking-tight">${cat}</h2>
+                        <div class="flex flex-col items-center mb-6 sm:mb-12">
+                            <h2 class="text-2xl sm:text-3xl italic serif-font mb-3 sm:mb-4 tracking-tight">${cat}</h2>
                             <div class="flex items-center gap-4">
                                 <div class="w-16 h-[1px] bg-[#9E764E]/20"></div>
                                 <div class="w-2 h-2 rotate-45 border border-[#9E764E]/40"></div>
                                 <div class="w-16 h-[1px] bg-[#9E764E]/20"></div>
                             </div>
                         </div>
-                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-10">
+                        ${mobileList}
+                        ${desktopGrid}
                     `;
 
-                    items.forEach(item => {
-                        html += createProductCard(item);
-                    });
-
-                    html += `</div>`;
                     section.innerHTML = html;
                     container.appendChild(section);
                 }
@@ -3615,11 +3652,354 @@ function getSelectedFlavorData(id) {
   const list = getFlavorList(item);
   return list.find(f => f.label === select.value) || null;
 }
- 
-    
-    
-    
-    
+
+// ===== MOBILE: LISTA DE PRODUTOS =====
+
+function createProductListItem(item) {
+    const hasKg = item.units && item.units.includes('kg');
+    const hasSizes = item.sizes && item.sizes.length > 0;
+    const hasFlavors = item.flavors && item.flavors.length > 0;
+    const imgSrc = (item.images && item.images.length) ? item.images[0] : (item.image || '');
+
+    let priceText;
+    if (item.isKit) {
+        const kitTotal = getKitComputedTotal(item, 10);
+        priceText = 'a partir de R$ ' + (kitTotal / 10).toFixed(2) + '/pessoa';
+    } else if (hasSizes) {
+        priceText = 'a partir de R$ ' + item.sizes[0].price.toFixed(2);
+    } else if (item.units && item.units[0] === 'kg') {
+        priceText = 'R$ ' + (item.priceKg || 0).toFixed(2) + '/kg';
+    } else {
+        const basePrice = item.price || item.priceKg || 0;
+        priceText = 'R$ ' + basePrice.toFixed(2) + (hasKg ? '/un' : '/un');
+    }
+
+    const flavorCount = hasFlavors ? item.flavors.length : 0;
+    const flavorBadge = flavorCount > 1
+        ? `<span class="inline-block text-[9px] font-bold text-[#9E764E]/70 bg-[#9E764E]/8 px-2 py-0.5 rounded-full">${flavorCount} opções</span>`
+        : '';
+
+    const kitBadge = item.isKit
+        ? `<span class="inline-block text-[9px] font-bold text-[#7D5C3D] bg-[#9E764E]/10 px-2 py-0.5 rounded-full">Kit</span>`
+        : '';
+
+    return `
+        <div class="product-list-item flex items-center gap-3.5 px-4 py-3.5" onclick="openProductModal('${item.id}')">
+            <div class="shrink-0 w-[68px] h-[68px] rounded-xl overflow-hidden bg-[#F3EEE8]">
+                ${imgSrc
+                    ? `<img src="${escapeHtml(imgSrc)}" class="w-full h-full object-cover" loading="lazy">`
+                    : `<div class="w-full h-full flex items-center justify-center"><i class="fas fa-cookie-bite text-xl text-[#9E764E]/25"></i></div>`
+                }
+            </div>
+            <div class="flex-grow min-w-0">
+                <h3 class="serif-font text-[14px] font-semibold text-[#241B15] leading-snug truncate">${escapeHtml(item.name)}</h3>
+                <p class="text-[11px] text-[#241B15]/45 leading-snug mt-0.5 truncate">${escapeHtml(item.description)}</p>
+                <div class="flex flex-wrap items-center gap-1.5 mt-1.5">
+                    <span class="text-[11px] font-bold text-[#9E764E]">${priceText}</span>
+                    ${flavorBadge}${kitBadge}
+                </div>
+            </div>
+            <i class="fas fa-chevron-right text-[#9E764E]/25 shrink-0 text-[10px] ml-1"></i>
+        </div>
+    `;
+}
+
+// ===== PRODUCT DETAIL MODAL (MOBILE) =====
+
+let currentModalItemId = null;
+let modalImageIdx = 0;
+let currentModalImages = [];
+
+function openProductModal(id) {
+    const item = MENU_ITEMS.find(i => i.id === id);
+    if (!item) return;
+    currentModalItemId = id;
+    modalImageIdx = 0;
+    currentModalImages = (item.images && item.images.length) ? [...item.images] : (item.image ? [item.image] : []);
+
+    document.getElementById('product-modal-body').innerHTML = buildProductModalContent(item);
+
+    const modal = document.getElementById('product-detail-modal');
+    modal.classList.remove('invisible');
+    document.body.classList.add('cart-open');
+
+    requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+            document.getElementById('product-modal-overlay').classList.add('opacity-100');
+            document.getElementById('product-modal-panel').classList.remove('translate-y-full');
+        });
+    });
+
+    updateModalPricePreview();
+}
+
+function closeProductModal() {
+    const overlay = document.getElementById('product-modal-overlay');
+    const panel = document.getElementById('product-modal-panel');
+    if (!overlay || !panel) return;
+
+    overlay.classList.remove('opacity-100');
+    panel.classList.add('translate-y-full');
+
+    setTimeout(() => {
+        document.getElementById('product-detail-modal').classList.add('invisible');
+        const cartOpen = !document.getElementById('cart-modal').classList.contains('invisible');
+        const kitOpen = !document.getElementById('kit-flavor-modal').classList.contains('invisible');
+        if (!cartOpen && !kitOpen) document.body.classList.remove('cart-open');
+    }, 420);
+}
+
+function buildProductModalContent(item) {
+    const hasKg = item.units && item.units.includes('kg');
+    const hasSizes = item.sizes && item.sizes.length > 0;
+    const hasFlavors = item.flavors && item.flavors.length > 0;
+    const initialQty = item.isKit ? 10 : (item.units && item.units[0] === 'kg' ? 0.5 : 1);
+    const imgSrc = currentModalImages[0] || '';
+    const hasMultiImg = currentModalImages.length > 1;
+
+    return `
+        <div class="relative h-56 overflow-hidden bg-[#F3EEE8]">
+            <img id="modal-img" src="${escapeHtml(imgSrc)}" class="w-full h-full object-cover">
+            ${hasMultiImg ? `
+                <button onclick="modalPrevImage()" class="absolute left-3 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white w-9 h-9 rounded-full shadow-md flex items-center justify-center active:scale-90 transition-all">
+                    <i class="fas fa-chevron-left text-xs text-[#241B15]"></i>
+                </button>
+                <button onclick="modalNextImage()" class="absolute right-3 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white w-9 h-9 rounded-full shadow-md flex items-center justify-center active:scale-90 transition-all">
+                    <i class="fas fa-chevron-right text-xs text-[#241B15]"></i>
+                </button>
+                <div class="absolute bottom-3 left-0 right-0 flex justify-center gap-2">
+                    ${currentModalImages.map((_, idx) => `<div id="modal-dot-${idx}" class="w-2 h-2 rounded-full ${idx === 0 ? 'bg-white' : 'bg-white/40'} shadow transition-all"></div>`).join('')}
+                </div>
+            ` : ''}
+        </div>
+
+        <div class="p-5 space-y-5">
+            <div>
+                <p class="text-[9px] uppercase font-black tracking-[0.25em] text-[#9E764E] mb-1">${escapeHtml(item.category)}</p>
+                <h2 class="text-xl serif-font text-[#241B15] leading-snug mb-2">${escapeHtml(item.name)}</h2>
+                <p class="text-[13px] text-[#241B15]/60 leading-relaxed">${escapeHtml(item.description)}</p>
+            </div>
+
+            ${hasKg ? `
+            <div class="flex bg-[#F3EEE8] p-1 rounded-2xl border border-[#9E764E]/5">
+                <button onclick="setModalUnit('un')" id="modal-unit-un" class="flex-1 py-2.5 rounded-xl text-[9px] font-black uppercase bg-[#241B15] text-white transition-all">Unidade</button>
+                <button onclick="setModalUnit('kg')" id="modal-unit-kg" class="flex-1 py-2.5 rounded-xl text-[9px] font-black uppercase text-[#9E764E]/50 transition-all">Kilo</button>
+            </div>
+            ` : ''}
+
+            ${hasSizes ? `
+            <div class="space-y-2">
+                <label class="text-[9px] font-black uppercase tracking-widest text-[#9E764E]">Tamanho</label>
+                <div class="grid ${item.sizes.length === 2 ? 'grid-cols-2' : 'grid-cols-3'} gap-1 bg-[#F3EEE8] p-1 rounded-xl">
+                    ${item.sizes.map((s, idx) => `
+                        <button onclick="setModalSize(${idx})" id="modal-size-${idx}" class="${idx === 0 ? 'bg-[#9E764E] text-white' : 'text-[#9E764E]/60'} py-2.5 rounded-lg text-[10px] font-bold uppercase transition-all">
+                            ${escapeHtml(s.label)}
+                            ${s.description ? `<span class="block text-[8px] font-normal opacity-70 normal-case tracking-normal mt-0.5 leading-tight">${escapeHtml(s.description)}</span>` : ''}
+                        </button>
+                    `).join('')}
+                </div>
+            </div>
+            ` : ''}
+
+            ${hasFlavors ? `
+            <div class="space-y-2">
+                <label class="text-[9px] font-black uppercase tracking-widest text-[#9E764E]">Sabor / Tipo</label>
+                <select id="modal-flavor" onchange="onModalFlavorChange()" class="w-full bg-[#F3EEE8] border border-[#9E764E]/10 rounded-xl px-4 py-3.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#9E764E]/20 appearance-none text-[#241B15]">
+                    ${getFlavorList(item).map(f => `<option value="${escapeHtml(f.label)}">${escapeHtml(f.label)}</option>`).join('')}
+                </select>
+            </div>
+            ` : ''}
+
+            <div class="flex items-center justify-between pt-1">
+                <div class="flex items-center gap-2 bg-[#F3EEE8] p-1 rounded-full">
+                    <button onclick="changeModalQty(-1)" class="w-11 h-11 rounded-full bg-white flex items-center justify-center shadow-sm hover:bg-[#241B15] hover:text-white transition-all active:scale-90"><i class="fas fa-minus text-xs"></i></button>
+                    <input type="number" id="modal-qty" value="${initialQty}" step="${item.units && item.units[0] === 'kg' ? '0.1' : '1'}" oninput="updateModalPricePreview()" class="w-12 bg-transparent text-center text-sm font-bold text-[#241B15] focus:outline-none">
+                    <button onclick="changeModalQty(1)" class="w-11 h-11 rounded-full bg-white flex items-center justify-center shadow-sm hover:bg-[#241B15] hover:text-white transition-all active:scale-90"><i class="fas fa-plus text-xs"></i></button>
+                </div>
+                <div class="text-right">
+                    <p class="text-2xl serif-font font-semibold tracking-tighter text-[#241B15]" id="modal-price-preview">R$ 0,00</p>
+                    <p class="text-[8px] uppercase text-[#9E764E] font-black tracking-widest" id="modal-unit-price-label"></p>
+                </div>
+            </div>
+
+            <button onclick="addToCartFromModal()" class="btn-primary w-full py-5 rounded-[1.5rem] text-[10px] uppercase tracking-[0.2em] font-black active:scale-95 flex items-center justify-center gap-3">
+                <i class="fas fa-shopping-basket"></i>
+                ${item.isKit ? 'Montar Kit' : 'Adicionar à Cesta'}
+            </button>
+        </div>
+    `;
+}
+
+function getModalUnit() {
+    const btnKg = document.getElementById('modal-unit-kg');
+    return (btnKg && btnKg.classList.contains('bg-[#241B15]')) ? 'kg' : 'un';
+}
+
+function setModalUnit(unit) {
+    const btnUn = document.getElementById('modal-unit-un');
+    const btnKg = document.getElementById('modal-unit-kg');
+    const input = document.getElementById('modal-qty');
+    if (!btnUn || !btnKg || !input) return;
+    if (unit === 'un') {
+        btnUn.classList.add('bg-[#241B15]', 'text-white'); btnUn.classList.remove('text-[#9E764E]/50');
+        btnKg.classList.remove('bg-[#241B15]', 'text-white'); btnKg.classList.add('text-[#9E764E]/50');
+        input.value = '1'; input.step = '1';
+    } else {
+        btnKg.classList.add('bg-[#241B15]', 'text-white'); btnKg.classList.remove('text-[#9E764E]/50');
+        btnUn.classList.remove('bg-[#241B15]', 'text-white'); btnUn.classList.add('text-[#9E764E]/50');
+        input.value = '0.5'; input.step = '0.1';
+    }
+    updateModalPricePreview();
+}
+
+function setModalSize(idx) {
+    const item = MENU_ITEMS.find(i => i.id === currentModalItemId);
+    if (!item || !item.sizes) return;
+    item.sizes.forEach((_, i) => {
+        const btn = document.getElementById(`modal-size-${i}`);
+        if (!btn) return;
+        btn.classList.toggle('bg-[#9E764E]', i === idx);
+        btn.classList.toggle('text-white', i === idx);
+        btn.classList.toggle('text-[#9E764E]/60', i !== idx);
+    });
+    if (item.sizes[idx] && item.sizes[idx].image) {
+        document.getElementById('modal-img').src = item.sizes[idx].image;
+    }
+    updateModalPricePreview();
+}
+
+function changeModalQty(delta) {
+    const item = MENU_ITEMS.find(i => i.id === currentModalItemId);
+    if (!item) return;
+    const input = document.getElementById('modal-qty');
+    const unit = getModalUnit();
+    const step = unit === 'kg' ? 0.1 : 1;
+    const min = item.isKit ? 5 : (unit === 'kg' ? 0.1 : 1);
+    let val = parseFloat(input.value) + (delta * step);
+    if (val < min) val = min;
+    input.value = val.toFixed(unit === 'kg' ? 1 : 0);
+    updateModalPricePreview();
+}
+
+function updateModalPricePreview() {
+    const item = MENU_ITEMS.find(i => i.id === currentModalItemId);
+    if (!item) return;
+    const qty = parseFloat(document.getElementById('modal-qty')?.value) || 0;
+    const unit = getModalUnit();
+    const suffix = item.isKit ? '/pessoa' : (unit === 'kg' ? '/kg' : '/un');
+
+    if (item.isKit) {
+        const total = getKitComputedTotal(item, qty);
+        const unitPrice = qty > 0 ? total / qty : 0;
+        const lbl = document.getElementById('modal-unit-price-label');
+        const prv = document.getElementById('modal-price-preview');
+        if (lbl) lbl.innerText = 'R$ ' + unitPrice.toFixed(2) + ' ' + suffix;
+        if (prv) prv.innerText = 'R$ ' + total.toFixed(2);
+        return;
+    }
+
+    let price;
+    if (unit === 'kg') {
+        price = item.priceKg;
+    } else if (item.sizes && item.sizes.length > 0) {
+        const activeIdx = item.sizes.findIndex((_, i) => {
+            const btn = document.getElementById(`modal-size-${i}`);
+            return btn && btn.classList.contains('bg-[#9E764E]');
+        });
+        price = item.sizes[Math.max(0, activeIdx)].price;
+    } else {
+        price = item.price;
+    }
+
+    const flavorSelect = document.getElementById('modal-flavor');
+    const selectedFlavor = flavorSelect ? flavorSelect.value : null;
+    if (!item.sizes && selectedFlavor && item.variants && item.variants[selectedFlavor]) {
+        const variant = item.variants[selectedFlavor];
+        if (unit === 'kg' && typeof variant.priceKg === 'number') price = variant.priceKg;
+        if (unit !== 'kg' && typeof variant.price === 'number') price = variant.price;
+    }
+
+    const lbl = document.getElementById('modal-unit-price-label');
+    const prv = document.getElementById('modal-price-preview');
+    if (lbl) lbl.innerText = 'R$ ' + price.toFixed(2) + ' ' + suffix;
+    if (prv) prv.innerText = 'R$ ' + (price * qty).toFixed(2);
+}
+
+function onModalFlavorChange() {
+    const item = MENU_ITEMS.find(i => i.id === currentModalItemId);
+    if (!item) return;
+    const select = document.getElementById('modal-flavor');
+    if (!select) return;
+    const flavor = select.value;
+    if (item.variants && item.variants[flavor]) {
+        const variant = item.variants[flavor];
+        const newImages = (variant.images && variant.images.length) ? variant.images
+                        : (variant.image ? [variant.image] : null);
+        if (newImages && newImages.length) {
+            currentModalImages = [...newImages];
+            modalImageIdx = 0;
+            document.getElementById('modal-img').src = currentModalImages[0];
+        }
+    }
+    updateModalPricePreview();
+}
+
+function modalPrevImage() {
+    if (currentModalImages.length <= 1) return;
+    modalImageIdx = (modalImageIdx - 1 + currentModalImages.length) % currentModalImages.length;
+    document.getElementById('modal-img').src = currentModalImages[modalImageIdx];
+    updateModalDots();
+}
+
+function modalNextImage() {
+    if (currentModalImages.length <= 1) return;
+    modalImageIdx = (modalImageIdx + 1) % currentModalImages.length;
+    document.getElementById('modal-img').src = currentModalImages[modalImageIdx];
+    updateModalDots();
+}
+
+function updateModalDots() {
+    currentModalImages.forEach((_, i) => {
+        const dot = document.getElementById(`modal-dot-${i}`);
+        if (dot) {
+            dot.classList.toggle('bg-white', i === modalImageIdx);
+            dot.classList.toggle('bg-white/40', i !== modalImageIdx);
+        }
+    });
+}
+
+function addToCartFromModal() {
+    const id = currentModalItemId;
+    const item = MENU_ITEMS.find(i => i.id === id);
+    if (!item) return;
+
+    const qty = parseFloat(document.getElementById('modal-qty').value) || 1;
+    const unit = getModalUnit();
+    const flavorSelect = document.getElementById('modal-flavor');
+    const flavor = flavorSelect ? flavorSelect.value : null;
+
+    let size = null;
+    if (item.sizes && item.sizes.length > 0) {
+        const activeIdx = item.sizes.findIndex((_, i) => {
+            const btn = document.getElementById(`modal-size-${i}`);
+            return btn && btn.classList.contains('bg-[#9E764E]');
+        });
+        size = item.sizes[Math.max(0, activeIdx)].label;
+    }
+
+    closeProductModal();
+
+    if (item.isKit && item.composition) {
+        setTimeout(() => openKitFlavorModal(item, qty), 380);
+        return;
+    }
+
+    const price = getUnitPriceForSelection(item, unit, flavor, size);
+    const image = getImageForSelection(item, flavor, size);
+    addIndividualToCart(id, unit, qty, flavor, size, price, image);
+    updateCartSummary();
+    showValidationPopup(item.name + ' adicionado à cesta!');
+}
      </script>
 </body>
 </html>
