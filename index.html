@@ -282,7 +282,7 @@
 /* Mobile product list */
 .product-list-item {
     background: white;
-    border-radius: 1.25rem;
+    border-radius: 1.5rem;
     border: 1px solid rgba(158, 118, 78, 0.08);
     cursor: pointer;
     -webkit-tap-highlight-color: transparent;
@@ -2510,7 +2510,7 @@ flavors: ['Sonho de Valsa', 'Ouro branco', 'Ninho trufado', 'Pessêgo', 'Amendoi
                     section.id = sanitizeId(cat);
                     section.className = 'animate-slide-up mb-10 sm:mb-16';
 
-                    let mobileList = `<div class="sm:hidden space-y-2">`;
+                    let mobileList = `<div class="sm:hidden space-y-3">`;
                     items.forEach(item => { mobileList += createProductListItem(item); });
                     mobileList += `</div>`;
 
@@ -3746,30 +3746,30 @@ function createProductListItem(item) {
 
     const flavorCount = hasFlavors ? item.flavors.length : 0;
     const flavorBadge = flavorCount > 1
-        ? `<span class="inline-block text-[9px] font-bold text-[#9E764E]/70 bg-[#9E764E]/8 px-2 py-0.5 rounded-full">${flavorCount} opções</span>`
+        ? `<span class="inline-block text-[11px] font-bold text-[#9E764E]/70 bg-[#9E764E]/8 px-2.5 py-0.5 rounded-full">${flavorCount} opções</span>`
         : '';
 
     const kitBadge = item.isKit
-        ? `<span class="inline-block text-[9px] font-bold text-[#7D5C3D] bg-[#9E764E]/10 px-2 py-0.5 rounded-full">Kit</span>`
+        ? `<span class="inline-block text-[11px] font-bold text-[#7D5C3D] bg-[#9E764E]/10 px-2.5 py-0.5 rounded-full">Kit</span>`
         : '';
 
     return `
-        <div class="product-list-item flex items-center gap-3.5 px-4 py-3.5" onclick="openProductModal('${item.id}')">
-            <div class="shrink-0 w-[68px] h-[68px] rounded-xl overflow-hidden bg-[#F3EEE8]">
+        <div class="product-list-item flex items-center gap-4 px-5 py-4" onclick="openProductModal('${item.id}')">
+            <div class="shrink-0 w-[88px] h-[88px] rounded-xl overflow-hidden bg-[#F3EEE8]">
                 ${imgSrc
                     ? `<img src="${escapeHtml(imgSrc)}" class="w-full h-full object-cover" loading="lazy">`
-                    : `<div class="w-full h-full flex items-center justify-center"><i class="fas fa-cookie-bite text-xl text-[#9E764E]/25"></i></div>`
+                    : `<div class="w-full h-full flex items-center justify-center"><i class="fas fa-cookie-bite text-2xl text-[#9E764E]/25"></i></div>`
                 }
             </div>
             <div class="flex-grow min-w-0">
-                <h3 class="serif-font text-base text-[#241B15] leading-snug truncate">${escapeHtml(item.name)}</h3>
-                <p class="text-[11px] text-[#241B15]/45 leading-snug mt-0.5 truncate">${escapeHtml(item.description)}</p>
-                <div class="flex flex-wrap items-center gap-1.5 mt-1.5">
-                    <span class="text-[11px] font-bold text-[#9E764E]">${priceText}</span>
+                <h3 class="serif-font text-lg text-[#241B15] leading-snug truncate">${escapeHtml(item.name)}</h3>
+                <p class="text-[13px] text-[#241B15]/45 leading-snug mt-1 truncate">${escapeHtml(item.description)}</p>
+                <div class="flex flex-wrap items-center gap-2 mt-2">
+                    <span class="text-[13px] font-bold text-[#9E764E]">${priceText}</span>
                     ${flavorBadge}${kitBadge}
                 </div>
             </div>
-            <i class="fas fa-chevron-right text-[#9E764E]/25 shrink-0 text-[10px] ml-1"></i>
+            <i class="fas fa-chevron-right text-[#9E764E]/25 shrink-0 text-xs ml-1"></i>
         </div>
     `;
 }
