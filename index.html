@@ -98,17 +98,18 @@
             background: var(--primary);
             box-shadow: 0 8px 20px rgba(158, 118, 78, 0.25);
         }
-        .header-menu-btn {
-            background: rgba(158, 118, 78, 0.15);
-            border: 1px solid rgba(158, 118, 78, 0.35);
-            color: #C4945A;
-            box-shadow: 0 2px 8px rgba(158, 118, 78, 0.15);
-            transition: all 0.3s ease;
+        .bookmark-tab {
+            background: linear-gradient(160deg, #9E764E, #7D5C3D);
+            box-shadow: 4px 0 24px rgba(90, 62, 43, 0.45);
+            color: white;
+            border: 1px solid rgba(255,255,255,0.12);
+            border-left: none;
+            transform: translateX(-2px);
+            transition: transform 0.25s ease, box-shadow 0.25s ease;
         }
-        .header-menu-btn:hover {
-            background: rgba(158, 118, 78, 0.28);
-            box-shadow: 0 4px 14px rgba(158, 118, 78, 0.28);
-            color: #E0B07A;
+        .bookmark-tab:hover {
+            transform: translateX(2px);
+            box-shadow: 6px 0 30px rgba(90, 62, 43, 0.55);
         }
 
         .product-card {
@@ -324,18 +325,19 @@
         </div>
     </div>
 
+    <!-- Tab Marcador Flutuante -->
+    <button onclick="showDiscovery()" class="bookmark-tab fixed left-0 top-[42%] z-40 flex flex-col items-center gap-2 px-2.5 py-5 rounded-r-2xl active:scale-95" title="Ver cardápio">
+        <i class="fas fa-bookmark text-sm"></i>
+        <span class="text-[7px] font-bold tracking-[0.2em] uppercase" style="writing-mode:vertical-rl;transform:rotate(180deg)">Cardápio</span>
+    </button>
+
     <!-- Header Fixo (Fundo Marrom Sólido) -->
     <div class="sticky top-0 z-50 flex flex-col w-full shadow-2xl shadow-black/10">
         <header class="bg-[#5A3E2B] text-white border-b border-white/5">
             <div class="max-w-7xl mx-auto px-6 py-5 flex justify-between items-center">
-                <div class="flex items-center gap-3">
-                    <button onclick="showDiscovery()" class="header-menu-btn flex items-center justify-center w-11 h-11 rounded-2xl active:scale-90" title="Ver cardápio">
-                        <i class="fas fa-bookmark text-lg"></i>
-                    </button>
-                    <div class="flex flex-col cursor-pointer group" onclick="window.scrollTo({top:0, behavior:'smooth'})">
-                        <h1 class="text-2xl font-normal tracking-tight serif-font group-hover:text-[#9E764E] transition-colors">Delícias da Vovó</h1>
-                        <span class="text-[9px] uppercase font-bold tracking-[0.3em] text-[#9E764E]">Padaria Artesanal</span>
-                    </div>
+                <div class="flex flex-col cursor-pointer group" onclick="window.scrollTo({top:0, behavior:'smooth'})">
+                    <h1 class="text-xl sm:text-2xl font-normal tracking-tight serif-font group-hover:text-[#9E764E] transition-colors leading-tight">Delícias<br class="sm:hidden"> da Vovó</h1>
+                    <span class="text-[9px] uppercase font-bold tracking-[0.3em] text-[#9E764E]">Padaria Artesanal</span>
                 </div>
                 <div class="flex items-center gap-3">
                     <button onclick="toggleSearch()" class="p-3 hover:bg-white/10 rounded-2xl transition-all active:scale-90" title="Buscar">
