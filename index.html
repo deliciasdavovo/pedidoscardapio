@@ -98,6 +98,18 @@
             background: var(--primary);
             box-shadow: 0 8px 20px rgba(158, 118, 78, 0.25);
         }
+        .header-menu-btn {
+            background: rgba(158, 118, 78, 0.15);
+            border: 1px solid rgba(158, 118, 78, 0.35);
+            color: #C4945A;
+            box-shadow: 0 2px 8px rgba(158, 118, 78, 0.15);
+            transition: all 0.3s ease;
+        }
+        .header-menu-btn:hover {
+            background: rgba(158, 118, 78, 0.28);
+            box-shadow: 0 4px 14px rgba(158, 118, 78, 0.28);
+            color: #E0B07A;
+        }
 
         .product-card {
             background: white;
@@ -317,8 +329,8 @@
         <header class="bg-[#5A3E2B] text-white border-b border-white/5">
             <div class="max-w-7xl mx-auto px-6 py-5 flex justify-between items-center">
                 <div class="flex items-center gap-3">
-                    <button onclick="showDiscovery()" class="p-2 hover:bg-white/10 rounded-2xl transition-all active:scale-90" title="Ver cardápio">
-                        <i class="fas fa-bookmark text-[#9E764E] text-2xl"></i>
+                    <button onclick="showDiscovery()" class="header-menu-btn flex items-center justify-center w-11 h-11 rounded-2xl active:scale-90" title="Ver cardápio">
+                        <i class="fas fa-bookmark text-lg"></i>
                     </button>
                     <div class="flex flex-col cursor-pointer group" onclick="window.scrollTo({top:0, behavior:'smooth'})">
                         <h1 class="text-2xl font-normal tracking-tight serif-font group-hover:text-[#9E764E] transition-colors">Delícias da Vovó</h1>
@@ -326,6 +338,9 @@
                     </div>
                 </div>
                 <div class="flex items-center gap-3">
+                    <button onclick="toggleSearch()" class="p-3 hover:bg-white/10 rounded-2xl transition-all active:scale-90" title="Buscar">
+                        <i class="fas fa-search text-lg"></i>
+                    </button>
                     <button onclick="openCart()" class="relative flex items-center gap-4 header-cart-btn hover:brightness-110 px-5 py-3 rounded-2xl transition-all active:scale-95 border border-white/10">
                         <i class="fas fa-shopping-basket text-lg"></i>
                         <span id="cart-badge" class="hidden absolute -top-2 -right-2 bg-white text-[#241B15] text-[10px] font-bold w-6 h-6 rounded-full flex items-center justify-center border-2 border-[#241B15] shadow-lg">0</span>
