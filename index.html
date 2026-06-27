@@ -3802,9 +3802,6 @@ function buildProductModalContent(item) {
     return `
         <div class="relative h-56 overflow-hidden bg-[#F3EEE8]">
             <img id="modal-img" src="${escapeHtml(imgSrc)}" class="w-full h-full object-cover">
-            <button onclick="closeProductModal()" class="absolute top-3 right-3 w-10 h-10 bg-black/35 backdrop-blur-sm rounded-full flex items-center justify-center z-10 active:scale-90 transition-all">
-                <i class="fas fa-times text-white text-sm"></i>
-            </button>
             ${hasMultiImg ? `
                 <button onclick="modalPrevImage()" class="absolute left-3 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white w-9 h-9 rounded-full shadow-md flex items-center justify-center active:scale-90 transition-all">
                     <i class="fas fa-chevron-left text-xs text-[#241B15]"></i>
