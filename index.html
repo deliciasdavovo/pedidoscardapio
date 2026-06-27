@@ -313,6 +313,41 @@
 #product-modal-panel {
     transition: transform 0.45s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
+
+/* Previne zoom automático do iOS em campos de formulário (requer font-size >= 16px) */
+@media (max-width: 768px) {
+    input[type="text"],
+    input[type="date"],
+    input[type="time"],
+    input[type="number"],
+    select,
+    textarea {
+        font-size: 16px !important;
+    }
+}
+
+/* Botão limpar busca */
+#search-clear {
+    transition: opacity 0.18s ease, transform 0.18s ease;
+}
+#search-clear:hover {
+    transform: scale(1.1);
+}
+
+/* Contador de resultados da busca */
+#search-result-count {
+    transition: opacity 0.2s ease, max-height 0.25s ease;
+    max-height: 0;
+    overflow: hidden;
+}
+#search-result-count.visible {
+    max-height: 2rem;
+}
+
+/* Estado vazio da busca */
+.search-empty-state {
+    animation: fadeIn 0.35s ease-out forwards;
+}
     </style>
 </head>
 <body class="relative min-h-screen">
@@ -339,8 +374,8 @@
                     <span class="text-[9px] uppercase font-bold tracking-[0.3em] text-[#9E764E]">Padaria Artesanal</span>
                 </div>
                 <div class="flex items-center gap-3">
-                    <button onclick="toggleSearch()" class="p-3 hover:bg-white/10 rounded-2xl transition-all active:scale-90" title="Buscar">
-                        <i class="fas fa-search text-lg"></i>
+                    <button id="search-toggle-btn" onclick="toggleSearch()" class="p-3 hover:bg-white/10 rounded-2xl transition-all active:scale-90" title="Buscar">
+                        <i id="search-toggle-icon" class="fas fa-search text-lg"></i>
                     </button>
                     <button onclick="openCart()" class="relative flex items-center gap-4 header-cart-btn hover:brightness-110 px-5 py-3 rounded-2xl transition-all active:scale-95 border border-white/10">
                         <i class="fas fa-shopping-basket text-lg"></i>
@@ -368,11 +403,15 @@
 
     <!-- Overlay de Busca -->
     <div id="search-bar" class="max-h-0 opacity-0 overflow-hidden transition-all duration-700 bg-white/60 backdrop-blur-md border-b border-[#9E764E]/10">
-        <div class="max-w-2xl mx-auto p-6">
+        <div class="max-w-2xl mx-auto px-6 pt-6 pb-4">
             <div class="relative group">
                 <i class="fas fa-search absolute left-5 top-1/2 -translate-y-1/2 text-[#9E764E]"></i>
-                <input type="text" id="search-input" oninput="handleSearch(this.value)" placeholder="Encontre a sua delícia preferida..." class="w-full pl-14 pr-6 py-5 bg-white/80 border border-[#9E764E]/20 rounded-3xl focus:outline-none focus:ring-4 focus:ring-[#9E764E]/10 italic shadow-inner text-lg transition-all">
+                <input type="text" id="search-input" oninput="handleSearch(this.value)" onkeydown="if(event.key==='Escape')toggleSearch()" placeholder="Encontre a sua delícia preferida..." class="w-full pl-14 pr-14 py-5 bg-white/80 border border-[#9E764E]/20 rounded-3xl focus:outline-none focus:ring-4 focus:ring-[#9E764E]/10 italic shadow-inner text-lg transition-all">
+                <button id="search-clear" onclick="clearSearch()" class="absolute right-4 top-1/2 -translate-y-1/2 text-[#9E764E]/50 hover:text-[#9E764E] w-9 h-9 flex items-center justify-center rounded-full hover:bg-[#F3EEE8] opacity-0 pointer-events-none" aria-label="Limpar busca">
+                    <i class="fas fa-times"></i>
+                </button>
             </div>
+            <p id="search-result-count" class="text-center text-xs text-[#9E764E]/60 mt-3 opacity-0"></p>
         </div>
     </div>
 
@@ -2467,6 +2506,19 @@ flavors: ['Sonho de Valsa', 'Ouro branco', 'Ninho trufado', 'Pessêgo', 'Amendoi
             setOrderType('Pronta entrega');
             setFulfillment('Retirada');
             initModalSwipe();
+
+            // Tecla Escape fecha busca/modais na ordem de prioridade
+            document.addEventListener('keydown', (e) => {
+                if (e.key !== 'Escape') return;
+                const bar = document.getElementById('search-bar');
+                const kitModal = document.getElementById('kit-flavor-modal');
+                const cartModal = document.getElementById('cart-modal');
+                const productModal = document.getElementById('product-detail-modal');
+                if (!bar.classList.contains('opacity-0')) { toggleSearch(); return; }
+                if (!kitModal.classList.contains('invisible')) { closeKitFlavorModal(); return; }
+                if (!cartModal.classList.contains('invisible')) { closeCart(); return; }
+                if (!productModal.classList.contains('invisible')) { closeProductModal(); return; }
+            });
         };
 
         function renderDiscovery() {
@@ -2556,7 +2608,19 @@ flavors: ['Sonho de Valsa', 'Ouro branco', 'Ninho trufado', 'Pessêgo', 'Amendoi
                 }
             });
 
-            if (activeGroupCategories) {
+            if (container.children.length === 0 && currentSearch) {
+                const emptyState = document.createElement('div');
+                emptyState.className = 'search-empty-state flex flex-col items-center gap-4 py-20 text-center px-6';
+                emptyState.innerHTML = `
+                    <i class="fas fa-cookie-bite text-6xl text-[#9E764E]/15"></i>
+                    <p class="text-xl serif-font italic text-[#9E764E]/40">Nenhuma delícia encontrada</p>
+                    <p class="text-sm text-[#9E764E]/35">para <span class="font-semibold text-[#9E764E]/55">"${currentSearch}"</span></p>
+                    <button onclick="clearSearch()" class="mt-2 px-7 py-3 rounded-2xl border border-[#9E764E]/20 text-[#9E764E] text-sm font-semibold hover:bg-[#9E764E]/5 transition-all active:scale-95">
+                        Limpar busca
+                    </button>
+                `;
+                container.appendChild(emptyState);
+            } else if (activeGroupCategories) {
                 const footer = document.createElement('div');
                 footer.className = 'flex flex-col items-center gap-3 py-10 sm:py-14';
                 footer.innerHTML = `
@@ -2684,12 +2748,59 @@ ${getFlavorList(item).map(f => `<option value="${f.label}">${f.label}</option>`)
         // LÓGICA DE UI
         function toggleSearch() {
             const bar = document.getElementById('search-bar');
+            const icon = document.getElementById('search-toggle-icon');
             const isHidden = bar.classList.contains('opacity-0');
-            if (isHidden) { bar.classList.remove('max-h-0', 'opacity-0'); bar.classList.add('max-h-52', 'opacity-100'); document.getElementById('search-input').focus(); }
-            else { bar.classList.add('max-h-0', 'opacity-0'); bar.classList.remove('max-h-52', 'opacity-100'); }
+            if (isHidden) {
+                bar.classList.remove('max-h-0', 'opacity-0');
+                bar.classList.add('max-h-52', 'opacity-100');
+                document.getElementById('search-input').focus();
+                if (icon) { icon.className = 'fas fa-times text-lg'; }
+            } else {
+                bar.classList.add('max-h-0', 'opacity-0');
+                bar.classList.remove('max-h-52', 'opacity-100');
+                clearSearch();
+                if (icon) { icon.className = 'fas fa-search text-lg'; }
+            }
         }
 
-        function handleSearch(val) { currentSearch = val; renderMenu(); }
+        function clearSearch() {
+            const input = document.getElementById('search-input');
+            if (input) input.value = '';
+            currentSearch = '';
+            renderMenu();
+            updateSearchUI('');
+        }
+
+        function handleSearch(val) {
+            currentSearch = val;
+            renderMenu();
+            updateSearchUI(val);
+        }
+
+        function updateSearchUI(val) {
+            const clearBtn = document.getElementById('search-clear');
+            const countEl = document.getElementById('search-result-count');
+            if (!clearBtn || !countEl) return;
+            if (val) {
+                clearBtn.classList.remove('opacity-0', 'pointer-events-none');
+                clearBtn.classList.add('opacity-100');
+                const count = MENU_ITEMS.filter(item =>
+                    item.name.toLowerCase().includes(val.toLowerCase()) ||
+                    item.description.toLowerCase().includes(val.toLowerCase())
+                ).length;
+                countEl.classList.add('visible');
+                countEl.style.opacity = '1';
+                countEl.textContent = count === 0
+                    ? 'Nenhum resultado encontrado'
+                    : `${count} ${count === 1 ? 'item encontrado' : 'itens encontrados'}`;
+            } else {
+                clearBtn.classList.add('opacity-0', 'pointer-events-none');
+                clearBtn.classList.remove('opacity-100');
+                countEl.classList.remove('visible');
+                countEl.style.opacity = '0';
+                countEl.textContent = '';
+            }
+        }
 
         function scrollToCategory(cat) {
             if (cat === 'Todos') {
