@@ -2520,7 +2520,25 @@ flavors: ['Sonho de Valsa', 'Ouro branco', 'Ninho trufado', 'Pessêgo', 'Amendoi
                 }
             });
 
+            if (activeGroupCategories) {
+                const footer = document.createElement('div');
+                footer.className = 'flex flex-col items-center gap-3 py-10 sm:py-14';
+                footer.innerHTML = `
+                    <p class="text-sm text-[#9E764E]/70 italic serif-font">Você chegou ao fim desta seleção</p>
+                    <button onclick="showFullMenu()" class="px-8 py-3.5 rounded-2xl border border-[#9E764E]/30 text-[#9E764E] text-sm font-semibold tracking-wide hover:bg-[#9E764E]/8 transition-all active:scale-95">
+                        Ver cardápio completo
+                    </button>
+                `;
+                container.appendChild(footer);
+            }
+
             requestAnimationFrame(refreshAllDescriptionToggles);
+        }
+
+        function showFullMenu() {
+            activeGroupCategories = null;
+            renderMenu();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
         function createProductCard(item) {
