@@ -2482,9 +2482,9 @@ flavors: ['Sonho de Valsa', 'Ouro branco', 'Ninho trufado', 'Pessêgo', 'Amendoi
 
         function renderCategories() {
             const nav = document.getElementById('category-nav');
-            let html = `<button onclick="scrollToCategory('Todos')" class="category-btn active px-3.5 py-1.5 sm:px-7 sm:py-2.5 rounded-full text-[11px] sm:text-sm serif-font whitespace-nowrap border border-transparent">Todos</button>`;
+            let html = `<button onclick="scrollToCategory('Todos')" class="category-btn active px-3.5 py-1.5 sm:px-7 sm:py-2.5 rounded-full text-[11px] sm:text-sm whitespace-nowrap border border-transparent">Todos</button>`;
             CATEGORIES.forEach(cat => {
-                html += `<button onclick="scrollToCategory('${cat}')" class="category-btn px-3.5 py-1.5 sm:px-7 sm:py-2.5 rounded-full text-[11px] sm:text-sm serif-font whitespace-nowrap border border-transparent">${cat}</button>`;
+                html += `<button onclick="scrollToCategory('${cat}')" class="category-btn px-3.5 py-1.5 sm:px-7 sm:py-2.5 rounded-full text-[11px] sm:text-sm whitespace-nowrap border border-transparent">${cat}</button>`;
             });
             nav.innerHTML = html;
         }
