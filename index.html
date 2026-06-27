@@ -313,9 +313,12 @@
     <div class="sticky top-0 z-50 flex flex-col w-full shadow-2xl shadow-black/10">
         <header class="bg-[#5A3E2B] text-white border-b border-white/5">
             <div class="max-w-7xl mx-auto px-6 py-5 flex justify-between items-center">
-                <div class="flex flex-col cursor-pointer group" onclick="window.scrollTo({top:0, behavior:'smooth'})">
-                    <h1 class="text-2xl font-normal tracking-tight serif-font group-hover:text-[#9E764E] transition-colors">Delícias da Vovó</h1>
-                    <span class="text-[9px] uppercase font-bold tracking-[0.3em] text-[#9E764E]">Padaria Artesanal</span>
+                <div class="flex items-center gap-3 cursor-pointer group" onclick="window.scrollTo({top:0, behavior:'smooth'})">
+                    <i class="fas fa-book-open text-[#9E764E] text-2xl group-hover:text-white transition-colors"></i>
+                    <div class="flex flex-col">
+                        <h1 class="text-2xl font-normal tracking-tight serif-font group-hover:text-[#9E764E] transition-colors">Delícias da Vovó</h1>
+                        <span class="text-[9px] uppercase font-bold tracking-[0.3em] text-[#9E764E]">Padaria Artesanal</span>
+                    </div>
                 </div>
                 <div class="flex items-center gap-3">
                     <button onclick="showDiscovery()" class="p-3 hover:bg-white/10 rounded-2xl transition-all active:scale-90" title="Menu inicial">
