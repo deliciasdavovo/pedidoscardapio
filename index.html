@@ -2493,7 +2493,7 @@ flavors: ['Sonho de Valsa', 'Ouro branco', 'Ninho trufado', 'Pessêgo', 'Amendoi
                 if (items.length > 0) {
                     const section = document.createElement('section');
                     section.id = sanitizeId(cat);
-                    section.className = 'animate-slide-up';
+                    section.className = 'animate-slide-up mb-10 sm:mb-16';
 
                     let mobileList = `<div class="sm:hidden space-y-2">`;
                     items.forEach(item => { mobileList += createProductListItem(item); });
@@ -2504,12 +2504,11 @@ flavors: ['Sonho de Valsa', 'Ouro branco', 'Ninho trufado', 'Pessêgo', 'Amendoi
                     desktopGrid += `</div>`;
 
                     let html = `
-                        <div class="flex flex-col items-center mb-6 sm:mb-12">
-                            <h2 class="text-2xl sm:text-3xl italic serif-font mb-3 sm:mb-4 tracking-tight">${cat}</h2>
-                            <div class="flex items-center gap-4">
-                                <div class="w-16 h-[1px] bg-[#9E764E]/20"></div>
-                                <div class="w-2 h-2 rotate-45 border border-[#9E764E]/40"></div>
-                                <div class="w-16 h-[1px] bg-[#9E764E]/20"></div>
+                        <div class="mb-5 sm:mb-10">
+                            <div class="flex items-center gap-4 sm:gap-6">
+                                <div class="flex-1 h-px bg-[#9E764E]/25"></div>
+                                <h2 class="text-lg sm:text-2xl italic serif-font tracking-tight text-[#4A3223] whitespace-nowrap px-1">${cat}</h2>
+                                <div class="flex-1 h-px bg-[#9E764E]/25"></div>
                             </div>
                         </div>
                         ${mobileList}
