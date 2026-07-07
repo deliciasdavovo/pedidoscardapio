@@ -285,6 +285,8 @@
     display: flex;
     flex-direction: column;
     justify-content: center;
+    align-items: center;
+    text-align: center;
     min-height: 90px;
 }
 .discovery-card:hover {
@@ -616,7 +618,7 @@
   category: 'Cestas de café da manhã',
 
   // imagem inicial (aparece ao abrir o card)
-  image: 'https://res.cloudinary.com/ds53z2vv8/image/upload/v1771101927/ChatGPT_Image_14_de_fev._de_2026_17_44_44_bzfrbk.png',
+  image: 'https://res.cloudinary.com/ds53z2vv8/image/upload/v1783462271/WhatsApp_Image_2026-07-07_at_19.02.05_xuq9lz.jpg',
 
   price: 135.00,
   units: ['un'],
@@ -2524,7 +2526,7 @@ flavors: ['Sonho de Valsa', 'Ouro branco', 'Ninho trufado', 'Pessêgo', 'Amendoi
                 const firstCat = group.categories[0].replace(/'/g, "\\'");
                 return `<div class="discovery-card ${isLastOdd ? 'col-span-2' : ''}" onclick="hideDiscovery('${firstCat}')">
                     <h3 class="serif-font text-base font-semibold text-[#241B15] leading-tight mb-1">${group.name}</h3>
-                    <p class="text-xs text-[#9E764E]/80 italic leading-relaxed">${group.subtitle}</p>
+                    <p class="text-xs text-[#9E764E]/80 leading-relaxed">${group.subtitle}</p>
                 </div>`;
             }).join('');
         }
