@@ -366,7 +366,7 @@
     </button>
 
     <!-- Header Fixo (Fundo Marrom Sólido) -->
-    <div class="sticky top-0 z-50 flex flex-col w-full overflow-hidden" style="border-radius:0 0 1.75rem 1.75rem; box-shadow:0 10px 40px rgba(36,27,21,0.13),0 2px 6px rgba(36,27,21,0.06);">
+    <div id="main-header" class="sticky top-0 z-50 flex flex-col w-full overflow-hidden" style="border-radius:0 0 1.75rem 1.75rem; box-shadow:0 10px 40px rgba(36,27,21,0.13),0 2px 6px rgba(36,27,21,0.06);">
         <header class="bg-[#5A3E2B] text-white border-b border-white/5">
             <div class="max-w-7xl mx-auto px-6 py-5 flex justify-between items-center">
                 <div class="flex flex-col cursor-pointer group" onclick="window.scrollTo({top:0, behavior:'smooth'})">
@@ -2499,6 +2499,7 @@ flavors: ['Sonho de Valsa', 'Ouro branco', 'Ninho trufado', 'Pessêgo', 'Amendoi
             setOrderType('Pronta entrega');
             setFulfillment('Retirada');
             initModalSwipe();
+            window.addEventListener('scroll', onScrollSpy, { passive: true });
 
             // Tecla Escape fecha busca/modais na ordem de prioridade
             document.addEventListener('keydown', (e) => {
@@ -2552,9 +2553,9 @@ flavors: ['Sonho de Valsa', 'Ouro branco', 'Ninho trufado', 'Pessêgo', 'Amendoi
 
         function renderCategories() {
             const nav = document.getElementById('category-nav');
-            let html = `<button onclick="scrollToCategory('Todos')" class="category-btn active px-3.5 py-1.5 sm:px-7 sm:py-2.5 rounded-full text-[11px] sm:text-sm whitespace-nowrap border border-transparent">Todos</button>`;
+            let html = `<button onclick="scrollToCategory('Todos')" data-cat="Todos" class="category-btn active serif-font px-3.5 py-1.5 sm:px-7 sm:py-2.5 rounded-full text-[11px] sm:text-sm whitespace-nowrap border border-transparent">Todos</button>`;
             CATEGORIES.forEach(cat => {
-                html += `<button onclick="scrollToCategory('${cat}')" class="category-btn px-3.5 py-1.5 sm:px-7 sm:py-2.5 rounded-full text-[11px] sm:text-sm whitespace-nowrap border border-transparent">${cat}</button>`;
+                html += `<button onclick="scrollToCategory('${cat}')" data-cat="${cat}" class="category-btn serif-font px-3.5 py-1.5 sm:px-7 sm:py-2.5 rounded-full text-[11px] sm:text-sm whitespace-nowrap border border-transparent">${cat}</button>`;
             });
             nav.innerHTML = html;
         }
@@ -2578,6 +2579,7 @@ flavors: ['Sonho de Valsa', 'Ouro branco', 'Ninho trufado', 'Pessêgo', 'Amendoi
                 if (items.length > 0) {
                     const section = document.createElement('section');
                     section.id = sanitizeId(cat);
+                    section.dataset.cat = cat;
                     section.className = 'animate-slide-up mb-10 sm:mb-16';
 
                     let mobileList = `<div class="sm:hidden space-y-2.5">`;
@@ -2796,12 +2798,11 @@ ${getFlavorList(item).map(f => `<option value="${f.label}">${f.label}</option>`)
         }
 
         function scrollToCategory(cat) {
+            suppressSpy();
             if (cat === 'Todos') {
                 activeGroupCategories = null;
                 renderMenu();
-                document.querySelectorAll('.category-btn').forEach(btn => {
-                    if (btn.innerText === 'Todos') btn.classList.add('active'); else btn.classList.remove('active');
-                });
+                setActiveCategory('Todos');
                 window.scrollTo({ top: 0, behavior: 'smooth' });
                 return;
             }
@@ -2809,11 +2810,57 @@ ${getFlavorList(item).map(f => `<option value="${f.label}">${f.label}</option>`)
                 activeGroupCategories = null;
                 renderMenu();
             }
-            document.querySelectorAll('.category-btn').forEach(btn => {
-                if(btn.innerText === cat) btn.classList.add('active'); else btn.classList.remove('active');
-            });
+            setActiveCategory(cat);
             const el = document.getElementById(sanitizeId(cat));
             if (el) window.scrollTo({ top: el.getBoundingClientRect().top + window.pageYOffset - 180, behavior: 'smooth' });
+        }
+
+        // ======= Destaque da categoria conforme rolagem (scroll spy) =======
+        let lastActiveCat = null;
+        let spySuppress = false;
+        let spySuppressTimer = null;
+        let spyScheduled = false;
+
+        function setActiveCategory(cat) {
+            const nav = document.getElementById('category-nav');
+            let activeBtn = null;
+            document.querySelectorAll('.category-btn').forEach(btn => {
+                const on = btn.dataset.cat === cat;
+                btn.classList.toggle('active', on);
+                if (on) activeBtn = btn;
+            });
+            if (cat !== lastActiveCat) {
+                lastActiveCat = cat;
+                if (activeBtn && nav) {
+                    const target = activeBtn.offsetLeft - (nav.clientWidth / 2) + (activeBtn.clientWidth / 2);
+                    nav.scrollTo({ left: Math.max(0, target), behavior: 'smooth' });
+                }
+            }
+        }
+
+        function suppressSpy() {
+            spySuppress = true;
+            clearTimeout(spySuppressTimer);
+            spySuppressTimer = setTimeout(() => { spySuppress = false; updateActiveOnScroll(); }, 900);
+        }
+
+        function updateActiveOnScroll() {
+            if (spySuppress) return;
+            const sections = document.querySelectorAll('#menu-container section');
+            if (!sections.length) return;
+            const header = document.getElementById('main-header');
+            const offset = (header ? header.offsetHeight : 160) + 24;
+            let currentCat = 'Todos';
+            sections.forEach(sec => {
+                if (sec.getBoundingClientRect().top <= offset) currentCat = sec.dataset.cat || currentCat;
+            });
+            setActiveCategory(currentCat);
+        }
+
+        function onScrollSpy() {
+            if (spyScheduled) return;
+            spyScheduled = true;
+            requestAnimationFrame(() => { spyScheduled = false; updateActiveOnScroll(); });
         }
 
         function refreshDescriptionToggle(id) {
