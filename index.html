@@ -2706,7 +2706,7 @@ flavors: ['Sonho de Valsa', 'Ouro branco', 'Ninho trufado', 'Pessêgo', 'Amendoi
                                 <label class="text-[9px] font-black uppercase tracking-widest text-[#9E764E]">Tamanho</label>
 <div class="grid ${item.sizes.length === 2 ? 'grid-cols-2' : 'grid-cols-3'} gap-1 bg-[#F3EEE8] p-1 rounded-xl">
                                     ${item.sizes.map((s, idx) => `
-                                        <button onclick="setCardSize('${item.id}', ${idx})" id="size-${item.id}-${idx}" class="size-btn ${idx === 0 ? 'bg-[#9E764E] text-white' : 'text-[#9E764E]/60'} py-2 rounded-lg text-[9px] font-bold uppercase transition-all whitespace-nowrap">
+                                        <button onclick="setCardSize('${item.id}', ${idx})" id="size-${item.id}-${idx}" class="size-btn ${idx === 0 ? 'bg-[#5A3E2B] text-white' : 'text-[#9E764E]/60'} py-2 rounded-lg text-[9px] font-bold uppercase transition-all whitespace-nowrap">
                                             ${s.label}
                                         </button>
                                     `).join('')}
@@ -2910,12 +2910,12 @@ ${getFlavorList(item).map(f => `<option value="${f.label}">${f.label}</option>`)
 
         function setCardSize(id, idx) {
   document.querySelectorAll(`[id^="size-${id}-"]`).forEach(btn => {
-    btn.classList.remove('bg-[#9E764E]', 'text-white');
+    btn.classList.remove('bg-[#5A3E2B]', 'text-white');
     btn.classList.add('text-[#9E764E]/60');
   });
 
   const selectedBtn = document.getElementById(`size-${id}-${idx}`);
-  selectedBtn.classList.add('bg-[#9E764E]', 'text-white');
+  selectedBtn.classList.add('bg-[#5A3E2B]', 'text-white');
   selectedBtn.classList.remove('text-[#9E764E]/60');
 
   updatePricePreview(id);
