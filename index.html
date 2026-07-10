@@ -6,6 +6,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Delícias da Vovó - Cardápio Digital</title>
     
+    <!-- Preconexão com o CDN de imagens para acelerar o carregamento -->
+    <link rel="preconnect" href="https://res.cloudinary.com" crossorigin>
+    <link rel="dns-prefetch" href="https://res.cloudinary.com">
+
     <!-- Bibliotecas Externas -->
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
@@ -2654,9 +2658,11 @@ flavors: ['Sonho de Valsa', 'Ouro branco', 'Ninho trufado', 'Pessêgo', 'Amendoi
             return `
                 <div class="product-card group flex flex-col h-full overflow-hidden">
                     <div class="relative h-56 overflow-hidden">
-  <img 
-    id="img-${item.id}" 
-    src="${(item.images && item.images.length ? item.images[0] : item.image)}"
+  <img
+    id="img-${item.id}"
+    src="${cldUrl((item.images && item.images.length ? item.images[0] : item.image), 600)}"
+    loading="lazy"
+    decoding="async"
     class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-[1s]"
   >
 
@@ -2928,9 +2934,9 @@ ${getFlavorList(item).map(f => `<option value="${f.label}">${f.label}</option>`)
 
   if (imgEl && item) {
     const sizeImg = item?.sizes?.[idx]?.image;
-    imgEl.src = sizeImg
+    imgEl.src = cldUrl(sizeImg
       ? sizeImg
-      : (item.images && item.images.length ? item.images[0] : item.image);
+      : (item.images && item.images.length ? item.images[0] : item.image), 600);
   }
 
   // atualizar descrição
@@ -3167,7 +3173,7 @@ if (!item.sizes && selectedFlavor && item.variants && item.variants[selectedFlav
                 return `
                     <div class="bg-white rounded-[1.75rem] border border-[#9E764E]/10 p-4 sm:p-5 shadow-sm" data-kit-entry="${entry.idx}">
                         <div class="kit-flavor-product-row">
-                            <img src="${escapeHtml(entry.image)}" class="w-16 h-16 object-cover rounded-2xl shadow-md bg-[#F3EEE8]">
+                            <img src="${escapeHtml(cldUrl(entry.image, 160))}" loading="lazy" decoding="async" class="w-16 h-16 object-cover rounded-2xl shadow-md bg-[#F3EEE8]">
                             <div class="flex-grow min-w-0">
                                 <div class="flex items-start justify-between gap-3">
                                     <div class="min-w-0">
@@ -3512,7 +3518,7 @@ if (!item.sizes && flavor && item.variants && item.variants[flavor]) {
                 const unitLabel = item.unit === 'kg' ? 'kg' : 'un';
                 return `
                 <div class="bg-white p-4 sm:p-5 rounded-[2rem] border border-[#9E764E]/10 flex gap-4 sm:gap-5 animate-fade shadow-sm">
-                    <img src="${item.image}" class="w-14 h-14 sm:w-16 sm:h-16 object-cover rounded-2xl shadow-md">
+                    <img src="${cldUrl(item.image, 160)}" loading="lazy" decoding="async" class="w-14 h-14 sm:w-16 sm:h-16 object-cover rounded-2xl shadow-md">
                     <div class="flex-grow min-w-0">
                         <div class="flex justify-between items-start mb-1">
                             <div>
@@ -3764,6 +3770,20 @@ if (!item.sizes && flavor && item.variants && item.variants[flavor]) {
     .replace(/\s+/g, "-")
     .replace(/[^a-z0-9-]/g, "");
 }
+
+        // Otimiza imagens do Cloudinary: formato/qualidade autom\u00e1ticos e largura
+        // adequada ao espa\u00e7o de exibi\u00e7\u00e3o, reduzindo muito o peso do download.
+        function cldUrl(url, width) {
+            if (!url || typeof url !== 'string') return url;
+            const marker = '/upload/';
+            const i = url.indexOf(marker);
+            // S\u00f3 transforma URLs do Cloudinary que ainda n\u00e3o tenham transforma\u00e7\u00e3o.
+            if (!url.includes('res.cloudinary.com') || i === -1) return url;
+            const after = url.slice(i + marker.length);
+            if (after.startsWith('f_auto') || after.startsWith('c_') || after.startsWith('w_')) return url;
+            const params = `f_auto,q_auto,dpr_auto,c_limit,w_${width}`;
+            return url.slice(0, i + marker.length) + params + '/' + after;
+        }
    
     // ======= GALERIA DE IMAGENS POR ITEM =======
 const imageIndexById = {}; // { [itemId]: currentIndex }
@@ -3823,7 +3843,7 @@ function setImage(id, idx) {
   imageIndexById[id] = clamped;
 
   const imgEl = document.getElementById(`img-${id}`);
-  if (imgEl) imgEl.src = imgs[clamped];
+  if (imgEl) imgEl.src = cldUrl(imgs[clamped], 600);
 
   // Atualiza bolinhas
   imgs.forEach((_, i) => {
@@ -3937,7 +3957,7 @@ function createProductListItem(item) {
         <div class="product-list-item flex items-center gap-3.5 px-4 py-4" onclick="openProductModal('${item.id}')">
             <div class="shrink-0 w-[80px] h-[80px] rounded-xl overflow-hidden bg-[#F3EEE8]">
                 ${imgSrc
-                    ? `<img src="${escapeHtml(imgSrc)}" class="w-full h-full object-cover" loading="lazy">`
+                    ? `<img src="${escapeHtml(cldUrl(imgSrc, 200))}" class="w-full h-full object-cover" loading="lazy" decoding="async">`
                     : `<div class="w-full h-full flex items-center justify-center"><i class="fas fa-cookie-bite text-xl text-[#9E764E]/25"></i></div>`
                 }
             </div>
@@ -4009,7 +4029,7 @@ function buildProductModalContent(item) {
 
     return `
         <div class="relative h-56 overflow-hidden bg-[#F3EEE8]">
-            <img id="modal-img" src="${escapeHtml(imgSrc)}" class="w-full h-full object-cover">
+            <img id="modal-img" src="${escapeHtml(cldUrl(imgSrc, 800))}" decoding="async" class="w-full h-full object-cover">
             <button onclick="closeProductModal()" class="absolute top-3 right-3 w-10 h-10 bg-black/35 backdrop-blur-sm rounded-full flex items-center justify-center z-10 active:scale-90 transition-all">
                 <i class="fas fa-times text-white text-sm"></i>
             </button>
@@ -4116,7 +4136,7 @@ function setModalSize(idx) {
         btn.classList.toggle('text-[#9E764E]/60', i !== idx);
     });
     if (item.sizes[idx] && item.sizes[idx].image) {
-        document.getElementById('modal-img').src = item.sizes[idx].image;
+        document.getElementById('modal-img').src = cldUrl(item.sizes[idx].image, 800);
     }
     updateModalPricePreview();
 }
@@ -4191,7 +4211,7 @@ function onModalFlavorChange() {
         if (newImages && newImages.length) {
             currentModalImages = [...newImages];
             modalImageIdx = 0;
-            document.getElementById('modal-img').src = currentModalImages[0];
+            document.getElementById('modal-img').src = cldUrl(currentModalImages[0], 800);
         }
     }
     updateModalPricePreview();
@@ -4200,14 +4220,14 @@ function onModalFlavorChange() {
 function modalPrevImage() {
     if (currentModalImages.length <= 1) return;
     modalImageIdx = (modalImageIdx - 1 + currentModalImages.length) % currentModalImages.length;
-    document.getElementById('modal-img').src = currentModalImages[modalImageIdx];
+    document.getElementById('modal-img').src = cldUrl(currentModalImages[modalImageIdx], 800);
     updateModalDots();
 }
 
 function modalNextImage() {
     if (currentModalImages.length <= 1) return;
     modalImageIdx = (modalImageIdx + 1) % currentModalImages.length;
-    document.getElementById('modal-img').src = currentModalImages[modalImageIdx];
+    document.getElementById('modal-img').src = cldUrl(currentModalImages[modalImageIdx], 800);
     updateModalDots();
 }
 
