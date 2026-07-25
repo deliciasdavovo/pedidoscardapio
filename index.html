@@ -79,19 +79,24 @@
         }
 
         .category-btn {
-            color: rgba(245, 237, 224, 0.62);
+            color: rgba(245, 237, 224, 0.55);
             font-weight: 500;
-            transition: color 0.18s ease, background 0.18s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.14em;
+            border-radius: 0;
+            border-bottom: 1.5px solid transparent;
+            padding-bottom: 3px;
+            transition: color 0.18s ease, border-color 0.18s ease;
         }
         .category-btn:hover:not(.active) {
             color: #FFFFFF;
-            background: rgba(255, 255, 255, 0.08);
+            background: transparent;
         }
         .category-btn.active {
-            background-color: #F5EDE0;
-            color: #5A3E2B;
+            color: #FFFFFF;
+            background: transparent;
             font-weight: 600;
-            border-color: transparent;
+            border-bottom-color: #C9A576;
             box-shadow: none;
         }
 
@@ -401,18 +406,23 @@
     <!-- Header Fixo (Fundo Marrom Sólido) -->
     <div id="main-header" class="sticky top-0 z-50 flex flex-col w-full" style="box-shadow:0 4px 20px rgba(36,27,21,0.10);">
         <header class="bg-[#5A3E2B] text-white">
-            <div class="max-w-7xl mx-auto px-5 sm:px-6 py-3 flex justify-between items-center">
-                <div class="flex flex-col cursor-pointer group leading-none" onclick="window.scrollTo({top:0, behavior:'smooth'})">
-                    <h1 class="text-lg sm:text-xl font-normal tracking-tight serif-font group-hover:text-[#E8D5C4] transition-colors whitespace-nowrap">Delícias da Vovó</h1>
-                    <span class="text-[8px] sm:text-[9px] uppercase font-bold tracking-[0.35em] text-[#C9A576] mt-1">Padaria Artesanal</span>
-                </div>
-                <div class="flex items-center gap-2">
-                    <button id="search-toggle-btn" onclick="toggleSearch()" class="p-2.5 hover:bg-white/10 rounded-full transition-all active:scale-90" title="Buscar">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 py-3.5 grid grid-cols-[1fr_auto_1fr] items-center gap-2">
+                <!-- Esquerda: busca -->
+                <div class="flex items-center justify-start">
+                    <button id="search-toggle-btn" onclick="toggleSearch()" class="p-2.5 hover:bg-white/10 rounded-full transition-all active:scale-90" title="Buscar" aria-label="Buscar">
                         <i id="search-toggle-icon" class="fas fa-search text-base"></i>
                     </button>
-                    <button onclick="openCart()" class="relative flex items-center gap-2.5 header-cart-btn hover:brightness-110 px-4 py-2.5 rounded-full transition-all active:scale-95">
+                </div>
+                <!-- Centro: logotipo -->
+                <div class="flex flex-col items-center text-center cursor-pointer group leading-none" onclick="window.scrollTo({top:0, behavior:'smooth'})">
+                    <h1 class="text-xl sm:text-2xl font-normal tracking-[0.02em] serif-font group-hover:text-[#E8D5C4] transition-colors whitespace-nowrap">Delícias da Vovó</h1>
+                    <span class="text-[8px] sm:text-[9px] uppercase font-semibold tracking-[0.42em] text-[#C9A576] mt-1.5 ml-[0.42em]">Padaria Artesanal</span>
+                </div>
+                <!-- Direita: carrinho -->
+                <div class="flex items-center justify-end">
+                    <button onclick="openCart()" class="relative flex items-center gap-2.5 hover:bg-white/10 px-3.5 py-2 rounded-full transition-all active:scale-95 border border-white/15" aria-label="Abrir cesta">
                         <i class="fas fa-shopping-basket text-base"></i>
-                        <span id="cart-badge" class="hidden absolute -top-1.5 -right-1.5 bg-white text-[#241B15] text-[10px] font-bold w-5 h-5 rounded-full flex items-center justify-center border-2 border-[#5A3E2B] shadow-lg">0</span>
+                        <span id="cart-badge" class="hidden absolute -top-1.5 -right-1.5 bg-[#C9A576] text-[#241B15] text-[10px] font-bold w-5 h-5 rounded-full flex items-center justify-center border-2 border-[#5A3E2B] shadow-lg">0</span>
                         <span class="hidden sm:block text-sm font-semibold serif-font tracking-wide" id="header-total">R$ 0,00</span>
                     </button>
                 </div>
@@ -420,7 +430,7 @@
 
             <!-- Navegação por Departamentos -->
             <nav class="nav-categoria border-t border-white/10">
-                <div id="category-nav" class="max-w-7xl mx-auto flex items-center gap-1.5 overflow-x-auto no-scrollbar py-2 px-4 sm:px-6 scroll-smooth">
+                <div id="category-nav" class="max-w-7xl mx-auto flex items-center justify-start sm:justify-center gap-6 sm:gap-9 overflow-x-auto no-scrollbar py-2.5 px-4 sm:px-6 scroll-smooth">
                     <!-- Injetado via JS -->
                 </div>
             </nav>
@@ -2585,7 +2595,7 @@ flavors: ['Sonho de Valsa', 'Ouro branco', 'Ninho trufado', 'Pessêgo', 'Amendoi
 
         function renderCategories() {
             const nav = document.getElementById('category-nav');
-            const btnClass = 'category-btn px-4 py-1.5 sm:px-5 sm:py-2 rounded-full text-[12px] sm:text-sm whitespace-nowrap border border-transparent';
+            const btnClass = 'category-btn whitespace-nowrap text-[10px] sm:text-[11px] leading-none';
             let html = `<button onclick="selectGroup('Todos')" data-group="Todos" class="${btnClass} active">Todos</button>`;
             MACRO_GROUPS.forEach(group => {
                 const label = group.short || group.name;
