@@ -73,22 +73,24 @@
         input[type="number"]::-webkit-inner-spin-button, 
         input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
 
-        /* Category nav strip */
+        /* Category nav strip (dentro do header marrom) */
         .nav-categoria {
-            background: #FDFAF6;
+            background: #5A3E2B;
         }
 
         .category-btn {
-            color: #A08878;
+            color: rgba(245, 237, 224, 0.62);
+            font-weight: 500;
             transition: color 0.18s ease, background 0.18s ease;
         }
         .category-btn:hover:not(.active) {
-            color: #5A3E2B;
-            background: rgba(90, 62, 43, 0.06);
+            color: #FFFFFF;
+            background: rgba(255, 255, 255, 0.08);
         }
         .category-btn.active {
-            background-color: #5A3E2B;
-            color: #F5EDE0;
+            background-color: #F5EDE0;
+            color: #5A3E2B;
+            font-weight: 600;
             border-color: transparent;
             box-shadow: none;
         }
@@ -397,32 +399,32 @@
     </button>
 
     <!-- Header Fixo (Fundo Marrom Sólido) -->
-    <div id="main-header" class="sticky top-0 z-50 flex flex-col w-full overflow-hidden" style="border-radius:0 0 1.75rem 1.75rem; box-shadow:0 10px 40px rgba(36,27,21,0.13),0 2px 6px rgba(36,27,21,0.06);">
-        <header class="bg-[#5A3E2B] text-white border-b border-white/5">
-            <div class="max-w-7xl mx-auto px-6 py-5 flex justify-between items-center">
-                <div class="flex flex-col cursor-pointer group" onclick="window.scrollTo({top:0, behavior:'smooth'})">
-                    <h1 class="text-2xl font-normal tracking-tight serif-font group-hover:text-[#9E764E] transition-colors whitespace-nowrap">Delícias da Vovó</h1>
-                    <span class="text-[9px] uppercase font-bold tracking-[0.3em] text-[#9E764E]">Padaria Artesanal</span>
+    <div id="main-header" class="sticky top-0 z-50 flex flex-col w-full" style="box-shadow:0 4px 20px rgba(36,27,21,0.10);">
+        <header class="bg-[#5A3E2B] text-white">
+            <div class="max-w-7xl mx-auto px-5 sm:px-6 py-3 flex justify-between items-center">
+                <div class="flex flex-col cursor-pointer group leading-none" onclick="window.scrollTo({top:0, behavior:'smooth'})">
+                    <h1 class="text-lg sm:text-xl font-normal tracking-tight serif-font group-hover:text-[#E8D5C4] transition-colors whitespace-nowrap">Delícias da Vovó</h1>
+                    <span class="text-[8px] sm:text-[9px] uppercase font-bold tracking-[0.35em] text-[#C9A576] mt-1">Padaria Artesanal</span>
                 </div>
-                <div class="flex items-center gap-3">
-                    <button id="search-toggle-btn" onclick="toggleSearch()" class="p-3 hover:bg-white/10 rounded-2xl transition-all active:scale-90" title="Buscar">
-                        <i id="search-toggle-icon" class="fas fa-search text-lg"></i>
+                <div class="flex items-center gap-2">
+                    <button id="search-toggle-btn" onclick="toggleSearch()" class="p-2.5 hover:bg-white/10 rounded-full transition-all active:scale-90" title="Buscar">
+                        <i id="search-toggle-icon" class="fas fa-search text-base"></i>
                     </button>
-                    <button onclick="openCart()" class="relative flex items-center gap-4 header-cart-btn hover:brightness-110 px-5 py-3 rounded-2xl transition-all active:scale-95 border border-white/10">
-                        <i class="fas fa-shopping-basket text-lg"></i>
-                        <span id="cart-badge" class="hidden absolute -top-2 -right-2 bg-white text-[#241B15] text-[10px] font-bold w-6 h-6 rounded-full flex items-center justify-center border-2 border-[#241B15] shadow-lg">0</span>
+                    <button onclick="openCart()" class="relative flex items-center gap-2.5 header-cart-btn hover:brightness-110 px-4 py-2.5 rounded-full transition-all active:scale-95">
+                        <i class="fas fa-shopping-basket text-base"></i>
+                        <span id="cart-badge" class="hidden absolute -top-1.5 -right-1.5 bg-white text-[#241B15] text-[10px] font-bold w-5 h-5 rounded-full flex items-center justify-center border-2 border-[#5A3E2B] shadow-lg">0</span>
                         <span class="hidden sm:block text-sm font-semibold serif-font tracking-wide" id="header-total">R$ 0,00</span>
                     </button>
                 </div>
             </div>
-        </header>
 
-        <!-- Navegação por Categorias -->
-        <nav class="nav-categoria overflow-hidden pb-2">
-            <div id="category-nav" class="flex items-center gap-3 overflow-x-auto no-scrollbar py-4 px-6 scroll-smooth">
-                <!-- Injetado via JS -->
-            </div>
-        </nav>
+            <!-- Navegação por Departamentos -->
+            <nav class="nav-categoria border-t border-white/10">
+                <div id="category-nav" class="max-w-7xl mx-auto flex items-center gap-1.5 overflow-x-auto no-scrollbar py-2 px-4 sm:px-6 scroll-smooth">
+                    <!-- Injetado via JS -->
+                </div>
+            </nav>
+        </header>
     </div>
 
     <!-- Overlay de Busca -->
@@ -624,11 +626,11 @@
         const ENCOMENDA_TIME_MAX = "20:00";
         
         const MACRO_GROUPS = [
-            { name: 'Coffees Sugeridos & Cestas', subtitle: 'Kits prontos para grupos e cestas especiais', categories: ['Coffee Breaks', 'Cestas de café da manhã', 'Bebidas'] },
-            { name: 'Salgados & Lanches', subtitle: 'Petiscos, lanches e salgadinhos', categories: ['Pão de bolinha', 'Mini salgados', 'Salgados assados', 'Lanches frios', 'Tortas & Quiches'] },
-            { name: 'Bolos & Doces', subtitle: 'Bolos, doces e quitutes', categories: ['Bolos caseiros', 'Doces panificação', 'Bolachas & biscoitos', 'Bolos gelados', 'Docinhos festa'] },
-            { name: 'Sobremesas', subtitle: 'Para se mimar com algo especial', categories: ['Mini sobremesas', 'Sobremesas unitárias', 'Tortas doces', 'Sobremesas clássicas'] },
-            { name: 'Especiais', subtitle: 'Edições limitadas e sazonais', categories: ['Especiais de Natal'] },
+            { name: 'Coffees Sugeridos & Cestas', short: 'Coffees & Cestas', subtitle: 'Kits prontos para grupos e cestas especiais', categories: ['Coffee Breaks', 'Cestas de café da manhã', 'Bebidas'] },
+            { name: 'Salgados & Lanches', short: 'Salgados & Lanches', subtitle: 'Petiscos, lanches e salgadinhos', categories: ['Pão de bolinha', 'Mini salgados', 'Salgados assados', 'Lanches frios', 'Tortas & Quiches'] },
+            { name: 'Bolos & Doces', short: 'Bolos & Doces', subtitle: 'Bolos, doces e quitutes', categories: ['Bolos caseiros', 'Doces panificação', 'Bolachas & biscoitos', 'Bolos gelados', 'Docinhos festa'] },
+            { name: 'Sobremesas', short: 'Sobremesas', subtitle: 'Para se mimar com algo especial', categories: ['Mini sobremesas', 'Sobremesas unitárias', 'Tortas doces', 'Sobremesas clássicas'] },
+            { name: 'Especiais', short: 'Especiais', subtitle: 'Edições limitadas e sazonais', categories: ['Especiais de Natal'] },
         ];
 
         const CATEGORIES = [
@@ -2518,6 +2520,7 @@ flavors: ['Sonho de Valsa', 'Ouro branco', 'Ninho trufado', 'Pessêgo', 'Amendoi
         let activeFulfillment = 'Retirada';
         let currentSearch = '';
         let activeGroupCategories = null;
+        let activeGroupName = 'Todos';
         let toastAutoHideTimer = null;
         let toastCleanupTimer = null;
         let pendingKitSelection = null;
@@ -2549,8 +2552,8 @@ flavors: ['Sonho de Valsa', 'Ouro branco', 'Ninho trufado', 'Pessêgo', 'Amendoi
             const container = document.getElementById('discovery-cards');
             container.innerHTML = MACRO_GROUPS.map((group, i) => {
                 const isLastOdd = i === MACRO_GROUPS.length - 1 && MACRO_GROUPS.length % 2 !== 0;
-                const firstCat = group.categories[0].replace(/'/g, "\\'");
-                return `<div class="discovery-card ${isLastOdd ? 'col-span-2' : ''}" onclick="hideDiscovery('${firstCat}')">
+                const groupNameAttr = group.name.replace(/'/g, "\\'");
+                return `<div class="discovery-card ${isLastOdd ? 'col-span-2' : ''}" onclick="hideDiscovery('${groupNameAttr}')">
                     <h3 class="serif-font text-base font-semibold text-[#241B15] leading-tight mb-1">${group.name}</h3>
                     <p class="text-xs text-[#9E764E]/80 leading-relaxed">${group.subtitle}</p>
                 </div>`;
@@ -2563,19 +2566,18 @@ flavors: ['Sonho de Valsa', 'Ouro branco', 'Ninho trufado', 'Pessêgo', 'Amendoi
             overlay.style.display = '';
         }
 
-        function hideDiscovery(firstCategory) {
+        function hideDiscovery(groupName) {
             const overlay = document.getElementById('discovery-overlay');
             overlay.classList.add('hiding');
             setTimeout(() => {
                 overlay.style.display = 'none';
-                if (firstCategory) {
-                    const group = MACRO_GROUPS.find(g => g.categories.includes(firstCategory));
-                    activeGroupCategories = group ? group.categories : null;
-                    renderMenu();
-                    scrollToCategory(firstCategory);
+                if (groupName) {
+                    selectGroup(groupName);
                 } else {
+                    activeGroupName = 'Todos';
                     activeGroupCategories = null;
                     renderMenu();
+                    setActiveGroup('Todos');
                     window.scrollTo({ top: 0, behavior: 'smooth' });
                 }
             }, 400);
@@ -2583,9 +2585,12 @@ flavors: ['Sonho de Valsa', 'Ouro branco', 'Ninho trufado', 'Pessêgo', 'Amendoi
 
         function renderCategories() {
             const nav = document.getElementById('category-nav');
-            let html = `<button onclick="scrollToCategory('Todos')" data-cat="Todos" class="category-btn active px-3.5 py-1.5 sm:px-7 sm:py-2.5 rounded-none text-[11px] sm:text-sm whitespace-nowrap border border-transparent">Todos</button>`;
-            CATEGORIES.forEach(cat => {
-                html += `<button onclick="scrollToCategory('${cat}')" data-cat="${cat}" class="category-btn px-3.5 py-1.5 sm:px-7 sm:py-2.5 rounded-none text-[11px] sm:text-sm whitespace-nowrap border border-transparent">${cat}</button>`;
+            const btnClass = 'category-btn px-4 py-1.5 sm:px-5 sm:py-2 rounded-full text-[12px] sm:text-sm whitespace-nowrap border border-transparent';
+            let html = `<button onclick="selectGroup('Todos')" data-group="Todos" class="${btnClass} active">Todos</button>`;
+            MACRO_GROUPS.forEach(group => {
+                const label = group.short || group.name;
+                const nameAttr = group.name.replace(/'/g, "\\'");
+                html += `<button onclick="selectGroup('${nameAttr}')" data-group="${group.name}" class="${btnClass}">${label}</button>`;
             });
             nav.innerHTML = html;
         }
@@ -2661,8 +2666,10 @@ flavors: ['Sonho de Valsa', 'Ouro branco', 'Ninho trufado', 'Pessêgo', 'Amendoi
         }
 
         function showFullMenu() {
+            activeGroupName = 'Todos';
             activeGroupCategories = null;
             renderMenu();
+            setActiveGroup('Todos');
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
@@ -2830,40 +2837,43 @@ ${getFlavorList(item).map(f => `<option value="${f.label}">${f.label}</option>`)
             }
         }
 
-        function scrollToCategory(cat) {
-            suppressSpy();
-            if (cat === 'Todos') {
-                activeGroupCategories = null;
-                renderMenu();
-                setActiveCategory('Todos');
-                window.scrollTo({ top: 0, behavior: 'smooth' });
-                return;
-            }
-            if (activeGroupCategories && !activeGroupCategories.includes(cat)) {
-                activeGroupCategories = null;
-                renderMenu();
-            }
-            setActiveCategory(cat);
-            const el = document.getElementById(sanitizeId(cat));
-            if (el) window.scrollTo({ top: el.getBoundingClientRect().top + window.pageYOffset - 180, behavior: 'smooth' });
+        // Departamento (macro grupo) ao qual uma categoria pertence
+        function groupForCategory(cat) {
+            const g = MACRO_GROUPS.find(gr => gr.categories.includes(cat));
+            return g ? g.name : 'Todos';
         }
 
-        // ======= Destaque da categoria conforme rolagem (scroll spy) =======
+        // Selecionar um departamento no menu superior
+        function selectGroup(name) {
+            suppressSpy();
+            activeGroupName = name;
+            if (name === 'Todos') {
+                activeGroupCategories = null;
+            } else {
+                const group = MACRO_GROUPS.find(g => g.name === name);
+                activeGroupCategories = group ? group.categories : null;
+            }
+            renderMenu();
+            setActiveGroup(name);
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // ======= Destaque do departamento conforme rolagem (scroll spy) =======
         let lastActiveCat = null;
         let spySuppress = false;
         let spySuppressTimer = null;
         let spyScheduled = false;
 
-        function setActiveCategory(cat) {
+        function setActiveGroup(name) {
             const nav = document.getElementById('category-nav');
             let activeBtn = null;
             document.querySelectorAll('.category-btn').forEach(btn => {
-                const on = btn.dataset.cat === cat;
+                const on = btn.dataset.group === name;
                 btn.classList.toggle('active', on);
                 if (on) activeBtn = btn;
             });
-            if (cat !== lastActiveCat) {
-                lastActiveCat = cat;
+            if (name !== lastActiveCat) {
+                lastActiveCat = name;
                 if (activeBtn && nav) {
                     const target = activeBtn.offsetLeft - (nav.clientWidth / 2) + (activeBtn.clientWidth / 2);
                     nav.scrollTo({ left: Math.max(0, target), behavior: 'smooth' });
@@ -2879,6 +2889,11 @@ ${getFlavorList(item).map(f => `<option value="${f.label}">${f.label}</option>`)
 
         function updateActiveOnScroll() {
             if (spySuppress) return;
+            // Departamento filtrado: mantém-se destacado enquanto o menu está filtrado
+            if (activeGroupName && activeGroupName !== 'Todos') {
+                setActiveGroup(activeGroupName);
+                return;
+            }
             const sections = document.querySelectorAll('#menu-container section');
             if (!sections.length) return;
             const header = document.getElementById('main-header');
@@ -2887,7 +2902,7 @@ ${getFlavorList(item).map(f => `<option value="${f.label}">${f.label}</option>`)
             sections.forEach(sec => {
                 if (sec.getBoundingClientRect().top <= offset) currentCat = sec.dataset.cat || currentCat;
             });
-            setActiveCategory(currentCat);
+            setActiveGroup(currentCat === 'Todos' ? 'Todos' : groupForCategory(currentCat));
         }
 
         function onScrollSpy() {
