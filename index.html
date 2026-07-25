@@ -2654,9 +2654,10 @@ flavors: ['Sonho de Valsa', 'Ouro branco', 'Ninho trufado', 'Pessêgo', 'Amendoi
             return `
                 <div class="product-card group flex flex-col h-full overflow-hidden">
                     <div class="relative h-56 overflow-hidden">
-  <img 
-    id="img-${item.id}" 
+  <img
+    id="img-${item.id}"
     src="${(item.images && item.images.length ? item.images[0] : item.image)}"
+    onerror="handleImgError(this)"
     class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-[1s]"
   >
 
@@ -3082,6 +3083,24 @@ if (!item.sizes && selectedFlavor && item.variants && item.variants[selectedFlav
                 .replace(/'/g, '&#039;');
         }
 
+        // Placeholder mostrado quando uma foto nao carrega (ex.: Cloudinary fora do ar
+        // ou cota excedida). Evita o icone de "imagem quebrada" do navegador.
+        const IMG_FALLBACK_SRC = 'data:image/svg+xml,' + encodeURIComponent(
+            "<svg xmlns='http://www.w3.org/2000/svg' width='400' height='400' viewBox='0 0 400 400'>" +
+            "<rect width='400' height='400' fill='#F3EEE8'/>" +
+            "<circle cx='200' cy='205' r='92' fill='#9E764E' fill-opacity='0.22'/>" +
+            "<g fill='#F3EEE8'>" +
+            "<circle cx='176' cy='184' r='13'/><circle cx='226' cy='176' r='10'/>" +
+            "<circle cx='212' cy='226' r='12'/><circle cx='170' cy='228' r='9'/>" +
+            "<circle cx='236' cy='222' r='7'/></g></svg>"
+        );
+
+        function handleImgError(el) {
+            if (!el || el.dataset.fallbackApplied) return;
+            el.dataset.fallbackApplied = '1';
+            el.src = IMG_FALLBACK_SRC;
+        }
+
         function getDefaultFlavorForKitItem(item, comp) {
             const flavors = getFlavorList(item);
             if (!flavors.length) return comp.flavor || null;
@@ -3167,7 +3186,7 @@ if (!item.sizes && selectedFlavor && item.variants && item.variants[selectedFlav
                 return `
                     <div class="bg-white rounded-[1.75rem] border border-[#9E764E]/10 p-4 sm:p-5 shadow-sm" data-kit-entry="${entry.idx}">
                         <div class="kit-flavor-product-row">
-                            <img src="${escapeHtml(entry.image)}" class="w-16 h-16 object-cover rounded-2xl shadow-md bg-[#F3EEE8]">
+                            <img src="${escapeHtml(entry.image)}" onerror="handleImgError(this)" class="w-16 h-16 object-cover rounded-2xl shadow-md bg-[#F3EEE8]">
                             <div class="flex-grow min-w-0">
                                 <div class="flex items-start justify-between gap-3">
                                     <div class="min-w-0">
@@ -3512,7 +3531,7 @@ if (!item.sizes && flavor && item.variants && item.variants[flavor]) {
                 const unitLabel = item.unit === 'kg' ? 'kg' : 'un';
                 return `
                 <div class="bg-white p-4 sm:p-5 rounded-[2rem] border border-[#9E764E]/10 flex gap-4 sm:gap-5 animate-fade shadow-sm">
-                    <img src="${item.image}" class="w-14 h-14 sm:w-16 sm:h-16 object-cover rounded-2xl shadow-md">
+                    <img src="${item.image}" onerror="handleImgError(this)" class="w-14 h-14 sm:w-16 sm:h-16 object-cover rounded-2xl shadow-md">
                     <div class="flex-grow min-w-0">
                         <div class="flex justify-between items-start mb-1">
                             <div>
@@ -3937,7 +3956,7 @@ function createProductListItem(item) {
         <div class="product-list-item flex items-center gap-3.5 px-4 py-4" onclick="openProductModal('${item.id}')">
             <div class="shrink-0 w-[80px] h-[80px] rounded-xl overflow-hidden bg-[#F3EEE8]">
                 ${imgSrc
-                    ? `<img src="${escapeHtml(imgSrc)}" class="w-full h-full object-cover" loading="lazy">`
+                    ? `<img src="${escapeHtml(imgSrc)}" onerror="handleImgError(this)" class="w-full h-full object-cover" loading="lazy">`
                     : `<div class="w-full h-full flex items-center justify-center"><i class="fas fa-cookie-bite text-xl text-[#9E764E]/25"></i></div>`
                 }
             </div>
@@ -4009,7 +4028,7 @@ function buildProductModalContent(item) {
 
     return `
         <div class="relative h-56 overflow-hidden bg-[#F3EEE8]">
-            <img id="modal-img" src="${escapeHtml(imgSrc)}" class="w-full h-full object-cover">
+            <img id="modal-img" src="${escapeHtml(imgSrc)}" onerror="handleImgError(this)" class="w-full h-full object-cover">
             <button onclick="closeProductModal()" class="absolute top-3 right-3 w-10 h-10 bg-black/35 backdrop-blur-sm rounded-full flex items-center justify-center z-10 active:scale-90 transition-all">
                 <i class="fas fa-times text-white text-sm"></i>
             </button>
