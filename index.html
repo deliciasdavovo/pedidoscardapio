@@ -2609,17 +2609,15 @@ flavors: ['Sonho de Valsa', 'Ouro branco', 'Ninho trufado', 'Pessêgo', 'Amendoi
             const container = document.getElementById('menu-container');
             container.innerHTML = '';
 
-            const categoriesToRender = activeGroupCategories
+            // Durante a busca, procura em todo o cardápio (ignora o filtro de departamento)
+            const categoriesToRender = (activeGroupCategories && !currentSearch)
                 ? CATEGORIES.filter(cat => activeGroupCategories.includes(cat))
                 : CATEGORIES;
 
             categoriesToRender.forEach(cat => {
-                const items = MENU_ITEMS.filter(item => {
-                    const matchesCategory = item.category === cat;
-                    const matchesSearch = item.name.toLowerCase().includes(currentSearch.toLowerCase()) ||
-                                         item.description.toLowerCase().includes(currentSearch.toLowerCase());
-                    return matchesCategory && matchesSearch;
-                });
+                const items = MENU_ITEMS.filter(item =>
+                    item.category === cat && itemMatchesSearch(item, currentSearch)
+                );
 
                 if (items.length > 0) {
                     const section = document.createElement('section');
@@ -2660,7 +2658,7 @@ flavors: ['Sonho de Valsa', 'Ouro branco', 'Ninho trufado', 'Pessêgo', 'Amendoi
                     </button>
                 `;
                 container.appendChild(emptyState);
-            } else if (activeGroupCategories) {
+            } else if (activeGroupCategories && !currentSearch) {
                 const footer = document.createElement('div');
                 footer.className = 'flex flex-col items-center gap-3 py-10 sm:py-14';
                 footer.innerHTML = `
@@ -2822,6 +2820,22 @@ ${getFlavorList(item).map(f => `<option value="${f.label}">${f.label}</option>`)
             updateSearchUI(val);
         }
 
+        // Normaliza texto para busca: minúsculas e sem acentos
+        function normalizeSearch(s) {
+            return (s || '')
+                .toLowerCase()
+                .normalize('NFD')
+                .replace(/[\u0300-\u036f]/g, '');
+        }
+
+        // Regra única de correspondência, usada tanto pelo contador quanto pela lista
+        function itemMatchesSearch(item, term) {
+            const q = normalizeSearch(term);
+            if (!q) return true;
+            return normalizeSearch(item.name).includes(q) ||
+                   normalizeSearch(item.description).includes(q);
+        }
+
         function updateSearchUI(val) {
             const clearBtn = document.getElementById('search-clear');
             const countEl = document.getElementById('search-result-count');
@@ -2829,10 +2843,7 @@ ${getFlavorList(item).map(f => `<option value="${f.label}">${f.label}</option>`)
             if (val) {
                 clearBtn.classList.remove('opacity-0', 'pointer-events-none');
                 clearBtn.classList.add('opacity-100');
-                const count = MENU_ITEMS.filter(item =>
-                    item.name.toLowerCase().includes(val.toLowerCase()) ||
-                    item.description.toLowerCase().includes(val.toLowerCase())
-                ).length;
+                const count = MENU_ITEMS.filter(item => itemMatchesSearch(item, val)).length;
                 countEl.classList.add('visible');
                 countEl.style.opacity = '1';
                 countEl.textContent = count === 0
