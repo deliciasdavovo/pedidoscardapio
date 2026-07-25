@@ -98,19 +98,21 @@
             background: #8B5E3C; /* Caramelo escuro */
             box-shadow: 0 8px 20px rgba(139, 94, 60, 0.3);
         }
-        .bookmark-tab {
-            background: linear-gradient(180deg, var(--cta) 0%, var(--cta-dark) 100%);
-            box-shadow: 4px 0 20px rgba(90, 62, 43, 0.5);
-            color: white;
-            border: 1px solid rgba(255,255,255,0.15);
-            border-left: none;
-            border-radius: 0 12px 12px 0;
-            transform: translateX(-6px);
-            transition: transform 0.25s cubic-bezier(0.2,0.8,0.2,1), box-shadow 0.25s ease;
+        /* Setinha discreta na lateral para abrir a tela de descoberta */
+        .discovery-arrow {
+            width: 24px;
+            height: 44px;
+            background: #5A3E2B;
+            color: #F5EDE0;
+            border-radius: 0 10px 10px 0;
+            box-shadow: 2px 0 10px rgba(36, 27, 21, 0.16);
+            opacity: 0.8;
+            transition: opacity 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
         }
-        .bookmark-tab:hover {
-            transform: translateX(0);
-            box-shadow: 6px 0 28px rgba(90, 62, 43, 0.65);
+        .discovery-arrow:hover {
+            opacity: 1;
+            background: #4A3121;
+            box-shadow: 3px 0 14px rgba(36, 27, 21, 0.26);
         }
 
         .product-card {
@@ -390,9 +392,8 @@
     </div>
 
     <!-- Marcador de Página Lateral -->
-    <button onclick="showDiscovery()" class="bookmark-tab fixed left-0 top-[44%] z-40 flex flex-col items-center gap-2 px-2.5 py-5 active:scale-95" title="Ver cardápio">
-        <i class="fas fa-bookmark text-base"></i>
-        <span class="text-[7px] font-bold tracking-[0.2em] uppercase" style="writing-mode:vertical-rl;transform:rotate(180deg)">Cardápio</span>
+    <button onclick="showDiscovery()" class="discovery-arrow fixed left-0 top-1/2 -translate-y-1/2 z-40 flex items-center justify-center active:scale-90" title="Ver cardápio" aria-label="Abrir cardápio">
+        <i class="fas fa-chevron-right text-[11px]"></i>
     </button>
 
     <!-- Header Fixo (Fundo Marrom Sólido) -->
@@ -2582,9 +2583,9 @@ flavors: ['Sonho de Valsa', 'Ouro branco', 'Ninho trufado', 'Pessêgo', 'Amendoi
 
         function renderCategories() {
             const nav = document.getElementById('category-nav');
-            let html = `<button onclick="scrollToCategory('Todos')" data-cat="Todos" class="category-btn active serif-font px-3.5 py-1.5 sm:px-7 sm:py-2.5 rounded-full text-[11px] sm:text-sm whitespace-nowrap border border-transparent">Todos</button>`;
+            let html = `<button onclick="scrollToCategory('Todos')" data-cat="Todos" class="category-btn active px-3.5 py-1.5 sm:px-7 sm:py-2.5 rounded-none text-[11px] sm:text-sm whitespace-nowrap border border-transparent">Todos</button>`;
             CATEGORIES.forEach(cat => {
-                html += `<button onclick="scrollToCategory('${cat}')" data-cat="${cat}" class="category-btn serif-font px-3.5 py-1.5 sm:px-7 sm:py-2.5 rounded-full text-[11px] sm:text-sm whitespace-nowrap border border-transparent">${cat}</button>`;
+                html += `<button onclick="scrollToCategory('${cat}')" data-cat="${cat}" class="category-btn px-3.5 py-1.5 sm:px-7 sm:py-2.5 rounded-none text-[11px] sm:text-sm whitespace-nowrap border border-transparent">${cat}</button>`;
             });
             nav.innerHTML = html;
         }
