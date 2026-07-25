@@ -3082,16 +3082,18 @@ if (!item.sizes && selectedFlavor && item.variants && item.variants[selectedFlav
                 .replace(/'/g, '&#039;');
         }
 
-        // Placeholder mostrado quando uma foto nao carrega (ex.: Cloudinary fora do ar
-        // ou cota excedida). Evita o icone de "imagem quebrada" do navegador.
+        // Placeholder mostrado quando uma foto nao carrega. Design clean: fundo creme
+        // suave da marca + icone minimalista de cupcake em traco fino, centralizado.
         const IMG_FALLBACK_SRC = 'data:image/svg+xml,' + encodeURIComponent(
             "<svg xmlns='http://www.w3.org/2000/svg' width='400' height='400' viewBox='0 0 400 400'>" +
             "<rect width='400' height='400' fill='#F3EEE8'/>" +
-            "<circle cx='200' cy='205' r='92' fill='#9E764E' fill-opacity='0.22'/>" +
-            "<g fill='#F3EEE8'>" +
-            "<circle cx='176' cy='184' r='13'/><circle cx='226' cy='176' r='10'/>" +
-            "<circle cx='212' cy='226' r='12'/><circle cx='170' cy='228' r='9'/>" +
-            "<circle cx='236' cy='222' r='7'/></g></svg>"
+            "<g fill='none' stroke='#B29A79' stroke-width='3.5' stroke-linecap='round' stroke-linejoin='round' opacity='0.6'>" +
+            "<path d='M180 202 C180 185 190 175 200 175 C210 175 220 185 220 202'/>" +
+            "<path d='M185 202 L215 202 L211 231 L189 231 Z'/>" +
+            "<path d='M195 204 L193 230'/>" +
+            "<path d='M205 204 L207 230'/>" +
+            "<circle cx='200' cy='169' r='4' fill='#B29A79' stroke='none'/>" +
+            "</g></svg>"
         );
 
         function handleImgError(el) {
