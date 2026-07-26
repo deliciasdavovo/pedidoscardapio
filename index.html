@@ -72,12 +72,12 @@
         .animate-fade { animation: fadeIn 0.4s ease-out forwards; }
 
         @keyframes toastIn {
-            from { opacity: 0; transform: translateY(-8px) scale(0.98); }
-            to { opacity: 1; transform: translateY(0) scale(1); }
+            from { opacity: 0; transform: translate(-50%, -8px) scale(0.98); }
+            to { opacity: 1; transform: translate(-50%, 0) scale(1); }
         }
         @keyframes toastOut {
-            from { opacity: 1; transform: translateY(0) scale(1); }
-            to { opacity: 0; transform: translateY(-8px) scale(0.98); }
+            from { opacity: 1; transform: translate(-50%, 0) scale(1); }
+            to { opacity: 0; transform: translate(-50%, -8px) scale(0.98); }
         }
 
         /* UI Helpers */
@@ -612,64 +612,75 @@
         <div class="absolute inset-y-0 right-0 w-full max-w-lg bg-[#F4F1EA] shadow-2xl translate-x-full transition-transform duration-600 flex flex-col h-full">
             <div class="p-6 sm:p-8 border-b border-[#8C8676]/10 bg-white flex justify-between items-center shrink-0">
                 <h2 class="text-xl sm:text-2xl font-medium flex items-center gap-4 serif-font">
-                    <i class="fas fa-shopping-basket text-[#8C8676] text-lg"></i> Minha seleção
+                    <i class="fas fa-shopping-basket text-[#8C8676] text-lg"></i> Minha Cestão
                 </h2>
                 <button onclick="closeCart()" class="text-[#8C8676] w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center rounded-full hover:bg-[#ECE9E1] transition-all">
                     <i class="fas fa-times text-xl sm:text-2xl"></i>
                 </button>
             </div>
             
-            <!-- LISTA DE ITENS COM MIN-H-0 PARA FUNCIONAR SCROLL NO FLEX -->
-            <div id="cart-items-list" class="flex-grow min-h-0 overflow-y-auto p-6 sm:p-8 space-y-6 custom-scrollbar">
-                <!-- Itens do carrinho aqui -->
-            </div>
+            <!-- ÁREA ROLÁVEL ÚNICA: itens + formulário (evita rolagem dupla "temerária") -->
+            <div id="cart-scroll" class="flex-grow min-h-0 overflow-y-auto custom-scrollbar">
+                <div id="cart-items-list" class="p-6 sm:p-8 space-y-6">
+                    <!-- Itens do carrinho aqui -->
+                </div>
 
-            <div id="cart-footer" class="hidden shrink-0 p-6 sm:p-8 bg-white border-t border-[#8C8676]/10 space-y-4 sm:space-y-6 overflow-y-auto max-h-[60%] custom-scrollbar">
-                <!-- Formulário de Checkout -->
-                <div class="space-y-4 sm:space-y-6">
-                    <div class="space-y-2">
-                        <label class="text-[13px] font-semibold text-[#8C8676] ml-2">Identificação </label>
-                        <input type="text" id="order-name" placeholder="Como podemos te chamar?" class="w-full bg-[#ECE9E1]/50 border border-[#8C8676]/10 rounded-2xl px-5 py-3 text-sm focus:outline-none focus:ring-4 focus:ring-[#8C8676]/5 transition-all">
-                    </div>
-                    
-                    <div class="space-y-2">
-                        <label class="text-[13px] font-semibold text-[#8C8676] ml-2">Data e horário da encomenda</label>
-                        <div id="sched-fields" class="grid grid-cols-2 gap-3">
-                            <div class="space-y-1">
-                                <label class="text-[12px] font-semibold text-[#8C8676] ml-2">Data</label>
-                                <input type="date" id="order-date" class="w-full bg-[#ECE9E1]/50 rounded-xl px-4 py-2 text-xs border border-[#8C8676]/10 outline-none">
+                <div id="cart-form" class="hidden p-6 sm:p-8 pt-4 bg-white border-t border-[#8C8676]/10 space-y-4 sm:space-y-6">
+                    <!-- Formulário de Checkout -->
+                    <div class="space-y-4 sm:space-y-6">
+                        <div class="space-y-2">
+                            <label class="text-[13px] font-semibold text-[#8C8676] ml-2">Identificação </label>
+                            <input type="text" id="order-name" placeholder="Como podemos te chamar?" class="w-full bg-[#ECE9E1]/50 border border-[#8C8676]/10 rounded-2xl px-5 py-3 text-sm focus:outline-none focus:ring-4 focus:ring-[#8C8676]/5 transition-all">
+                        </div>
+
+                        <div class="space-y-2">
+                            <div class="flex items-center gap-2 ml-2">
+                                <label class="text-[13px] font-semibold text-[#8C8676]">Data e horário da encomenda</label>
+                                <button type="button" onclick="showProntaEntregaInfo()" aria-label="Informação sobre pronta entrega" class="w-5 h-5 shrink-0 rounded-full bg-[#8C8676]/15 text-[#8C8676] text-[10px] flex items-center justify-center hover:bg-[#8C8676]/25 active:scale-90 transition-all">
+                                    <i class="fas fa-info"></i>
+                                </button>
                             </div>
-                            <div class="space-y-1">
-                                <label class="text-[12px] font-semibold text-[#8C8676] ml-2">Horário</label>
-                                <input type="time" id="order-time" class="w-full bg-[#ECE9E1]/50 rounded-xl px-4 py-2 text-xs border border-[#8C8676]/10 outline-none">
+                            <div id="sched-fields" class="grid grid-cols-2 gap-4">
+                                <div class="space-y-1 min-w-0">
+                                    <label class="text-[12px] font-semibold text-[#8C8676] ml-2">Data</label>
+                                    <input type="date" id="order-date" class="w-full bg-[#ECE9E1]/50 rounded-xl px-4 py-2.5 text-xs border border-[#8C8676]/10 outline-none">
+                                </div>
+                                <div class="space-y-1 min-w-0">
+                                    <label class="text-[12px] font-semibold text-[#8C8676] ml-2">Horário</label>
+                                    <input type="time" id="order-time" class="w-full bg-[#ECE9E1]/50 rounded-xl px-4 py-2.5 text-xs border border-[#8C8676]/10 outline-none">
+                                </div>
+                            </div>
+                            <p class="text-[11px] text-[#8C8676]/75 ml-2 leading-relaxed">Encomendas a partir de amanhã. Para <strong>pronta entrega</strong> (hoje), ligue <a href="tel:+551140135248" class="font-semibold underline text-[#22201C]">(11) 4013-5248</a>.</p>
+                        </div>
+
+                        <div class="space-y-2">
+                            <label class="text-[13px] font-semibold text-[#8C8676] ml-2">Como receber?</label>
+                            <div class="toggle-container">
+                                <button onclick="setFulfillment('Retirada')" id="btn-pickup" class="toggle-btn active">Retirada</button>
+                                <button onclick="setFulfillment('Entrega')" id="btn-delivery" class="toggle-btn">Entrega</button>
                             </div>
                         </div>
-                    </div>
 
-                    <div class="space-y-2">
-                        <label class="text-[13px] font-semibold text-[#8C8676] ml-2">Como receber?</label>
-                        <div class="toggle-container">
-                            <button onclick="setFulfillment('Retirada')" id="btn-pickup" class="toggle-btn active">Retirada</button>
-                            <button onclick="setFulfillment('Entrega')" id="btn-delivery" class="toggle-btn">Entrega</button>
-                        </div>
-                    </div>
-
-                    <div id="fulfillment-details" class="animate-fade">
-                        <div id="pickup-location-container" class="space-y-2">
-                            <label class="text-[12px] font-semibold text-[#8C8676] ml-2 block">Unidade Escolhida</label>
-                            <select id="pickup-location" class="w-full bg-[#ECE9E1]/50 border border-[#8C8676]/10 rounded-2xl px-5 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#8C8676]/20 appearance-none text-[#22201C]">
-                                <option value="Matriz">Unidade Matriz - Centro</option>
-                                <option value="Vila Nova">Unidade Vila Nova - Unicenter</option>
-                            </select>
-                        </div>
-                        <div id="delivery-address-container" class="hidden space-y-2">
-                            <label class="text-[12px] font-semibold text-[#8C8676] ml-2 block">Endereço para Entrega</label>
-                            <input type="text" id="delivery-address" placeholder="Rua, número, bairro e apto/casa" class="w-full bg-[#ECE9E1]/50 border border-[#8C8676]/10 rounded-2xl px-5 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#8C8676]/20 transition-all">
+                        <div id="fulfillment-details" class="animate-fade">
+                            <div id="pickup-location-container" class="space-y-2">
+                                <label class="text-[12px] font-semibold text-[#8C8676] ml-2 block">Unidade Escolhida</label>
+                                <select id="pickup-location" class="w-full bg-[#ECE9E1]/50 border border-[#8C8676]/10 rounded-2xl px-5 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#8C8676]/20 appearance-none text-[#22201C]">
+                                    <option value="Matriz">Unidade Matriz - Centro</option>
+                                    <option value="Vila Nova">Unidade Vila Nova - Unicenter</option>
+                                </select>
+                            </div>
+                            <div id="delivery-address-container" class="hidden space-y-2">
+                                <label class="text-[12px] font-semibold text-[#8C8676] ml-2 block">Endereço para Entrega</label>
+                                <input type="text" id="delivery-address" placeholder="Rua, número, bairro e apto/casa" class="w-full bg-[#ECE9E1]/50 border border-[#8C8676]/10 rounded-2xl px-5 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#8C8676]/20 transition-all">
+                            </div>
                         </div>
                     </div>
                 </div>
+            </div>
 
-                <div class="pt-4 border-t border-[#8C8676]/15 space-y-2">
+            <!-- BARRA DE AÇÃO FIXA: total + finalizar (sempre visível) -->
+            <div id="cart-actions" class="hidden shrink-0 p-6 sm:p-8 bg-white border-t border-[#8C8676]/10 space-y-4">
+                <div class="space-y-2">
                     <div id="delivery-fee-row" class="hidden flex justify-between items-center px-2 text-sm text-[#8C8676]">
                         <span class="font-medium">Serviço de Entrega</span>
                         <span class="font-bold">R$ 15,00</span>
@@ -714,6 +725,7 @@
         const DELIVERY_FEE = 15.00;
         const ENCOMENDA_TIME_MIN = "07:30";
         const ENCOMENDA_TIME_MAX = "20:00";
+        const PRONTA_ENTREGA_MSG = 'Pedidos para hoje (pronta entrega): ligue (11) 4013-5248.';
         
         const MACRO_GROUPS = [
             { name: 'Coffees Sugeridos & Cestas', short: 'Coffees & Cestas', subtitle: 'Kits prontos para grupos e cestas especiais', categories: ['Coffee Breaks', 'Cestas de café da manhã', 'Bebidas'] },
@@ -2887,8 +2899,8 @@ flavors: ['Sonho de Valsa', 'Ouro branco', 'Ninho trufado', 'Pessêgo', 'Amendoi
                         </div>
                         
                         <div class="mt-auto pt-6 border-t border-[#8C8676]/10 space-y-5">
-                            <!-- Toggle Un/Kg -->
-                            ${hasKg ? `
+                            <!-- Toggle Un/Kg (só quando o produto é vendido nas duas unidades) -->
+                            ${(hasKg && item.units.includes('un')) ? `
                             <div class="flex bg-[#ECE9E1] p-1 rounded-2xl border border-[#8C8676]/5">
                                 <button onclick="setCardUnit('${item.id}', 'un')" id="unit-un-${item.id}" class="unit-btn active flex-1 py-2 rounded-xl text-[12px] font-semibold bg-[#22201C] text-white">Unidade</button>
                                 <button onclick="setCardUnit('${item.id}', 'kg')" id="unit-kg-${item.id}" class="unit-btn flex-1 py-2 rounded-xl text-[12px] font-semibold text-[#8C8676]/50">Kilo</button>
@@ -3201,7 +3213,11 @@ ${getFlavorList(item).map(f => `<option value="${f.label}">${f.label}</option>`)
 
         function getSelectedUnit(id) {
             const btnKg = document.getElementById('unit-kg-' + id);
-            return (btnKg && btnKg.classList.contains('active')) ? 'kg' : 'un';
+            if (btnKg && btnKg.classList.contains('active')) return 'kg';
+            // Produtos vendidos só por kg não têm toggle: sempre usar 'kg'
+            const item = MENU_ITEMS.find(i => i.id === id);
+            if (item && Array.isArray(item.units) && !item.units.includes('un')) return 'kg';
+            return 'un';
         }
 
         function updatePricePreview(id) {
@@ -3730,7 +3746,8 @@ if (!item.sizes && flavor && item.variants && item.variants[flavor]) {
             document.getElementById('sticky-cart-count').innerText = count;
             const bar = document.getElementById('sticky-cart-bar');
             if (count > 0) bar.classList.remove('translate-y-40'); else bar.classList.add('translate-y-40');
-            document.getElementById('cart-footer').classList.toggle('hidden', count === 0);
+            document.getElementById('cart-form').classList.toggle('hidden', count === 0);
+            document.getElementById('cart-actions').classList.toggle('hidden', count === 0);
         }
 
         function renderCartItems() {
@@ -3888,6 +3905,10 @@ if (!item.sizes && flavor && item.variants && item.variants[flavor]) {
           return formatDateLocalISO(date);
         }
 
+        function showProntaEntregaInfo() {
+          showValidationPopup(PRONTA_ENTREGA_MSG);
+        }
+
         function showValidationPopup(message) {
           if (!message) return;
           const toast = document.getElementById('site-toast');
@@ -3980,6 +4001,13 @@ if (!item.sizes && flavor && item.variants && item.variants[flavor]) {
 
           if (!dateInput.dataset.encomendaValidationBound) {
             dateInput.addEventListener('change', () => {
+              // tentou escolher hoje (ou data anterior a amanhã): é pronta entrega
+              if (dateInput.value && dateInput.min && dateInput.value < dateInput.min) {
+                showProntaEntregaInfo();
+                dateInput.value = getNextValidEncomendaDate();
+                validarDataEncomenda(false);
+                return;
+              }
               if (!validarDataEncomenda(true, true)) {
                 dateInput.value = getNextValidEncomendaDate();
                 validarDataEncomenda(false);
