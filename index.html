@@ -612,91 +612,96 @@
         <div id="cart-panel" class="absolute inset-y-0 right-0 w-full max-w-lg bg-[#F4F1EA] shadow-2xl translate-x-full transition-transform duration-600 flex flex-col h-full">
             <div class="p-6 sm:p-8 border-b border-[#8C8676]/10 bg-white flex justify-between items-center shrink-0">
                 <h2 class="text-xl sm:text-2xl font-medium flex items-center gap-4 serif-font">
-                    <i class="fas fa-shopping-basket text-[#8C8676] text-lg"></i> Minha Cestão
+                    <i class="fas fa-shopping-basket text-[#8C8676] text-lg"></i> Minha seleção
                 </h2>
                 <button onclick="closeCart()" class="text-[#8C8676] w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center rounded-full hover:bg-[#ECE9E1] transition-all">
                     <i class="fas fa-times text-xl sm:text-2xl"></i>
                 </button>
             </div>
             
-            <!-- ÁREA ROLÁVEL ÚNICA: itens + formulário (evita rolagem dupla "temerária") -->
-            <div id="cart-scroll" class="flex-grow min-h-0 overflow-y-auto custom-scrollbar">
-                <div id="cart-items-list" class="p-6 sm:p-8 space-y-6">
-                    <!-- Itens do carrinho aqui -->
-                </div>
+            <!-- LISTA DE ITENS (rolável) -->
+            <div id="cart-items-list" class="flex-grow min-h-0 overflow-y-auto p-6 sm:p-8 space-y-6 custom-scrollbar">
+                <!-- Itens do carrinho aqui -->
+            </div>
 
-                <div id="cart-form" class="hidden p-6 sm:p-8 pt-4 bg-white border-t border-[#8C8676]/10 space-y-4 sm:space-y-6">
-                    <!-- Formulário de Checkout -->
-                    <div class="space-y-4 sm:space-y-6">
-                        <div class="space-y-2">
-                            <label class="text-[13px] font-semibold text-[#8C8676] ml-2">Identificação </label>
-                            <input type="text" id="order-name" placeholder="Como podemos te chamar?" class="w-full bg-[#ECE9E1]/50 border border-[#8C8676]/10 rounded-2xl px-5 py-3 text-sm focus:outline-none focus:ring-4 focus:ring-[#8C8676]/5 transition-all">
+            <!-- PAINEL DE CHECKOUT SEMI-FIXO E RETRÁTIL (não ocupa a tela toda) -->
+            <div id="cart-checkout" class="hidden shrink-0 bg-white border-t border-[#8C8676]/10">
+                <!-- Alça retrátil -->
+                <button type="button" id="checkout-toggle" onclick="toggleCheckout()" class="w-full flex flex-col items-center gap-1.5 px-6 sm:px-8 pt-2.5 pb-2 active:opacity-70 transition-opacity">
+                    <span class="w-10 h-1 rounded-full bg-[#8C8676]/25"></span>
+                    <span class="w-full flex items-center justify-between">
+                        <span class="text-[13px] font-semibold text-[#8C8676]">Seus dados e entrega</span>
+                        <i id="checkout-chevron" class="fas fa-chevron-down text-[#8C8676] text-sm transition-transform"></i>
+                    </span>
+                </button>
+
+                <!-- Corpo retrátil: formulário -->
+                <div id="checkout-body" class="overflow-y-auto max-h-[42vh] px-6 sm:px-8 pb-4 space-y-4 sm:space-y-5 custom-scrollbar">
+                    <div class="space-y-2">
+                        <label class="text-[13px] font-semibold text-[#8C8676] ml-2">Identificação </label>
+                        <input type="text" id="order-name" placeholder="Como podemos te chamar?" class="w-full bg-[#ECE9E1]/50 border border-[#8C8676]/10 rounded-2xl px-5 py-3 text-sm focus:outline-none focus:ring-4 focus:ring-[#8C8676]/5 transition-all">
+                    </div>
+
+                    <div class="space-y-2">
+                        <div class="flex items-center gap-2 ml-2">
+                            <label class="text-[13px] font-semibold text-[#8C8676]">Data e horário da encomenda</label>
+                            <button type="button" onclick="showProntaEntregaInfo()" aria-label="Informação sobre pronta entrega" class="w-5 h-5 shrink-0 rounded-full bg-[#8C8676]/15 text-[#8C8676] text-[10px] flex items-center justify-center hover:bg-[#8C8676]/25 active:scale-90 transition-all">
+                                <i class="fas fa-info"></i>
+                            </button>
                         </div>
-
-                        <div class="space-y-2">
-                            <div class="flex items-center gap-2 ml-2">
-                                <label class="text-[13px] font-semibold text-[#8C8676]">Data e horário da encomenda</label>
-                                <button type="button" onclick="showProntaEntregaInfo()" aria-label="Informação sobre pronta entrega" class="w-5 h-5 shrink-0 rounded-full bg-[#8C8676]/15 text-[#8C8676] text-[10px] flex items-center justify-center hover:bg-[#8C8676]/25 active:scale-90 transition-all">
-                                    <i class="fas fa-info"></i>
-                                </button>
+                        <div id="sched-fields" class="space-y-3">
+                            <div class="space-y-1">
+                                <label class="text-[12px] font-semibold text-[#8C8676] ml-2 block">Data</label>
+                                <input type="date" id="order-date" class="w-full bg-[#ECE9E1]/50 rounded-xl px-4 py-3 text-sm border border-[#8C8676]/10 outline-none">
                             </div>
-                            <div id="sched-fields" class="grid grid-cols-2 gap-4">
-                                <div class="space-y-1 min-w-0">
-                                    <label class="text-[12px] font-semibold text-[#8C8676] ml-2">Data</label>
-                                    <input type="date" id="order-date" class="w-full bg-[#ECE9E1]/50 rounded-xl px-4 py-2.5 text-xs border border-[#8C8676]/10 outline-none">
-                                </div>
-                                <div class="space-y-1 min-w-0">
-                                    <label class="text-[12px] font-semibold text-[#8C8676] ml-2">Horário</label>
-                                    <input type="time" id="order-time" class="w-full bg-[#ECE9E1]/50 rounded-xl px-4 py-2.5 text-xs border border-[#8C8676]/10 outline-none">
-                                </div>
-                            </div>
-                            <p class="text-[11px] text-[#8C8676]/75 ml-2 leading-relaxed">Encomendas a partir de amanhã. Para <strong>pronta entrega</strong> (hoje), ligue <a href="tel:+551140135248" class="font-semibold underline text-[#22201C]">(11) 4013-5248</a>.</p>
-                        </div>
-
-                        <div class="space-y-2">
-                            <label class="text-[13px] font-semibold text-[#8C8676] ml-2">Como receber?</label>
-                            <div class="toggle-container">
-                                <button onclick="setFulfillment('Retirada')" id="btn-pickup" class="toggle-btn active">Retirada</button>
-                                <button onclick="setFulfillment('Entrega')" id="btn-delivery" class="toggle-btn">Entrega</button>
+                            <div class="space-y-1">
+                                <label class="text-[12px] font-semibold text-[#8C8676] ml-2 block">Horário</label>
+                                <input type="time" id="order-time" class="w-full bg-[#ECE9E1]/50 rounded-xl px-4 py-3 text-sm border border-[#8C8676]/10 outline-none">
                             </div>
                         </div>
+                        <p class="text-[11px] text-[#8C8676]/75 ml-2 leading-relaxed">Encomendas a partir de amanhã. Para <strong>pronta entrega</strong> (hoje), ligue <a href="tel:+551140135248" class="font-semibold underline text-[#22201C]">(11) 4013-5248</a>.</p>
+                    </div>
 
-                        <div id="fulfillment-details" class="animate-fade">
-                            <div id="pickup-location-container" class="space-y-2">
-                                <label class="text-[12px] font-semibold text-[#8C8676] ml-2 block">Unidade Escolhida</label>
-                                <select id="pickup-location" class="w-full bg-[#ECE9E1]/50 border border-[#8C8676]/10 rounded-2xl px-5 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#8C8676]/20 appearance-none text-[#22201C]">
-                                    <option value="Matriz">Unidade Matriz - Centro</option>
-                                    <option value="Vila Nova">Unidade Vila Nova - Unicenter</option>
-                                </select>
-                            </div>
-                            <div id="delivery-address-container" class="hidden space-y-2">
-                                <label class="text-[12px] font-semibold text-[#8C8676] ml-2 block">Endereço para Entrega</label>
-                                <input type="text" id="delivery-address" placeholder="Rua, número, bairro e apto/casa" class="w-full bg-[#ECE9E1]/50 border border-[#8C8676]/10 rounded-2xl px-5 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#8C8676]/20 transition-all">
-                            </div>
+                    <div class="space-y-2">
+                        <label class="text-[13px] font-semibold text-[#8C8676] ml-2">Como receber?</label>
+                        <div class="toggle-container">
+                            <button onclick="setFulfillment('Retirada')" id="btn-pickup" class="toggle-btn active">Retirada</button>
+                            <button onclick="setFulfillment('Entrega')" id="btn-delivery" class="toggle-btn">Entrega</button>
+                        </div>
+                    </div>
+
+                    <div id="fulfillment-details" class="animate-fade">
+                        <div id="pickup-location-container" class="space-y-2">
+                            <label class="text-[12px] font-semibold text-[#8C8676] ml-2 block">Unidade Escolhida</label>
+                            <select id="pickup-location" class="w-full bg-[#ECE9E1]/50 border border-[#8C8676]/10 rounded-2xl px-5 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#8C8676]/20 appearance-none text-[#22201C]">
+                                <option value="Matriz">Unidade Matriz - Centro</option>
+                                <option value="Vila Nova">Unidade Vila Nova - Unicenter</option>
+                            </select>
+                        </div>
+                        <div id="delivery-address-container" class="hidden space-y-2">
+                            <label class="text-[12px] font-semibold text-[#8C8676] ml-2 block">Endereço para Entrega</label>
+                            <input type="text" id="delivery-address" placeholder="Rua, número, bairro e apto/casa" class="w-full bg-[#ECE9E1]/50 border border-[#8C8676]/10 rounded-2xl px-5 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#8C8676]/20 transition-all">
                         </div>
                     </div>
                 </div>
-            </div>
 
-            <!-- BARRA DE AÇÃO FIXA: total + finalizar (sempre visível) -->
-            <div id="cart-actions" class="hidden shrink-0 p-6 sm:p-8 bg-white border-t border-[#8C8676]/10 space-y-4">
-                <div class="space-y-2">
-                    <div id="delivery-fee-row" class="hidden flex justify-between items-center px-2 text-sm text-[#8C8676]">
+                <!-- Barra fixa: total + finalizar (sempre visível) -->
+                <div class="px-6 sm:px-8 pt-3 pb-6 border-t border-[#8C8676]/10 space-y-3">
+                    <div id="delivery-fee-row" class="hidden flex justify-between items-center px-1 text-sm text-[#8C8676]">
                         <span class="font-medium">Serviço de Entrega</span>
                         <span class="font-bold">R$ 15,00</span>
                     </div>
-                    <div class="flex justify-between items-center px-2">
+                    <div class="flex justify-between items-center px-1">
                         <div class="text-left">
                             <span class="text-[#8C8676] text-[13px] font-semibold block mb-0.5">Total estimado</span>
                             <span class="text-[11px] text-gray-400 italic">Pesagem final na entrega</span>
                         </div>
                         <span class="text-3xl sm:text-4xl font-bold text-[#22201C] tracking-tight" id="cart-final-total">R$ 0,00</span>
                     </div>
+                    <button onclick="sendWhatsAppOrder()" class="w-full bg-[#1F8F7A] hover:bg-[#176E60] text-white py-4 sm:py-[18px] rounded-2xl font-semibold tracking-[-0.01em] text-[16px] transition-all shadow-[0_8px_24px_rgba(31,143,122,0.28),0_2px_6px_rgba(31,143,122,0.20)] flex items-center justify-center gap-3 active:scale-95 group">
+                        <i class="fab fa-whatsapp text-xl sm:text-2xl group-hover:rotate-12 transition-transform"></i> Finalizar no WhatsApp
+                    </button>
                 </div>
-
-                <button onclick="sendWhatsAppOrder()" class="w-full bg-[#1F8F7A] hover:bg-[#176E60] text-white py-4 sm:py-[18px] rounded-2xl font-semibold tracking-[-0.01em] text-[16px] transition-all shadow-[0_8px_24px_rgba(31,143,122,0.28),0_2px_6px_rgba(31,143,122,0.20)] flex items-center justify-center gap-3 active:scale-95 group">
-                    <i class="fab fa-whatsapp text-xl sm:text-2xl group-hover:rotate-12 transition-transform"></i> Finalizar no WhatsApp
-                </button>
             </div>
         </div>
     </div>
@@ -3746,8 +3751,7 @@ if (!item.sizes && flavor && item.variants && item.variants[flavor]) {
             document.getElementById('sticky-cart-count').innerText = count;
             const bar = document.getElementById('sticky-cart-bar');
             if (count > 0) bar.classList.remove('translate-y-40'); else bar.classList.add('translate-y-40');
-            document.getElementById('cart-form').classList.toggle('hidden', count === 0);
-            document.getElementById('cart-actions').classList.toggle('hidden', count === 0);
+            document.getElementById('cart-checkout').classList.toggle('hidden', count === 0);
         }
 
         function renderCartItems() {
@@ -3907,6 +3911,15 @@ if (!item.sizes && flavor && item.variants && item.variants[flavor]) {
 
         function showProntaEntregaInfo() {
           showValidationPopup(PRONTA_ENTREGA_MSG);
+        }
+
+        // Painel de checkout retrátil: recolhe/expande o formulário sem ocupar a tela toda
+        function toggleCheckout() {
+          const body = document.getElementById('checkout-body');
+          const chevron = document.getElementById('checkout-chevron');
+          if (!body) return;
+          const collapsed = body.classList.toggle('hidden');
+          if (chevron) chevron.classList.toggle('rotate-180', collapsed);
         }
 
         function showValidationPopup(message) {
