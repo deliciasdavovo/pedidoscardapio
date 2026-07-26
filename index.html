@@ -76,30 +76,31 @@
         input[type="number"]::-webkit-inner-spin-button, 
         input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
 
-        /* Category nav strip (dentro do header marrom) */
+        /* Navegação por texto (pontinhos) dentro do header verde */
         .nav-categoria {
-            background: #F4F1EA;
+            background: #2C4A34;
         }
 
         .category-btn {
-            color: #4B4B44;
+            color: rgba(244, 241, 234, 0.62);
             font-weight: 500;
-            background: #FFFFFF;
-            border: 1px solid rgba(34, 32, 28, 0.12);
-            border-radius: 9999px;
-            transition: color 0.18s ease, background 0.18s ease, border-color 0.18s ease;
+            background: transparent;
+            border: none;
+            border-radius: 0;
+            padding: 2px 2px;
+            transition: color 0.18s ease;
         }
         .category-btn:hover:not(.active) {
-            color: #22201C;
-            border-color: rgba(34, 32, 28, 0.28);
-            background: #FFFFFF;
+            color: #FFFFFF;
         }
         .category-btn.active {
             color: #FFFFFF;
-            background: #2C4A34;
-            font-weight: 600;
-            border-color: #2C4A34;
-            box-shadow: 0 4px 12px rgba(44, 74, 52, 0.22);
+            font-weight: 700;
+        }
+        .cat-sep {
+            color: rgba(244, 241, 234, 0.32);
+            font-weight: 400;
+            user-select: none;
         }
 
         /* Botão de Cesta no Header */
@@ -384,40 +385,40 @@
         </div>
     </div>
 
-    <!-- Header Fixo (claro / marfim) -->
-    <div id="main-header" class="sticky top-0 z-50 flex flex-col w-full" style="box-shadow:0 6px 24px rgba(34,32,28,0.06);">
-        <header class="bg-[#F4F1EA] text-[#22201C]">
+    <!-- Header Fixo (verde-pinho) -->
+    <div id="main-header" class="sticky top-0 z-50 flex flex-col w-full" style="box-shadow:0 6px 24px rgba(20,34,22,0.16);">
+        <header class="bg-[#2C4A34] text-[#F4F1EA]">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 py-3.5 grid grid-cols-[1fr_auto_1fr] items-center gap-2">
                 <!-- Esquerda: descobrir + busca -->
                 <div class="flex items-center justify-start gap-0.5">
-                    <button onclick="showDiscovery()" class="p-2.5 hover:bg-black/5 rounded-full transition-all active:scale-90 text-[#22201C]" title="Descobrir categorias" aria-label="Descobrir categorias">
+                    <button onclick="showDiscovery()" class="p-2.5 hover:bg-white/10 rounded-full transition-all active:scale-90 text-[#F4F1EA]" title="Descobrir categorias" aria-label="Descobrir categorias">
                         <i class="fas fa-table-cells-large text-base"></i>
                     </button>
-                    <button id="search-toggle-btn" onclick="toggleSearch()" class="p-2.5 hover:bg-black/5 rounded-full transition-all active:scale-90 text-[#22201C]" title="Buscar" aria-label="Buscar">
+                    <button id="search-toggle-btn" onclick="toggleSearch()" class="p-2.5 hover:bg-white/10 rounded-full transition-all active:scale-90 text-[#F4F1EA]" title="Buscar" aria-label="Buscar">
                         <i id="search-toggle-icon" class="fas fa-search text-base"></i>
                     </button>
                 </div>
                 <!-- Centro: logotipo -->
                 <div class="flex flex-col items-center text-center cursor-pointer group leading-none" onclick="window.scrollTo({top:0, behavior:'smooth'})">
                     <div class="flex items-center gap-2">
-                        <i class="fas fa-seedling text-[#2C4A34] text-base sm:text-lg"></i>
-                        <h1 class="text-xl sm:text-2xl font-normal tracking-[0.01em] serif-font text-[#22201C] group-hover:text-[#2C4A34] transition-colors whitespace-nowrap">Delícias da Vovó</h1>
+                        <i class="fas fa-seedling text-[#C9A576] text-base sm:text-lg"></i>
+                        <h1 class="text-xl sm:text-2xl font-normal tracking-[0.01em] serif-font text-[#F4F1EA] group-hover:text-white transition-colors whitespace-nowrap">Delícias da Vovó</h1>
                     </div>
-                    <span class="text-[8px] sm:text-[9px] uppercase font-semibold tracking-[0.42em] text-[#2C4A34]/70 mt-1.5 ml-[0.42em]">Padaria Artesanal</span>
+                    <span class="text-[8px] sm:text-[9px] uppercase font-semibold tracking-[0.42em] text-[#C9A576] mt-1.5 ml-[0.42em]">Padaria Artesanal</span>
                 </div>
                 <!-- Direita: carrinho -->
                 <div class="flex items-center justify-end">
-                    <button onclick="openCart()" class="relative flex items-center gap-2.5 hover:bg-black/5 px-3.5 py-2 rounded-full transition-all active:scale-95 border border-[#22201C]/12 text-[#22201C]" aria-label="Abrir cesta">
+                    <button onclick="openCart()" class="relative flex items-center gap-2.5 hover:bg-white/10 px-3.5 py-2 rounded-full transition-all active:scale-95 border border-white/20 text-[#F4F1EA]" aria-label="Abrir cesta">
                         <i class="fas fa-shopping-basket text-base"></i>
-                        <span id="cart-badge" class="hidden absolute -top-1.5 -right-1.5 bg-[#BE6B2E] text-white text-[10px] font-bold w-5 h-5 rounded-full flex items-center justify-center border-2 border-[#F4F1EA] shadow-lg">0</span>
+                        <span id="cart-badge" class="hidden absolute -top-1.5 -right-1.5 bg-[#BE6B2E] text-white text-[10px] font-bold w-5 h-5 rounded-full flex items-center justify-center border-2 border-[#2C4A34] shadow-lg">0</span>
                         <span class="hidden sm:block text-sm font-semibold serif-font tracking-wide" id="header-total">R$ 0,00</span>
                     </button>
                 </div>
             </div>
 
-            <!-- Navegação por Departamentos -->
-            <nav class="nav-categoria border-t border-[#22201C]/8">
-                <div id="category-nav" class="max-w-7xl mx-auto flex items-center justify-start sm:justify-center gap-2.5 sm:gap-3 overflow-x-auto no-scrollbar py-2.5 px-4 sm:px-6 scroll-smooth">
+            <!-- Navegação por Departamentos (texto com pontinhos) -->
+            <nav class="nav-categoria border-t border-white/10">
+                <div id="category-nav" class="max-w-7xl mx-auto flex items-center justify-start sm:justify-center gap-2 sm:gap-2.5 overflow-x-auto no-scrollbar py-2.5 px-4 sm:px-6 scroll-smooth text-[12px] sm:text-sm">
                     <!-- Injetado via JS -->
                 </div>
             </nav>
@@ -2582,14 +2583,14 @@ flavors: ['Sonho de Valsa', 'Ouro branco', 'Ninho trufado', 'Pessêgo', 'Amendoi
 
         function renderCategories() {
             const nav = document.getElementById('category-nav');
-            const btnClass = 'category-btn whitespace-nowrap px-4 py-1.5 sm:px-5 sm:py-2 text-[12px] sm:text-sm';
-            let html = `<button onclick="selectGroup('Todos')" data-group="Todos" class="${btnClass} active">Todos</button>`;
-            MACRO_GROUPS.forEach(group => {
-                const label = group.short || group.name;
-                const nameAttr = group.name.replace(/'/g, "\\'");
-                html += `<button onclick="selectGroup('${nameAttr}')" data-group="${group.name}" class="${btnClass}">${label}</button>`;
-            });
-            nav.innerHTML = html;
+            const btnClass = 'category-btn whitespace-nowrap';
+            const btn = (group, label, active) => {
+                const nameAttr = group.replace(/'/g, "\\'");
+                return `<button onclick="selectGroup('${nameAttr}')" data-group="${group}" class="${btnClass} ${active ? 'active' : ''}">${label}</button>`;
+            };
+            const parts = [ btn('Todos', 'Todos', true) ];
+            MACRO_GROUPS.forEach(group => parts.push(btn(group.name, group.short || group.name, false)));
+            nav.innerHTML = parts.join('<span class="cat-sep">·</span>');
         }
 
         function renderMenu() {
