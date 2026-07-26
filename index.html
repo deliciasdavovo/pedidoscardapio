@@ -442,23 +442,25 @@
     </div>
 
     <!-- Header Fixo (verde-pinho, enxuto) -->
-    <div id="main-header" class="sticky top-0 z-50 flex flex-col w-full" style="box-shadow:0 3px 12px rgba(20,34,22,0.14);">
+    <div id="main-header" class="sticky top-0 z-50 flex flex-col w-full">
         <header class="bg-[#2C4A34] text-[#F4F1EA]">
-            <div class="max-w-7xl mx-auto px-3 sm:px-6 py-4 sm:py-5 flex items-center justify-end gap-0.5">
-                <!-- Menu, busca e cesta agrupados -->
+            <div class="max-w-7xl mx-auto px-3 sm:px-6 py-3 sm:py-3.5 flex items-center justify-between gap-2">
+                <!-- Menu à esquerda -->
                 <button onclick="toggleSideMenu()" class="p-1.5 hover:bg-white/10 rounded-full transition-all active:scale-90 text-[#F4F1EA]" title="Categorias" aria-label="Abrir menu de categorias">
                     <i class="fas fa-bars text-[12px]"></i>
                 </button>
-                <button id="search-toggle-btn" onclick="toggleSearch()" class="p-1.5 hover:bg-white/10 rounded-full transition-all active:scale-90 text-[#F4F1EA]" title="Buscar" aria-label="Buscar">
-                    <i id="search-toggle-icon" class="fas fa-search text-[12px]"></i>
-                </button>
-                <button onclick="openCart()" class="relative flex items-center gap-2 hover:bg-white/10 p-1.5 rounded-full transition-all active:scale-90 text-[#F4F1EA]" aria-label="Abrir cesta">
-                    <i class="fas fa-shopping-basket text-[12px]"></i>
-                    <span id="cart-badge" class="hidden absolute -top-0.5 -right-0.5 bg-[#BE6B2E] text-white text-[9px] font-bold w-[18px] h-[18px] rounded-full flex items-center justify-center border-2 border-[#2C4A34] shadow-lg">0</span>
-                    <span class="hidden sm:block text-[12px] font-semibold tracking-wide" id="header-total">R$ 0,00</span>
-                </button>
+                <!-- Busca e cesta à direita -->
+                <div class="flex items-center gap-0.5">
+                    <button id="search-toggle-btn" onclick="toggleSearch()" class="p-1.5 hover:bg-white/10 rounded-full transition-all active:scale-90 text-[#F4F1EA]" title="Buscar" aria-label="Buscar">
+                        <i id="search-toggle-icon" class="fas fa-search text-[12px]"></i>
+                    </button>
+                    <button onclick="openCart()" class="relative flex items-center gap-2 hover:bg-white/10 p-1.5 rounded-full transition-all active:scale-90 text-[#F4F1EA]" aria-label="Abrir cesta">
+                        <i class="fas fa-shopping-basket text-[12px]"></i>
+                        <span id="cart-badge" class="hidden absolute -top-0.5 -right-0.5 bg-[#BE6B2E] text-white text-[9px] font-bold w-[18px] h-[18px] rounded-full flex items-center justify-center border-2 border-[#2C4A34] shadow-lg">0</span>
+                        <span class="hidden sm:block text-[12px] font-semibold tracking-wide" id="header-total">R$ 0,00</span>
+                    </button>
+                </div>
             </div>
-
         </header>
     </div>
 
@@ -515,7 +517,7 @@
     </div>
 
     <!-- Faixa de boas-vindas (verde-pinho) -->
-    <div class="bg-[#2C4A34] text-[#F4F1EA] px-6 pt-1 pb-14 sm:pb-20">
+    <div class="bg-[#2C4A34] text-[#F4F1EA] px-6 pt-1 pb-14 sm:pb-20 -mt-px">
         <div class="max-w-7xl mx-auto">
             <p class="text-[10px] uppercase font-semibold tracking-[0.34em] text-[#C9A576] mb-2">Delícias da Vovó</p>
             <h2 class="serif-font text-xl sm:text-3xl leading-snug">Dê uma olhada<br class="sm:hidden"> no nosso cardápio</h2>
