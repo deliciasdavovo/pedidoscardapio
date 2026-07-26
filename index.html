@@ -380,6 +380,8 @@
     pointer-events: none;
 }
 .discovery-card {
+    position: relative;
+    overflow: hidden;
     background: white;
     border-radius: 1.5rem;
     border: 1px solid rgba(158, 118, 78, 0.12);
@@ -394,10 +396,28 @@
     text-align: center;
     min-height: 90px;
 }
+/* Detalhe verde: barrinha superior verde-pinho */
+.discovery-card::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 2.25rem;
+    height: 4px;
+    border-radius: 0 0 999px 999px;
+    background: #2C4A34;
+    opacity: 0.55;
+    transition: all 0.2s ease;
+}
 .discovery-card:hover {
     transform: translateY(-3px);
-    box-shadow: 0 8px 24px rgba(90, 62, 43, 0.12);
-    border-color: rgba(158, 118, 78, 0.3);
+    box-shadow: 0 10px 26px rgba(44, 74, 52, 0.16);
+    border-color: rgba(44, 74, 52, 0.35);
+}
+.discovery-card:hover::before {
+    width: 3.5rem;
+    opacity: 1;
 }
 .discovery-card:active {
     transform: scale(0.97);
@@ -531,8 +551,9 @@
         <div class="min-h-screen flex flex-col items-center justify-center px-6 py-14">
             <div class="w-full max-w-md">
                 <div class="text-center mb-10">
-                    <p class="text-[10px] uppercase font-bold tracking-[0.3em] text-[#8C8676] mb-3">Delícias da Vovó</p>
+                    <p class="text-[10px] uppercase font-bold tracking-[0.3em] text-[#2C4A34] mb-3">Delícias da Vovó</p>
                     <h2 class="text-2xl sm:text-3xl serif-font italic text-[#22201C] leading-snug mb-3">O que você está buscando hoje?</h2>
+                    <span class="inline-block w-10 h-1 rounded-full bg-[#2C4A34]/60 mb-4"></span>
                     <p class="text-sm text-[#8C8676]/70">Escolha uma categoria para começar</p>
                 </div>
                 <div id="discovery-cards" class="grid grid-cols-2 gap-4 mb-5">
