@@ -107,22 +107,6 @@
             background: #B98A4E; /* Caramelo escuro */
             box-shadow: 0 8px 20px rgba(139, 94, 60, 0.3);
         }
-        /* Setinha discreta na lateral para abrir a tela de descoberta */
-        .discovery-arrow {
-            width: 24px;
-            height: 44px;
-            background: #2C4A34;
-            color: #F5EDE0;
-            border-radius: 0 10px 10px 0;
-            box-shadow: 2px 0 10px rgba(36, 27, 21, 0.16);
-            opacity: 0.8;
-            transition: opacity 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
-        }
-        .discovery-arrow:hover {
-            opacity: 1;
-            background: #4A3121;
-            box-shadow: 3px 0 14px rgba(36, 27, 21, 0.26);
-        }
 
         .product-card {
             background: white;
@@ -400,17 +384,15 @@
         </div>
     </div>
 
-    <!-- Marcador de Página Lateral -->
-    <button onclick="showDiscovery()" class="discovery-arrow fixed left-0 top-1/2 -translate-y-1/2 z-40 flex items-center justify-center active:scale-90" title="Ver cardápio" aria-label="Abrir cardápio">
-        <i class="fas fa-chevron-right text-[11px]"></i>
-    </button>
-
     <!-- Header Fixo (claro / marfim) -->
     <div id="main-header" class="sticky top-0 z-50 flex flex-col w-full" style="box-shadow:0 6px 24px rgba(34,32,28,0.06);">
         <header class="bg-[#F4F1EA] text-[#22201C]">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 py-3.5 grid grid-cols-[1fr_auto_1fr] items-center gap-2">
-                <!-- Esquerda: busca -->
-                <div class="flex items-center justify-start">
+                <!-- Esquerda: descobrir + busca -->
+                <div class="flex items-center justify-start gap-0.5">
+                    <button onclick="showDiscovery()" class="p-2.5 hover:bg-black/5 rounded-full transition-all active:scale-90 text-[#22201C]" title="Descobrir categorias" aria-label="Descobrir categorias">
+                        <i class="fas fa-table-cells-large text-base"></i>
+                    </button>
                     <button id="search-toggle-btn" onclick="toggleSearch()" class="p-2.5 hover:bg-black/5 rounded-full transition-all active:scale-90 text-[#22201C]" title="Buscar" aria-label="Buscar">
                         <i id="search-toggle-icon" class="fas fa-search text-base"></i>
                     </button>
