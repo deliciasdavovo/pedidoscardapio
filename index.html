@@ -180,12 +180,32 @@
         .btn-primary {
             background: var(--cta);
             color: white;
-            box-shadow: 0 10px 25px rgba(190, 107, 46, 0.28);
-            transition: all 0.3s ease;
+            /* Sombreado estilo Apple system: várias camadas suaves,
+               da sombra de contato à sombra ambiente ampla */
+            box-shadow:
+                0 1px 1px rgba(122, 66, 25, 0.16),
+                0 2px 4px rgba(122, 66, 25, 0.14),
+                0 6px 12px rgba(190, 107, 46, 0.18),
+                0 14px 28px rgba(190, 107, 46, 0.16);
+            transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1),
+                        box-shadow 0.4s cubic-bezier(0.22, 1, 0.36, 1),
+                        background 0.3s ease;
         }
         .btn-primary:hover {
             background: var(--cta-dark);
             transform: translateY(-1px);
+            box-shadow:
+                0 1px 1px rgba(122, 66, 25, 0.18),
+                0 3px 6px rgba(122, 66, 25, 0.16),
+                0 10px 20px rgba(190, 107, 46, 0.22),
+                0 20px 40px rgba(190, 107, 46, 0.18);
+        }
+        .btn-primary:active {
+            transform: translateY(0) scale(0.98);
+            box-shadow:
+                0 1px 1px rgba(122, 66, 25, 0.16),
+                0 2px 4px rgba(122, 66, 25, 0.12),
+                0 4px 8px rgba(190, 107, 46, 0.14);
         }
 
         /* Botão "Adicionar à Cesta" surge no hover do card (desktop),
