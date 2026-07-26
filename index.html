@@ -24,6 +24,11 @@
             --accent: #E4DDCF;
             --cta: #BE6B2E;          /* caramelo (preços e botão Adicionar) */
             --cta-dark: #9E551F;
+
+            /* Elevação estilo Apple System: 2 níveis suaves e quase neutros.
+               Preferimos hairlines + material (blur) a drop-shadows pesados. */
+            --shadow-1: 0 1px 2px rgba(20, 34, 22, 0.06), 0 4px 12px rgba(20, 34, 22, 0.05);
+            --shadow-2: 0 2px 6px rgba(20, 34, 22, 0.06), 0 8px 24px rgba(20, 34, 22, 0.10);
         }
 
         body {
@@ -32,9 +37,14 @@
             color: var(--ink);
             scroll-behavior: smooth;
             -webkit-tap-highlight-color: transparent;
+            /* Dígitos de largura fixa — a Apple sempre alinha numerais (preços/totais) */
+            font-variant-numeric: tabular-nums;
+            -webkit-font-smoothing: antialiased;
+            text-rendering: optimizeLegibility;
         }
 
-        .serif-font { font-family: 'Lora', serif; font-weight: 400 !important; }
+        /* Títulos serifados grandes com tracking negativo (estilo SF display) */
+        .serif-font { font-family: 'Lora', serif; font-weight: 400 !important; letter-spacing: -0.02em; }
         .caslon-font { font-family: 'Libre Caslon Text', serif; }
 
         /* Todos os itálicos usam Libre Caslon Text */
@@ -116,12 +126,12 @@
             width: 100%;
             text-align: left;
             padding: 10px 14px;
-            border-radius: 14px;
+            border-radius: 12px;
             color: #22201C;
             font-weight: 600;
-            font-size: 13.5px;
+            font-size: 15px;
             font-family: 'Libre Caslon Text', serif;
-            letter-spacing: 0.01em;
+            letter-spacing: -0.01em;
             background: transparent;
             border: none;
             cursor: pointer;
@@ -147,7 +157,7 @@
             text-align: left;
             padding: 7px 12px;
             border-radius: 10px;
-            font-size: 12.5px;
+            font-size: 14px;
             color: rgba(40, 30, 14, 0.62);
             background: transparent;
             border: none;
@@ -162,7 +172,7 @@
         /* Botão de Cesta no Header */
         .header-cart-btn {
             background: #B98A4E; /* Caramelo escuro */
-            box-shadow: 0 8px 20px rgba(139, 94, 60, 0.3);
+            box-shadow: var(--shadow-1);
         }
 
         .product-card {
@@ -172,40 +182,34 @@
             transition: all 0.5s cubic-bezier(0.2, 0.8, 0.2, 1);
         }
         .product-card:hover {
-            transform: translateY(-8px);
-            box-shadow: 0 30px 60px rgba(36, 27, 21, 0.08);
-            border-color: rgba(158, 118, 78, 0.2);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-2);
+            border-color: rgba(158, 118, 78, 0.16);
         }
 
         .btn-primary {
             background: var(--cta);
             color: white;
-            /* Sombreado estilo Apple system: várias camadas suaves,
-               da sombra de contato à sombra ambiente ampla */
+            /* Sombreado estilo Apple System: contato + ambiente, discreto e neutro */
             box-shadow:
-                0 1px 1px rgba(122, 66, 25, 0.16),
-                0 2px 4px rgba(122, 66, 25, 0.14),
-                0 6px 12px rgba(190, 107, 46, 0.18),
-                0 14px 28px rgba(190, 107, 46, 0.16);
-            transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1),
-                        box-shadow 0.4s cubic-bezier(0.22, 1, 0.36, 1),
+                0 1px 2px rgba(122, 66, 25, 0.18),
+                0 6px 16px rgba(190, 107, 46, 0.16);
+            transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1),
+                        box-shadow 0.35s cubic-bezier(0.22, 1, 0.36, 1),
                         background 0.3s ease;
         }
         .btn-primary:hover {
             background: var(--cta-dark);
             transform: translateY(-1px);
             box-shadow:
-                0 1px 1px rgba(122, 66, 25, 0.18),
-                0 3px 6px rgba(122, 66, 25, 0.16),
-                0 10px 20px rgba(190, 107, 46, 0.22),
-                0 20px 40px rgba(190, 107, 46, 0.18);
+                0 2px 4px rgba(122, 66, 25, 0.18),
+                0 10px 24px rgba(190, 107, 46, 0.20);
         }
         .btn-primary:active {
             transform: translateY(0) scale(0.98);
             box-shadow:
-                0 1px 1px rgba(122, 66, 25, 0.16),
-                0 2px 4px rgba(122, 66, 25, 0.12),
-                0 4px 8px rgba(190, 107, 46, 0.14);
+                0 1px 2px rgba(122, 66, 25, 0.16),
+                0 3px 8px rgba(190, 107, 46, 0.14);
         }
 
         /* Botão "Adicionar à Cesta" surge no hover do card (desktop),
@@ -234,14 +238,15 @@
             .add-reveal { transition: opacity 0.25s ease; transform: none; }
         }
 
+        /* Segmented control estilo iOS: trilho cinza claro, thumb branco deslizante */
         .toggle-container {
             position: relative;
-            background: #ECE9E1;
-            border-radius: 1.25rem;
-            padding: 5px;
+            background: rgba(120, 110, 90, 0.10);
+            border-radius: 12px;
+            padding: 3px;
             display: flex;
-            gap: 5px;
-            border: 1px solid rgba(158, 118, 78, 0.1);
+            gap: 3px;
+            border: none;
         }
         .toggle-btn {
             position: relative;
@@ -249,18 +254,20 @@
             flex: 1;
             text-align: center;
             padding: 8px 0;
-            border-radius: 1rem;
-            font-size: 10px;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.1em;
-            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-            color: var(--primary);
+            border-radius: 9px;
+            font-size: 13px;
+            font-weight: 500;
+            text-transform: none;
+            letter-spacing: -0.01em;
+            white-space: nowrap;
+            transition: color 0.25s ease, background 0.25s ease, box-shadow 0.25s ease;
+            color: var(--ink);
         }
         .toggle-btn.active {
-            color: white;
-            background: var(--secondary);
-            box-shadow: 0 6px 15px rgba(36, 27, 21, 0.25);
+            color: var(--ink);
+            font-weight: 600;
+            background: #FFFFFF;
+            box-shadow: var(--shadow-1);
         }
         
         #cart-items-list {
@@ -467,19 +474,19 @@
             <div class="max-w-7xl mx-auto px-3 sm:px-6 py-3 sm:py-3.5 flex items-center justify-between gap-2 relative">
                 <!-- Menu à esquerda -->
                 <button onclick="toggleSideMenu()" class="p-1.5 hover:bg-white/10 rounded-full transition-all active:scale-90 text-[#F4F1EA]" title="Categorias" aria-label="Abrir menu de categorias">
-                    <i class="fas fa-bars text-[12px]"></i>
+                    <i class="fas fa-bars text-[15px]"></i>
                 </button>
                 <!-- Marca centralizada -->
                 <p class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-[10px] uppercase font-semibold tracking-[0.3em] text-[#C9A576] pointer-events-none whitespace-nowrap">Delícias da Vovó</p>
                 <!-- Busca e cesta à direita -->
                 <div class="flex items-center gap-0.5">
                     <button id="search-toggle-btn" onclick="toggleSearch()" class="p-1.5 hover:bg-white/10 rounded-full transition-all active:scale-90 text-[#F4F1EA]" title="Buscar" aria-label="Buscar">
-                        <i id="search-toggle-icon" class="fas fa-search text-[12px]"></i>
+                        <i id="search-toggle-icon" class="fas fa-search text-[15px]"></i>
                     </button>
                     <button onclick="openCart()" class="relative flex items-center gap-2 hover:bg-white/10 p-1.5 rounded-full transition-all active:scale-90 text-[#F4F1EA]" aria-label="Abrir cesta">
-                        <i class="fas fa-shopping-basket text-[12px]"></i>
+                        <i class="fas fa-shopping-basket text-[15px]"></i>
                         <span id="cart-badge" class="hidden absolute -top-0.5 -right-0.5 bg-[#BE6B2E] text-white text-[9px] font-bold w-[18px] h-[18px] rounded-full flex items-center justify-center border-2 border-[#2C4A34] shadow-lg">0</span>
-                        <span class="hidden sm:block text-[12px] font-semibold tracking-wide" id="header-total">R$ 0,00</span>
+                        <span class="hidden sm:block text-[13px] font-semibold" id="header-total">R$ 0,00</span>
                     </button>
                 </div>
             </div>
@@ -555,15 +562,15 @@
 
     <!-- Barra de Carrinho Inferior (Mobile) -->
     <div id="sticky-cart-bar" class="fixed bottom-8 left-0 right-0 z-40 px-6 flex justify-center translate-y-40 transition-transform duration-700 pointer-events-none">
-        <button onclick="openCart()" class="pointer-events-auto w-full max-w-md bg-[#22201C] text-white px-10 py-6 rounded-[3rem] shadow-[0_30px_70px_rgba(0,0,0,0.4)] flex items-center justify-between border border-white/5 active:scale-95 transition-all group">
+        <button onclick="openCart()" class="pointer-events-auto w-full max-w-md bg-[#22201C] text-white px-8 py-5 rounded-[1.75rem] shadow-[0_10px_30px_rgba(20,34,22,0.28),0_2px_8px_rgba(20,34,22,0.20)] flex items-center justify-between border border-white/5 active:scale-95 transition-all group">
             <div class="flex items-center gap-5">
                 <div class="relative group-hover:scale-110 transition-transform">
                     <i class="fas fa-shopping-basket text-3xl text-[#8C8676]"></i>
                     <span id="sticky-cart-count" class="absolute -top-2 -right-2 bg-white text-[#22201C] text-[10px] font-black w-6 h-6 rounded-full flex items-center justify-center shadow-lg">0</span>
                 </div>
                 <div class="text-left">
-                    <p class="text-[11px] uppercase tracking-[0.25em] text-[#8C8676] font-bold">Ver Carrinho</p>
-                    <p class="text-[10px] italic text-white/40">Total estimado</p>
+                    <p class="text-[15px] font-semibold text-white tracking-[-0.01em]">Ver carrinho</p>
+                    <p class="text-[12px] text-white/45">Total estimado</p>
                 </div>
             </div>
             <span class="text-3xl font-semibold tracking-tight" id="sticky-total">R$ 0,00</span>
@@ -576,7 +583,7 @@
         <div class="kit-flavor-panel absolute inset-x-4 top-1/2 -translate-y-1/2 mx-auto w-auto max-w-3xl max-h-[88vh] bg-[#F4F1EA] rounded-[2rem] shadow-2xl border border-white/60 overflow-hidden scale-95 opacity-0 transition-all duration-300 flex flex-col">
             <div class="bg-white px-6 py-5 sm:px-8 border-b border-[#8C8676]/10 flex items-start justify-between gap-4">
                 <div>
-                    <p class="text-[9px] uppercase font-black tracking-[0.25em] text-[#8C8676] mb-1">Coffee Break</p>
+                    <p class="text-[11px] uppercase font-semibold tracking-[0.1em] text-[#8C8676] mb-1">Coffee Break</p>
                     <h2 id="kit-flavor-title" class="serif-font text-2xl text-[#22201C]">Escolha os sabores</h2>
                     <p id="kit-flavor-subtitle" class="text-xs text-[#22201C]/55 mt-1 leading-relaxed">Revise os itens calculados e ajuste os sabores antes de enviar para o carrinho.</p>
                 </div>
@@ -589,11 +596,11 @@
             </div>
             <div class="bg-white px-6 py-5 sm:px-8 border-t border-[#8C8676]/10 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
-                    <p class="text-[9px] uppercase font-black tracking-[0.22em] text-[#8C8676]">Total estimado</p>
+                    <p class="text-[13px] font-semibold text-[#8C8676]">Total estimado</p>
                     <p id="kit-flavor-total" class="text-3xl font-bold text-[#22201C]">R$ 0,00</p>
                 </div>
-                <button onclick="confirmKitFlavorSelection()" class="btn-primary px-7 py-4 rounded-[1.5rem] text-[10px] uppercase tracking-[0.2em] font-black active:scale-95 flex items-center justify-center gap-3">
-                    <i class="fas fa-shopping-basket"></i> Adicionar ao Carrinho
+                <button onclick="confirmKitFlavorSelection()" class="btn-primary px-7 py-4 rounded-2xl text-[15px] tracking-[-0.01em] font-semibold active:scale-95 flex items-center justify-center gap-3">
+                    <i class="fas fa-shopping-basket"></i> Adicionar ao carrinho
                 </button>
             </div>
         </div>
@@ -604,8 +611,8 @@
         <div class="absolute inset-0 bg-[#22201C]/70 backdrop-blur-md opacity-0 transition-opacity duration-500" onclick="closeCart()"></div>
         <div class="absolute inset-y-0 right-0 w-full max-w-lg bg-[#F4F1EA] shadow-2xl translate-x-full transition-transform duration-600 flex flex-col h-full">
             <div class="p-6 sm:p-8 border-b border-[#8C8676]/10 bg-white flex justify-between items-center shrink-0">
-                <h2 class="text-lg sm:text-xl font-medium uppercase tracking-[0.2em] flex items-center gap-4 serif-font">
-                    <i class="fas fa-shopping-basket text-[#8C8676]"></i> Minha Seleção
+                <h2 class="text-xl sm:text-2xl font-medium flex items-center gap-4 serif-font">
+                    <i class="fas fa-shopping-basket text-[#8C8676] text-lg"></i> Minha seleção
                 </h2>
                 <button onclick="closeCart()" class="text-[#8C8676] w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center rounded-full hover:bg-[#ECE9E1] transition-all">
                     <i class="fas fa-times text-xl sm:text-2xl"></i>
@@ -621,12 +628,12 @@
                 <!-- Formulário de Checkout -->
                 <div class="space-y-4 sm:space-y-6">
                     <div class="space-y-2">
-                        <label class="text-[10px] uppercase font-bold text-[#8C8676] ml-2 tracking-[0.2em]">Identificação </label>
+                        <label class="text-[13px] font-semibold text-[#8C8676] ml-2">Identificação </label>
                         <input type="text" id="order-name" placeholder="Como podemos te chamar?" class="w-full bg-[#ECE9E1]/50 border border-[#8C8676]/10 rounded-2xl px-5 py-3 text-sm focus:outline-none focus:ring-4 focus:ring-[#8C8676]/5 transition-all">
                     </div>
                     
                     <div class="space-y-2">
-                        <label class="text-[10px] uppercase font-bold text-[#8C8676] ml-2 tracking-[0.2em]">Disponibilidade</label>
+                        <label class="text-[13px] font-semibold text-[#8C8676] ml-2">Disponibilidade</label>
                         <div class="toggle-container">
                             <button onclick="setOrderType('Pronta entrega')" id="btn-order-ready" class="toggle-btn active">Pronta entrega</button>
                             <button onclick="setOrderType('Encomenda')" id="btn-order-sched" class="toggle-btn">Encomenda</button>
@@ -635,17 +642,17 @@
 
                     <div id="sched-fields" class="hidden grid grid-cols-2 gap-3 animate-fade">
                         <div class="space-y-1">
-                            <label class="text-[9px] uppercase font-bold text-[#8C8676] ml-2">Data</label>
+                            <label class="text-[12px] font-semibold text-[#8C8676] ml-2">Data</label>
                             <input type="date" id="order-date" class="w-full bg-[#ECE9E1]/50 rounded-xl px-4 py-2 text-xs border border-[#8C8676]/10 outline-none">
                         </div>
                         <div class="space-y-1">
-                            <label class="text-[9px] uppercase font-bold text-[#8C8676] ml-2">Horário</label>
+                            <label class="text-[12px] font-semibold text-[#8C8676] ml-2">Horário</label>
                             <input type="time" id="order-time" class="w-full bg-[#ECE9E1]/50 rounded-xl px-4 py-2 text-xs border border-[#8C8676]/10 outline-none">
                         </div>
                     </div>
 
                     <div class="space-y-2">
-                        <label class="text-[10px] uppercase font-bold text-[#8C8676] ml-2 tracking-[0.2em]">Como receber?</label>
+                        <label class="text-[13px] font-semibold text-[#8C8676] ml-2">Como receber?</label>
                         <div class="toggle-container">
                             <button onclick="setFulfillment('Retirada')" id="btn-pickup" class="toggle-btn active">Retirada</button>
                             <button onclick="setFulfillment('Entrega')" id="btn-delivery" class="toggle-btn">Entrega</button>
@@ -654,14 +661,14 @@
 
                     <div id="fulfillment-details" class="animate-fade">
                         <div id="pickup-location-container" class="space-y-2">
-                            <label class="text-[9px] uppercase font-bold text-[#8C8676] ml-2 block">Unidade Escolhida</label>
+                            <label class="text-[12px] font-semibold text-[#8C8676] ml-2 block">Unidade Escolhida</label>
                             <select id="pickup-location" class="w-full bg-[#ECE9E1]/50 border border-[#8C8676]/10 rounded-2xl px-5 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#8C8676]/20 appearance-none text-[#22201C]">
                                 <option value="Matriz">Unidade Matriz - Centro</option>
                                 <option value="Vila Nova">Unidade Vila Nova - Unicenter</option>
                             </select>
                         </div>
                         <div id="delivery-address-container" class="hidden space-y-2">
-                            <label class="text-[9px] uppercase font-bold text-[#8C8676] ml-2 block">Endereço para Entrega</label>
+                            <label class="text-[12px] font-semibold text-[#8C8676] ml-2 block">Endereço para Entrega</label>
                             <input type="text" id="delivery-address" placeholder="Rua, número, bairro e apto/casa" class="w-full bg-[#ECE9E1]/50 border border-[#8C8676]/10 rounded-2xl px-5 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#8C8676]/20 transition-all">
                         </div>
                     </div>
@@ -674,15 +681,15 @@
                     </div>
                     <div class="flex justify-between items-center px-2">
                         <div class="text-left">
-                            <span class="text-[#8C8676] text-[10px] font-bold uppercase tracking-[0.2em] block mb-0.5">Total Estimado</span>
-                            <span class="text-[9px] text-gray-400 italic">Pesagem final na entrega</span>
+                            <span class="text-[#8C8676] text-[13px] font-semibold block mb-0.5">Total estimado</span>
+                            <span class="text-[11px] text-gray-400 italic">Pesagem final na entrega</span>
                         </div>
-                        <span class="text-3xl sm:text-4xl font-bold text-[#22201C] tracking-tighter" id="cart-final-total">R$ 0,00</span>
+                        <span class="text-3xl sm:text-4xl font-bold text-[#22201C] tracking-tight" id="cart-final-total">R$ 0,00</span>
                     </div>
                 </div>
 
-                <button onclick="sendWhatsAppOrder()" class="w-full bg-[#1F8F7A] hover:bg-[#176E60] text-white py-4 sm:py-6 rounded-[2rem] font-bold uppercase tracking-[0.25em] text-[10px] sm:text-[11px] transition-all shadow-2xl flex items-center justify-center gap-4 active:scale-95 group">
-                    <i class="fab fa-whatsapp text-xl sm:text-2xl group-hover:rotate-12 transition-transform"></i> Finalizar WhatsApp
+                <button onclick="sendWhatsAppOrder()" class="w-full bg-[#1F8F7A] hover:bg-[#176E60] text-white py-4 sm:py-[18px] rounded-2xl font-semibold tracking-[-0.01em] text-[16px] transition-all shadow-[0_8px_24px_rgba(31,143,122,0.28),0_2px_6px_rgba(31,143,122,0.20)] flex items-center justify-center gap-3 active:scale-95 group">
+                    <i class="fab fa-whatsapp text-xl sm:text-2xl group-hover:rotate-12 transition-transform"></i> Finalizar no WhatsApp
                 </button>
             </div>
         </div>
@@ -2786,7 +2793,7 @@ flavors: ['Sonho de Valsa', 'Ouro branco', 'Ninho trufado', 'Pessêgo', 'Amendoi
 
                     let html = `
                         <div class="mb-6 sm:mb-10 text-center">
-                            <h2 class="text-[10px] sm:text-xs tracking-[0.35em] uppercase caslon-font text-[#8C8676]/80">${cat}</h2>
+                            <h2 class="text-[11px] sm:text-xs tracking-[0.14em] uppercase caslon-font text-[#8C8676]/80">${cat}</h2>
                         </div>
                         ${mobileList}
                         ${desktopGrid}
@@ -2875,11 +2882,11 @@ flavors: ['Sonho de Valsa', 'Ouro branco', 'Ninho trufado', 'Pessêgo', 'Amendoi
                     <div class="p-8 flex flex-col flex-grow">
                         <div class="mb-5">
                             <h3 class="text-2xl serif-font mb-2 group-hover:text-[#8C8676] transition-colors">${item.name}</h3>
-                            <p id="desc-${item.id}" class="product-desc text-[11px] leading-relaxed text-[#22201C]/60">${item.description}</p>
-                            <button id="desc-toggle-${item.id}" onclick="toggleDescription('${item.id}')" class="hidden mt-1 text-[10px] font-semibold text-[#8C8676] hover:text-[#233A29] transition-colors">
+                            <p id="desc-${item.id}" class="product-desc text-[13px] leading-relaxed text-[#22201C]/60">${item.description}</p>
+                            <button id="desc-toggle-${item.id}" onclick="toggleDescription('${item.id}')" class="hidden mt-1 text-[12px] font-semibold text-[#8C8676] hover:text-[#233A29] transition-colors">
                                 Ver mais
                             </button>
-                            <p class="text-[10px] font-bold text-[#8C8676] mt-2 uppercase tracking-widest" id="unit-price-label-${item.id}">
+                            <p class="text-[13px] font-semibold text-[#8C8676] mt-2" id="unit-price-label-${item.id}">
                                 R$ ${initialPrice.toFixed(2)} ${unitSuffix}
                             </p>
                         </div>
@@ -2888,18 +2895,18 @@ flavors: ['Sonho de Valsa', 'Ouro branco', 'Ninho trufado', 'Pessêgo', 'Amendoi
                             <!-- Toggle Un/Kg -->
                             ${hasKg ? `
                             <div class="flex bg-[#ECE9E1] p-1 rounded-2xl border border-[#8C8676]/5">
-                                <button onclick="setCardUnit('${item.id}', 'un')" id="unit-un-${item.id}" class="unit-btn active flex-1 py-1.5 rounded-xl text-[9px] font-black uppercase bg-[#22201C] text-white">Unidade</button>
-                                <button onclick="setCardUnit('${item.id}', 'kg')" id="unit-kg-${item.id}" class="unit-btn flex-1 py-1.5 rounded-xl text-[9px] font-black uppercase text-[#8C8676]/50">Kilo</button>
+                                <button onclick="setCardUnit('${item.id}', 'un')" id="unit-un-${item.id}" class="unit-btn active flex-1 py-2 rounded-xl text-[12px] font-semibold bg-[#22201C] text-white">Unidade</button>
+                                <button onclick="setCardUnit('${item.id}', 'kg')" id="unit-kg-${item.id}" class="unit-btn flex-1 py-2 rounded-xl text-[12px] font-semibold text-[#8C8676]/50">Kilo</button>
                             </div>
                             ` : ''}
 
                             <!-- Seleção de Tamanho (Aro) -->
                             ${hasSizes ? `
                             <div class="space-y-2">
-                                <label class="text-[9px] font-black uppercase tracking-widest text-[#8C8676]">Tamanho</label>
+                                <label class="text-[12px] font-semibold text-[#8C8676]">Tamanho</label>
 <div class="grid ${item.sizes.length === 2 ? 'grid-cols-2' : 'grid-cols-3'} gap-1 bg-[#ECE9E1] p-1 rounded-xl">
                                     ${item.sizes.map((s, idx) => `
-                                        <button onclick="setCardSize('${item.id}', ${idx})" id="size-${item.id}-${idx}" class="size-btn ${idx === 0 ? 'bg-[#2C4A34] text-white' : 'text-[#8C8676]/60'} py-2 rounded-lg text-[9px] font-bold uppercase transition-all whitespace-nowrap">
+                                        <button onclick="setCardSize('${item.id}', ${idx})" id="size-${item.id}-${idx}" class="size-btn ${idx === 0 ? 'bg-[#2C4A34] text-white' : 'text-[#8C8676]/60'} py-2 rounded-lg text-[12px] font-medium transition-all whitespace-nowrap">
                                             ${s.label}
                                         </button>
                                     `).join('')}
@@ -2910,7 +2917,7 @@ flavors: ['Sonho de Valsa', 'Ouro branco', 'Ninho trufado', 'Pessêgo', 'Amendoi
                             <!-- Seleção de Sabores -->
                             ${hasFlavors ? `
                             <div class="space-y-2">
-                                <label class="text-[9px] font-black uppercase tracking-widest text-[#8C8676]">Sabor/Tipo</label>
+                                <label class="text-[12px] font-semibold text-[#8C8676]">Sabor/Tipo</label>
                                 <select id="flavor-${item.id}" onchange="onFlavorChange('${item.id}')" class="w-full bg-[#ECE9E1] border border-[#8C8676]/10 rounded-xl px-4 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-[#8C8676]/20 appearance-none text-[#22201C]">
 ${getFlavorList(item).map(f => `<option value="${f.label}">${f.label}</option>`).join('')}                                </select>
                             </div>
@@ -2923,13 +2930,13 @@ ${getFlavorList(item).map(f => `<option value="${f.label}">${f.label}</option>`)
                                     <button onclick="changeQtyUI('${item.id}', 1)" class="w-10 h-10 flex items-center justify-center text-[#2C4A34] text-sm hover:bg-[#2C4A34]/5 active:bg-[#2C4A34]/10 transition-colors"><i class="fas fa-plus"></i></button>
                                 </div>
                                 <div class="text-right">
-                                    <p class="text-xl font-bold tracking-tighter" id="price-preview-${item.id}">R$ ${(initialPrice * initialQty).toFixed(2)}</p>
-                                    <p class="text-[8px] uppercase text-[#8C8676] font-black tracking-widest" id="price-label-${item.id}">Total</p>
+                                    <p class="text-xl font-bold tracking-tight" id="price-preview-${item.id}">R$ ${(initialPrice * initialQty).toFixed(2)}</p>
+                                    <p class="text-[11px] text-[#8C8676] font-semibold" id="price-label-${item.id}">Total</p>
                                 </div>
                             </div>
                             
                             <div class="add-reveal">
-                                <button onclick="addToCart('${item.id}')" class="btn-primary w-full py-4 rounded-[1.5rem] text-[10px] uppercase tracking-[0.2em] font-black active:scale-95">
+                                <button onclick="addToCart('${item.id}')" class="btn-primary w-full py-4 rounded-2xl text-[15px] tracking-[-0.01em] font-semibold active:scale-95">
                                     ${item.isKit ? 'Montar Kit' : 'Adicionar à Cesta'}
                                 </button>
                             </div>
@@ -3415,7 +3422,7 @@ if (!item.sizes && selectedFlavor && item.variants && item.variants[selectedFlav
                                     <div class="min-w-0">
                                         <h3 class="serif-font text-base font-semibold text-[#22201C] truncate">${escapeHtml(entry.name)}</h3>
                                         <div class="flex flex-wrap gap-2 mt-1">${sizeBadge}${fixedFlavorBadge}</div>
-                                        <p class="text-[9px] text-[#8C8676]/70 font-black uppercase tracking-widest mt-2">${formatKitQty(entry.qty, entry.unit)} calculado para o kit</p>
+                                        <p class="text-[12px] text-[#8C8676]/70 font-medium mt-2">${formatKitQty(entry.qty, entry.unit)} calculado para o kit</p>
                                     </div>
                                     <p class="text-sm font-bold text-[#22201C] whitespace-nowrap" id="kit-entry-total-${entry.idx}">R$ 0,00</p>
                                 </div>
@@ -3424,7 +3431,7 @@ if (!item.sizes && selectedFlavor && item.variants && item.variants[selectedFlav
                                     <div class="kit-flavor-rows-${entry.idx} mt-4 space-y-2">
                                         ${renderKitFlavorRow(entry.idx, 0, entry.qty, entry.defaultFlavor, baseItem, entry)}
                                     </div>
-                                    <button onclick="addKitFlavorRow(${entry.idx})" class="mt-3 text-[10px] font-black uppercase tracking-[0.18em] text-[#8C8676] hover:text-[#233A29] flex items-center gap-2">
+                                    <button onclick="addKitFlavorRow(${entry.idx})" class="mt-3 text-[13px] font-semibold text-[#8C8676] hover:text-[#233A29] flex items-center gap-2">
                                         <i class="fas fa-plus-circle"></i> Dividir em outro sabor
                                     </button>
                                 ` : `
@@ -3742,7 +3749,7 @@ if (!item.sizes && flavor && item.variants && item.variants[flavor]) {
                             </div>
                             <p class="serif-font text-2xl text-[#22201C]">Sua cesta está vazia</p>
                             <p class="mt-2 text-sm leading-relaxed text-[#22201C]/55">Escolha suas delícias no cardápio para montar o pedido.</p>
-                            <button onclick="closeCart()" class="mt-7 inline-flex items-center justify-center gap-3 bg-[#22201C] text-white px-6 py-4 rounded-2xl text-[10px] uppercase tracking-[0.2em] font-black active:scale-95 transition-all">
+                            <button onclick="closeCart()" class="mt-7 inline-flex items-center justify-center gap-3 bg-[#22201C] text-white px-6 py-3.5 rounded-2xl text-[14px] tracking-[-0.01em] font-semibold active:scale-95 transition-all">
                                 <i class="fas fa-arrow-left text-xs"></i> Ver cardápio
                             </button>
                         </div>
@@ -3760,10 +3767,10 @@ if (!item.sizes && flavor && item.variants && item.variants[flavor]) {
                             <div>
                                 <h4 class="serif-font text-sm font-semibold truncate">${item.name}</h4>
                                 <div class="flex flex-wrap gap-2 mt-1">
-                                    ${item.size ? `<span class="text-[8px] bg-[#8C8676]/10 text-[#8C8676] px-2 py-0.5 rounded-full font-bold uppercase">${item.size}</span>` : ''}
-                                    ${item.flavor ? `<span class="text-[10px] bg-[#22201C]/5 text-[#22201C] px-2.5 py-1 rounded-full font-bold">Sabor: ${item.flavor}</span>` : ''}
+                                    ${item.size ? `<span class="text-[11px] bg-[#8C8676]/10 text-[#8C8676] px-2 py-0.5 rounded-full font-semibold">${item.size}</span>` : ''}
+                                    ${item.flavor ? `<span class="text-[11px] bg-[#22201C]/5 text-[#22201C] px-2.5 py-1 rounded-full font-semibold">Sabor: ${item.flavor}</span>` : ''}
                                 </div>
-                                <p class="text-[9px] text-[#8C8676]/70 font-bold mt-1 uppercase tracking-widest">R$ ${item.finalPrice.toFixed(2)} /${unitLabel}</p>
+                                <p class="text-[12px] text-[#8C8676]/70 font-medium mt-1">R$ ${item.finalPrice.toFixed(2)} /${unitLabel}</p>
                             </div>
                             <button onclick="removeFromCart(${idx})" class="text-red-300 hover:text-red-600 transition-colors p-2">
                                 <i class="fas fa-trash-alt text-sm"></i>
@@ -4191,7 +4198,7 @@ function createProductListItem(item) {
                 <h3 class="serif-font text-[17px] text-[#22201C] leading-snug truncate">${escapeHtml(item.name)}</h3>
                 <p class="text-[12.5px] text-[#2C4A34]/60 leading-snug mt-0.5 truncate">${escapeHtml(item.description)}</p>
                 <div class="flex flex-wrap items-center gap-x-2 gap-y-1 mt-2">
-                    <span class="text-[11px] text-[#BE6B2E]" style="font-family: 'DM Sans', sans-serif; font-weight: 700; letter-spacing: -0.01em;">${priceText}</span>
+                    <span class="text-[13px] text-[#BE6B2E]" style="font-family: 'DM Sans', sans-serif; font-weight: 700; letter-spacing: -0.01em;">${priceText}</span>
                     ${flavorBadge}${kitBadge}
                 </div>
             </div>
@@ -4271,24 +4278,24 @@ function buildProductModalContent(item) {
 
         <div class="p-5 pt-4 space-y-3.5">
             <div>
-                <p class="text-[9px] uppercase font-black tracking-[0.25em] text-[#8C8676] mb-1">${escapeHtml(item.category)}</p>
+                <p class="text-[11px] uppercase font-semibold tracking-[0.1em] text-[#8C8676] mb-1">${escapeHtml(item.category)}</p>
                 <h2 class="text-xl serif-font text-[#22201C] leading-snug mb-1.5">${escapeHtml(item.name)}</h2>
                 <p class="text-[13px] text-[#22201C]/60 leading-relaxed">${escapeHtml(item.description)}</p>
             </div>
 
             ${hasKg ? `
             <div class="flex bg-[#ECE9E1] p-1 rounded-2xl border border-[#8C8676]/5">
-                <button onclick="setModalUnit('un')" id="modal-unit-un" class="flex-1 py-2.5 rounded-xl text-[9px] font-black uppercase bg-[#2C4A34] text-white transition-all">Unidade</button>
-                <button onclick="setModalUnit('kg')" id="modal-unit-kg" class="flex-1 py-2.5 rounded-xl text-[9px] font-black uppercase text-[#8C8676]/50 transition-all">Kilo</button>
+                <button onclick="setModalUnit('un')" id="modal-unit-un" class="flex-1 py-2.5 rounded-xl text-[13px] font-semibold bg-[#2C4A34] text-white transition-all">Unidade</button>
+                <button onclick="setModalUnit('kg')" id="modal-unit-kg" class="flex-1 py-2.5 rounded-xl text-[13px] font-semibold text-[#8C8676]/50 transition-all">Kilo</button>
             </div>
             ` : ''}
 
             ${hasSizes ? `
             <div class="space-y-2">
-                <label class="text-[9px] font-black uppercase tracking-widest text-[#8C8676]">Tamanho</label>
+                <label class="text-[12px] font-semibold text-[#8C8676]">Tamanho</label>
                 <div class="grid ${item.sizes.length === 2 ? 'grid-cols-2' : 'grid-cols-3'} gap-1 bg-[#ECE9E1] p-1 rounded-xl">
                     ${item.sizes.map((s, idx) => `
-                        <button onclick="setModalSize(${idx})" id="modal-size-${idx}" class="${idx === 0 ? 'bg-[#8C8676] text-white' : 'text-[#8C8676]/60'} py-2.5 rounded-lg text-[10px] font-bold uppercase transition-all">
+                        <button onclick="setModalSize(${idx})" id="modal-size-${idx}" class="${idx === 0 ? 'bg-[#8C8676] text-white' : 'text-[#8C8676]/60'} py-2.5 rounded-lg text-[12px] font-medium transition-all">
                             ${escapeHtml(s.label)}
                             ${s.description ? `<span class="block text-[8px] font-normal opacity-70 normal-case tracking-normal mt-0.5 leading-tight">${escapeHtml(s.description)}</span>` : ''}
                         </button>
@@ -4299,7 +4306,7 @@ function buildProductModalContent(item) {
 
             ${hasFlavors ? `
             <div class="space-y-2">
-                <label class="text-[9px] font-black uppercase tracking-widest text-[#8C8676]">Sabor / Tipo</label>
+                <label class="text-[12px] font-semibold text-[#8C8676]">Sabor / Tipo</label>
                 <select id="modal-flavor" onchange="onModalFlavorChange()" class="w-full bg-[#ECE9E1] border border-[#8C8676]/10 rounded-xl px-4 py-3.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#8C8676]/20 appearance-none text-[#22201C]">
                     ${getFlavorList(item).map(f => `<option value="${escapeHtml(f.label)}">${escapeHtml(f.label)}</option>`).join('')}
                 </select>
@@ -4314,11 +4321,11 @@ function buildProductModalContent(item) {
                 </div>
                 <div class="text-right">
                     <p class="text-[27px] leading-none font-extrabold tracking-tight text-[#2C4A34]" id="modal-price-preview">R$ 0,00</p>
-                    <p class="text-[8px] uppercase text-[#8C8676] font-black tracking-widest mt-1.5" id="modal-unit-price-label"></p>
+                    <p class="text-[11px] text-[#8C8676] font-semibold mt-1.5" id="modal-unit-price-label"></p>
                 </div>
             </div>
 
-            <button onclick="addToCartFromModal()" class="btn-primary w-full py-4 rounded-[1.5rem] text-[10px] uppercase tracking-[0.2em] font-black active:scale-95 flex items-center justify-center gap-3">
+            <button onclick="addToCartFromModal()" class="btn-primary w-full py-4 rounded-2xl text-[15px] tracking-[-0.01em] font-semibold active:scale-95 flex items-center justify-center gap-3">
                 <i class="fas fa-shopping-basket"></i>
                 ${item.isKit ? 'Montar Kit' : 'Adicionar à Cesta'}
             </button>
