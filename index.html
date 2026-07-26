@@ -128,7 +128,7 @@
             padding: 10px 14px;
             border-radius: 12px;
             color: #22201C;
-            font-weight: 600;
+            font-weight: 400;
             font-size: 15px;
             font-family: 'Libre Caslon Text', serif;
             letter-spacing: -0.01em;
@@ -144,6 +144,15 @@
             background: #2C4A34;
             color: #F4F1EA;
         }
+        .side-chevron {
+            margin-left: auto;
+            font-size: 10px;
+            opacity: 0.5;
+            transition: transform 0.25s ease;
+        }
+        .side-section.open .side-chevron {
+            transform: rotate(180deg);
+        }
         .side-section {
             margin-top: 2px;
         }
@@ -151,6 +160,15 @@
             display: flex;
             flex-direction: column;
             gap: 1px;
+            padding: 0 0 0 20px;
+            max-height: 0;
+            overflow: hidden;
+            opacity: 0;
+            transition: max-height 0.3s ease, opacity 0.25s ease, padding 0.3s ease;
+        }
+        .side-section.open .side-sub {
+            max-height: 640px;
+            opacity: 1;
             padding: 3px 0 8px 20px;
         }
         .side-cat {
@@ -517,11 +535,7 @@
     <div id="side-menu" class="fixed inset-0 z-[70] invisible">
         <div id="side-menu-overlay" class="absolute inset-0 bg-[#22201C]/50 backdrop-blur-sm opacity-0 transition-opacity duration-300" onclick="closeSideMenu()"></div>
         <aside id="side-menu-panel" class="absolute inset-y-0 left-0 w-[82%] max-w-xs bg-[#F4F1EA] shadow-[0_20px_60px_rgba(0,0,0,0.4)] -translate-x-full transition-transform duration-300 ease-out flex flex-col">
-            <div class="shrink-0 bg-[#2C4A34] text-[#F4F1EA] px-5 py-4 flex items-center justify-between">
-                <div class="leading-none">
-                    <p class="serif-font text-lg">Categorias</p>
-                    <p class="text-[7px] uppercase font-semibold tracking-[0.32em] text-[#C9A576] mt-1.5">Delícias da Vovó</p>
-                </div>
+            <div class="shrink-0 bg-[#2C4A34] text-[#F4F1EA] px-5 py-3 flex items-center justify-end">
                 <button onclick="closeSideMenu()" class="w-9 h-9 rounded-full flex items-center justify-center text-[#F4F1EA]/70 hover:text-white hover:bg-white/10 transition-all active:scale-90" aria-label="Fechar menu">
                     <i class="fas fa-times text-base"></i>
                 </button>
@@ -2734,7 +2748,7 @@ flavors: ['Sonho de Valsa', 'Ouro branco', 'Ninho trufado', 'Pessêgo', 'Amendoi
 
             MACRO_GROUPS.forEach(group => {
                 html += `<div class="side-section">
-                    <button onclick="selectGroupFromMenu('${esc(group.name)}')" data-group="${esc(group.name)}" class="side-group">${group.name}</button>
+                    <button onclick="toggleSideSection(this)" data-group="${esc(group.name)}" class="side-group"><span>${group.name}</span><i class="fas fa-chevron-down side-chevron"></i></button>
                     <div class="side-sub">`;
                 group.categories.forEach(cat => {
                     html += `<button onclick="goToCategory('${esc(cat)}')" class="side-cat">${cat}</button>`;
@@ -2745,6 +2759,17 @@ flavors: ['Sonho de Valsa', 'Ouro branco', 'Ninho trufado', 'Pessêgo', 'Amendoi
             list.innerHTML = html;
         }
 
+        // Expande/recolhe as subcategorias de uma categoria maior (accordion, uma aberta por vez)
+        function toggleSideSection(btn) {
+            const section = btn.closest('.side-section');
+            if (!section) return;
+            const willOpen = !section.classList.contains('open');
+            document.querySelectorAll('#side-menu-list .side-section.open').forEach(s => {
+                if (s !== section) s.classList.remove('open');
+            });
+            section.classList.toggle('open', willOpen);
+        }
+
         // ===== Controle de abertura/fechamento do menu lateral =====
         function openSideMenu() {
             const m = document.getElementById('side-menu');
@@ -2753,6 +2778,13 @@ flavors: ['Sonho de Valsa', 'Ouro branco', 'Ninho trufado', 'Pessêgo', 'Amendoi
                 document.getElementById('side-menu-overlay').classList.remove('opacity-0');
                 document.getElementById('side-menu-panel').classList.remove('-translate-x-full');
             });
+            // Expande automaticamente a categoria ativa
+            const activeBtn = document.querySelector('#side-menu-list .side-group.active');
+            const activeSection = activeBtn ? activeBtn.closest('.side-section') : null;
+            document.querySelectorAll('#side-menu-list .side-section.open').forEach(s => {
+                if (s !== activeSection) s.classList.remove('open');
+            });
+            if (activeSection) activeSection.classList.add('open');
             document.body.style.overflow = 'hidden';
         }
 
