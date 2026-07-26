@@ -385,40 +385,37 @@
         </div>
     </div>
 
-    <!-- Header Fixo (verde-pinho) -->
-    <div id="main-header" class="sticky top-0 z-50 flex flex-col w-full" style="box-shadow:0 6px 24px rgba(20,34,22,0.16);">
+    <!-- Header Fixo (verde-pinho, enxuto) -->
+    <div id="main-header" class="sticky top-0 z-50 flex flex-col w-full" style="box-shadow:0 3px 12px rgba(20,34,22,0.14);">
         <header class="bg-[#2C4A34] text-[#F4F1EA]">
-            <div class="max-w-7xl mx-auto px-4 sm:px-6 py-3.5 grid grid-cols-[1fr_auto_1fr] items-center gap-2">
+            <div class="max-w-7xl mx-auto px-3 sm:px-6 py-1.5 grid grid-cols-[1fr_auto_1fr] items-center gap-2">
                 <!-- Esquerda: descobrir + busca -->
-                <div class="flex items-center justify-start gap-0.5">
-                    <button onclick="showDiscovery()" class="p-2.5 hover:bg-white/10 rounded-full transition-all active:scale-90 text-[#F4F1EA]" title="Descobrir categorias" aria-label="Descobrir categorias">
-                        <i class="fas fa-table-cells-large text-base"></i>
+                <div class="flex items-center justify-start">
+                    <button onclick="showDiscovery()" class="p-2 hover:bg-white/10 rounded-full transition-all active:scale-90 text-[#F4F1EA]" title="Descobrir categorias" aria-label="Descobrir categorias">
+                        <i class="fas fa-table-cells-large text-[13px]"></i>
                     </button>
-                    <button id="search-toggle-btn" onclick="toggleSearch()" class="p-2.5 hover:bg-white/10 rounded-full transition-all active:scale-90 text-[#F4F1EA]" title="Buscar" aria-label="Buscar">
-                        <i id="search-toggle-icon" class="fas fa-search text-base"></i>
+                    <button id="search-toggle-btn" onclick="toggleSearch()" class="p-2 hover:bg-white/10 rounded-full transition-all active:scale-90 text-[#F4F1EA]" title="Buscar" aria-label="Buscar">
+                        <i id="search-toggle-icon" class="fas fa-search text-[13px]"></i>
                     </button>
                 </div>
                 <!-- Centro: logotipo -->
                 <div class="flex flex-col items-center text-center cursor-pointer group leading-none" onclick="window.scrollTo({top:0, behavior:'smooth'})">
-                    <div class="flex items-center gap-2">
-                        <i class="fas fa-seedling text-[#C9A576] text-base sm:text-lg"></i>
-                        <h1 class="text-xl sm:text-2xl font-normal tracking-[0.01em] serif-font text-[#F4F1EA] group-hover:text-white transition-colors whitespace-nowrap">Delícias da Vovó</h1>
-                    </div>
-                    <span class="text-[8px] sm:text-[9px] uppercase font-semibold tracking-[0.42em] text-[#C9A576] mt-1.5 ml-[0.42em]">Padaria Artesanal</span>
+                    <h1 class="text-[15px] sm:text-lg font-normal tracking-[0.01em] serif-font text-[#F4F1EA] group-hover:text-white transition-colors whitespace-nowrap">Delícias da Vovó</h1>
+                    <span class="text-[6.5px] sm:text-[7.5px] uppercase font-semibold tracking-[0.38em] text-[#C9A576] mt-0.5 ml-[0.38em]">Padaria Artesanal</span>
                 </div>
                 <!-- Direita: carrinho -->
                 <div class="flex items-center justify-end">
-                    <button onclick="openCart()" class="relative flex items-center gap-2.5 hover:bg-white/10 px-3.5 py-2 rounded-full transition-all active:scale-95 border border-white/20 text-[#F4F1EA]" aria-label="Abrir cesta">
-                        <i class="fas fa-shopping-basket text-base"></i>
-                        <span id="cart-badge" class="hidden absolute -top-1.5 -right-1.5 bg-[#BE6B2E] text-white text-[10px] font-bold w-5 h-5 rounded-full flex items-center justify-center border-2 border-[#2C4A34] shadow-lg">0</span>
-                        <span class="hidden sm:block text-sm font-semibold serif-font tracking-wide" id="header-total">R$ 0,00</span>
+                    <button onclick="openCart()" class="relative flex items-center gap-2 hover:bg-white/10 px-2.5 py-1.5 rounded-full transition-all active:scale-95 border border-white/20 text-[#F4F1EA]" aria-label="Abrir cesta">
+                        <i class="fas fa-shopping-basket text-[13px]"></i>
+                        <span id="cart-badge" class="hidden absolute -top-1 -right-1 bg-[#BE6B2E] text-white text-[9px] font-bold w-[18px] h-[18px] rounded-full flex items-center justify-center border-2 border-[#2C4A34] shadow-lg">0</span>
+                        <span class="hidden sm:block text-[13px] font-semibold serif-font tracking-wide" id="header-total">R$ 0,00</span>
                     </button>
                 </div>
             </div>
 
             <!-- Navegação por Departamentos (texto com pontinhos) -->
             <nav class="nav-categoria border-t border-white/10">
-                <div id="category-nav" class="max-w-7xl mx-auto flex items-center justify-start sm:justify-center gap-2 sm:gap-2.5 overflow-x-auto no-scrollbar py-2.5 px-4 sm:px-6 scroll-smooth text-[12px] sm:text-sm">
+                <div id="category-nav" class="max-w-7xl mx-auto flex items-center justify-start sm:justify-center gap-1.5 sm:gap-2 overflow-x-auto no-scrollbar py-1.5 px-3 sm:px-6 scroll-smooth text-[10.5px] sm:text-[11.5px]">
                     <!-- Injetado via JS -->
                 </div>
             </nav>
