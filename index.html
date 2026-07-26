@@ -608,8 +608,8 @@
 
     <!-- Carrinho Lateral (Modal) -->
     <div id="cart-modal" class="fixed inset-0 z-[60] invisible">
-        <div class="absolute inset-0 bg-[#22201C]/70 backdrop-blur-md opacity-0 transition-opacity duration-500" onclick="closeCart()"></div>
-        <div class="absolute inset-y-0 right-0 w-full max-w-lg bg-[#F4F1EA] shadow-2xl translate-x-full transition-transform duration-600 flex flex-col h-full">
+        <div id="cart-overlay" class="absolute inset-0 bg-[#22201C]/70 backdrop-blur-md opacity-0 transition-opacity duration-500" onclick="closeCart()"></div>
+        <div id="cart-panel" class="absolute inset-y-0 right-0 w-full max-w-lg bg-[#F4F1EA] shadow-2xl translate-x-full transition-transform duration-600 flex flex-col h-full">
             <div class="p-6 sm:p-8 border-b border-[#8C8676]/10 bg-white flex justify-between items-center shrink-0">
                 <h2 class="text-xl sm:text-2xl font-medium flex items-center gap-4 serif-font">
                     <i class="fas fa-shopping-basket text-[#8C8676] text-lg"></i> Minha seleção
@@ -3251,8 +3251,8 @@ if (!item.sizes && selectedFlavor && item.variants && item.variants[selectedFlav
         function openCart() {
             document.getElementById('cart-modal').classList.remove('invisible');
             setTimeout(() => {
-                document.getElementById('cart-modal').querySelector('.opacity-0').classList.add('opacity-100');
-                document.getElementById('cart-modal').querySelector('.translate-x-full').classList.remove('translate-x-full');
+                document.getElementById('cart-overlay').classList.add('opacity-100');
+                document.getElementById('cart-panel').classList.remove('translate-x-full');
             }, 10);
             document.body.classList.add('cart-open');
             renderCartItems();
@@ -3260,8 +3260,8 @@ if (!item.sizes && selectedFlavor && item.variants && item.variants[selectedFlav
         }
 
         function closeCart() {
-            document.getElementById('cart-modal').querySelector('.opacity-0').classList.remove('opacity-100');
-            document.getElementById('cart-modal').querySelector('div:last-child').classList.add('translate-x-full');
+            document.getElementById('cart-overlay').classList.remove('opacity-100');
+            document.getElementById('cart-panel').classList.add('translate-x-full');
             setTimeout(() => { document.getElementById('cart-modal').classList.add('invisible'); document.body.classList.remove('cart-open'); }, 500);
         }
 
