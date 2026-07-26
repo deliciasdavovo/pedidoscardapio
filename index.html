@@ -441,45 +441,47 @@
     transform: scale(0.97);
 }
 
-/* Painel verde deslizante da tela inicial */
-#discovery-green-panel {
-    position: fixed;
-    top: 0;
-    right: 0;
-    height: 100%;
-    width: 44px;
-    background: var(--green);
+/* Botão principal verde da tela inicial */
+.discovery-cta {
+    width: 100%;
+    padding: 1rem 1.25rem;
+    border-radius: 1rem;
     border: none;
+    background: var(--green);
+    color: var(--bg);
+    font-size: 15px;
+    font-weight: 600;
+    letter-spacing: -0.01em;
     cursor: pointer;
-    z-index: 5;
     display: flex;
     align-items: center;
     justify-content: center;
-    overflow: hidden;
-    box-shadow: -10px 0 30px rgba(20, 34, 22, 0.16);
-    transition: width 0.6s cubic-bezier(0.76, 0, 0.24, 1), box-shadow 0.3s ease;
+    gap: 0.6rem;
+    box-shadow: 0 8px 22px rgba(44, 74, 52, 0.24), 0 2px 6px rgba(44, 74, 52, 0.16);
+    transition: transform 0.15s ease, box-shadow 0.2s ease, background 0.2s ease;
 }
-#discovery-green-panel:hover {
-    width: 56px;
+.discovery-cta:hover {
+    background: var(--green-dark);
+    box-shadow: 0 12px 28px rgba(44, 74, 52, 0.30), 0 3px 8px rgba(44, 74, 52, 0.18);
+    transform: translateY(-1px);
 }
-#discovery-green-panel.expanding {
-    width: 100%;
-    box-shadow: none;
+.discovery-cta:active { transform: scale(0.98); }
+.discovery-cta i { font-size: 12px; transition: transform 0.2s ease; }
+.discovery-cta:hover i { transform: translateX(3px); }
+
+/* Transição verde de tela cheia (o verde sobe cobrindo e revela o cardápio) */
+#discovery-sweep {
+    position: fixed;
+    inset: 0;
+    z-index: 65;
+    background: var(--green);
+    transform: translateY(100%);
+    transition: transform 0.58s cubic-bezier(0.76, 0, 0.24, 1);
+    pointer-events: none;
+    will-change: transform;
 }
-.green-panel-arrow {
-    color: var(--bg);
-    font-size: 13px;
-    opacity: 0.85;
-    animation: green-panel-nudge 1.6s ease-in-out infinite;
-}
-#discovery-green-panel.expanding .green-panel-arrow {
-    opacity: 0;
-    transition: opacity 0.2s ease;
-}
-@keyframes green-panel-nudge {
-    0%, 100% { transform: translateX(0); }
-    50% { transform: translateX(-4px); }
-}
+#discovery-sweep.on { transform: translateY(0); }
+#discovery-sweep.reveal { transform: translateY(-100%); }
 
 /* Mobile product list */
 .product-list-item {
@@ -602,7 +604,7 @@
 
     <!-- Tela de Descoberta -->
     <div id="discovery-overlay">
-        <div class="min-h-screen flex flex-col items-center justify-center pl-6 pr-24 py-14">
+        <div class="min-h-screen flex flex-col items-center justify-center px-6 py-14">
             <div class="w-full max-w-md">
                 <div class="text-center mb-10">
                     <p class="text-[10px] uppercase font-bold tracking-[0.3em] text-[#2C4A34] mb-3">Delícias da Vovó</p>
@@ -613,16 +615,14 @@
                 <div id="discovery-cards" class="grid grid-cols-2 gap-4 mb-5">
                     <!-- Injetado via JS -->
                 </div>
-                <button onclick="hideDiscovery(null)" class="w-full py-4 rounded-2xl border border-[#8C8676]/20 text-[#8C8676] text-sm font-semibold tracking-wide hover:bg-[#8C8676]/5 transition-all active:scale-95">
-                    Ver cardápio completo
+                <button onclick="enterMenu()" class="discovery-cta" aria-label="Ver o cardápio completo">
+                    Ver cardápio completo <i class="fas fa-arrow-right"></i>
                 </button>
             </div>
         </div>
-        <!-- Painel verde deslizante: ao clicar, o verde se expande e revela o cardápio -->
-        <button id="discovery-green-panel" onclick="expandGreenPanel()" aria-label="Ver o cardápio completo">
-            <i class="fas fa-chevron-left green-panel-arrow"></i>
-        </button>
     </div>
+    <!-- Transição verde de tela cheia -->
+    <div id="discovery-sweep"></div>
 
     <!-- Faixa de boas-vindas (verde-pinho) -->
     <div id="welcome-banner" class="bg-[#2C4A34] text-[#F4F1EA] px-6 pt-1 pb-14 sm:pb-20 -mt-px">
@@ -2762,19 +2762,29 @@ flavors: ['Sonho de Valsa', 'Ouro branco', 'Ninho trufado', 'Pessêgo', 'Amendoi
             const overlay = document.getElementById('discovery-overlay');
             overlay.classList.remove('hiding');
             overlay.style.display = '';
-            const panel = document.getElementById('discovery-green-panel');
-            if (panel) panel.classList.remove('expanding');
+            const sweep = document.getElementById('discovery-sweep');
+            if (sweep) sweep.classList.remove('on', 'reveal', 'busy');
         }
 
-        // Painel verde: expande varrendo a tela e então revela o cardápio
-        function expandGreenPanel() {
-            const panel = document.getElementById('discovery-green-panel');
-            if (!panel || panel.classList.contains('expanding')) return;
-            panel.classList.add('expanding');
+        // Transição verde: o verde sobe cobrindo a tela e revela o cardápio completo
+        function enterMenu() {
+            const sweep = document.getElementById('discovery-sweep');
+            if (!sweep || sweep.classList.contains('busy')) return;
+            sweep.classList.add('busy', 'on');
+            // 1) verde termina de cobrir a tela → troca o conteúdo por baixo
             setTimeout(() => {
-                hideDiscovery(null);
-                setTimeout(() => panel.classList.remove('expanding'), 450);
-            }, 620);
+                const overlay = document.getElementById('discovery-overlay');
+                overlay.style.display = 'none';
+                overlay.classList.remove('hiding');
+                activeGroupName = 'Todos';
+                activeGroupCategories = null;
+                renderMenu();
+                setActiveGroup('Todos');
+                window.scrollTo({ top: 0 });
+                // 2) verde sai para cima revelando o cardápio
+                requestAnimationFrame(() => sweep.classList.add('reveal'));
+                setTimeout(() => sweep.classList.remove('on', 'reveal', 'busy'), 640);
+            }, 600);
         }
 
         function hideDiscovery(groupName) {
