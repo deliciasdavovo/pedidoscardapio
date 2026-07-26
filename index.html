@@ -2849,7 +2849,7 @@ flavors: ['Sonho de Valsa', 'Ouro branco', 'Ninho trufado', 'Pessêgo', 'Amendoi
                                 Ver mais
                             </button>
                             <p class="text-[10px] font-bold text-[#8C8676] mt-2 uppercase tracking-widest" id="unit-price-label-${item.id}">
-                                R$ ${initialPrice.toFixed(2)} ${unitSuffix}
+                                R$ ${initialPrice.toFixed(2).replace('.', ',')} ${unitSuffix}
                             </p>
                         </div>
                         
@@ -2886,13 +2886,13 @@ ${getFlavorList(item).map(f => `<option value="${f.label}">${f.label}</option>`)
                             ` : ''}
 
                             <div class="flex items-center justify-between">
-                                <div class="flex items-center gap-2 bg-[#ECE9E1] p-1 rounded-full">
-                                    <button onclick="changeQtyUI('${item.id}', -1)" class="w-9 h-9 rounded-full bg-white flex items-center justify-center text-[10px] shadow-sm hover:bg-[#22201C] hover:text-white transition-all"><i class="fas fa-minus"></i></button>
-                                    <input type="number" id="qty-${item.id}" value="${initialQty}" step="${item.units[0] === 'kg' ? '0.1' : '1'}" class="w-10 bg-transparent text-center text-sm font-bold text-[#22201C] focus:outline-none">
-                                    <button onclick="changeQtyUI('${item.id}', 1)" class="w-9 h-9 rounded-full bg-white flex items-center justify-center text-[10px] shadow-sm hover:bg-[#22201C] hover:text-white transition-all"><i class="fas fa-plus"></i></button>
+                                <div class="inline-flex items-stretch bg-white rounded-2xl shadow-sm border border-[#8C8676]/15 overflow-hidden">
+                                    <button onclick="changeQtyUI('${item.id}', -1)" class="w-10 h-10 flex items-center justify-center text-[#2C4A34] text-sm hover:bg-[#2C4A34]/5 active:bg-[#2C4A34]/10 transition-colors"><i class="fas fa-minus"></i></button>
+                                    <input type="number" id="qty-${item.id}" value="${initialQty}" step="${item.units[0] === 'kg' ? '0.1' : '1'}" class="w-11 bg-transparent text-center text-sm font-semibold text-[#22201C] border-x border-[#8C8676]/15 focus:outline-none">
+                                    <button onclick="changeQtyUI('${item.id}', 1)" class="w-10 h-10 flex items-center justify-center text-[#2C4A34] text-sm hover:bg-[#2C4A34]/5 active:bg-[#2C4A34]/10 transition-colors"><i class="fas fa-plus"></i></button>
                                 </div>
                                 <div class="text-right">
-                                    <p class="text-xl font-bold tracking-tighter" id="price-preview-${item.id}">R$ ${(initialPrice * initialQty).toFixed(2)}</p>
+                                    <p class="text-xl font-bold tracking-tighter" id="price-preview-${item.id}">R$ ${(initialPrice * initialQty).toFixed(2).replace('.', ',')}</p>
                                     <p class="text-[8px] uppercase text-[#8C8676] font-black tracking-widest" id="price-label-${item.id}">Total</p>
                                 </div>
                             </div>
@@ -3170,8 +3170,8 @@ ${getFlavorList(item).map(f => `<option value="${f.label}">${f.label}</option>`)
 if (item.isKit) {
     const total = getKitComputedTotal(item, qty);
     const unitPrice = qty > 0 ? total / qty : 0;
-    document.getElementById('unit-price-label-' + id).innerText = 'R$ ' + unitPrice.toFixed(2) + ' ' + suffix;
-    document.getElementById('price-preview-' + id).innerText = 'R$ ' + total.toFixed(2);
+    document.getElementById('unit-price-label-' + id).innerText = 'R$ ' + unitPrice.toFixed(2).replace('.', ',') + ' ' + suffix;
+    document.getElementById('price-preview-' + id).innerText = 'R$ ' + total.toFixed(2).replace('.', ',');
     return;
 }
 if (unit === 'kg') {
@@ -3200,8 +3200,8 @@ if (!item.sizes && selectedFlavor && item.variants && item.variants[selectedFlav
     }
 }
 
-            document.getElementById('unit-price-label-' + id).innerText = 'R$ ' + price.toFixed(2) + ' ' + suffix;
-            document.getElementById('price-preview-' + id).innerText = 'R$ ' + (price * qty).toFixed(2);
+            document.getElementById('unit-price-label-' + id).innerText = 'R$ ' + price.toFixed(2).replace('.', ',') + ' ' + suffix;
+            document.getElementById('price-preview-' + id).innerText = 'R$ ' + (price * qty).toFixed(2).replace('.', ',');
         }
 
         // LÓGICA DO CARRINHO
@@ -3491,10 +3491,10 @@ if (!item.sizes && selectedFlavor && item.variants && item.variants[selectedFlav
 
                 total += entryTotal;
                 const entryTotalEl = document.getElementById(`kit-entry-total-${entry.idx}`);
-                if (entryTotalEl) entryTotalEl.innerText = 'R$ ' + entryTotal.toFixed(2);
+                if (entryTotalEl) entryTotalEl.innerText = 'R$ ' + entryTotal.toFixed(2).replace('.', ',');
             });
 
-            document.getElementById('kit-flavor-total').innerText = 'R$ ' + total.toFixed(2);
+            document.getElementById('kit-flavor-total').innerText = 'R$ ' + total.toFixed(2).replace('.', ',');
         }
 
         function confirmKitFlavorSelection() {
@@ -3681,9 +3681,9 @@ if (!item.sizes && flavor && item.variants && item.variants[flavor]) {
             else { document.getElementById('delivery-fee-row').classList.add('hidden'); }
             document.getElementById('cart-badge').innerText = count;
             document.getElementById('cart-badge').classList.toggle('hidden', count === 0);
-            document.getElementById('header-total').innerText = 'R$ ' + total.toFixed(2);
-            document.getElementById('sticky-total').innerText = 'R$ ' + total.toFixed(2);
-            document.getElementById('cart-final-total').innerText = 'R$ ' + total.toFixed(2);
+            document.getElementById('header-total').innerText = 'R$ ' + total.toFixed(2).replace('.', ',');
+            document.getElementById('sticky-total').innerText = 'R$ ' + total.toFixed(2).replace('.', ',');
+            document.getElementById('cart-final-total').innerText = 'R$ ' + total.toFixed(2).replace('.', ',');
             document.getElementById('sticky-cart-count').innerText = count;
             const bar = document.getElementById('sticky-cart-bar');
             if (count > 0) bar.classList.remove('translate-y-40'); else bar.classList.add('translate-y-40');
@@ -3722,19 +3722,19 @@ if (!item.sizes && flavor && item.variants && item.variants[flavor]) {
                                     ${item.size ? `<span class="text-[8px] bg-[#8C8676]/10 text-[#8C8676] px-2 py-0.5 rounded-full font-bold uppercase">${item.size}</span>` : ''}
                                     ${item.flavor ? `<span class="text-[10px] bg-[#22201C]/5 text-[#22201C] px-2.5 py-1 rounded-full font-bold">Sabor: ${item.flavor}</span>` : ''}
                                 </div>
-                                <p class="text-[9px] text-[#8C8676]/70 font-bold mt-1 uppercase tracking-widest">R$ ${item.finalPrice.toFixed(2)} /${unitLabel}</p>
+                                <p class="text-[9px] text-[#8C8676]/70 font-bold mt-1 uppercase tracking-widest">R$ ${item.finalPrice.toFixed(2).replace('.', ',')} /${unitLabel}</p>
                             </div>
                             <button onclick="removeFromCart(${idx})" class="text-red-300 hover:text-red-600 transition-colors p-2">
                                 <i class="fas fa-trash-alt text-sm"></i>
                             </button>
                         </div>
                         <div class="flex justify-between items-end mt-2">
-                            <div class="flex items-center gap-3 bg-[#ECE9E1] px-2 py-1 rounded-full border border-[#8C8676]/5">
-                                <button onclick="updateCartQty(${idx}, -1)" class="text-[10px] text-[#8C8676] w-6 h-6 flex items-center justify-center bg-white rounded-full shadow-sm"><i class="fas fa-minus"></i></button>
-                                <span class="text-xs font-bold text-[#22201C]">${item.qty.toFixed(item.unit === 'kg' ? 1 : 0)}${unitLabel}</span>
-                                <button onclick="updateCartQty(${idx}, 1)" class="text-[10px] text-[#8C8676] w-6 h-6 flex items-center justify-center bg-white rounded-full shadow-sm"><i class="fas fa-plus"></i></button>
+                            <div class="inline-flex items-stretch bg-white rounded-xl shadow-sm border border-[#8C8676]/15 overflow-hidden">
+                                <button onclick="updateCartQty(${idx}, -1)" class="w-8 h-8 flex items-center justify-center text-[#2C4A34] text-xs hover:bg-[#2C4A34]/5 active:bg-[#2C4A34]/10 transition-colors"><i class="fas fa-minus"></i></button>
+                                <span class="min-w-[2.5rem] px-1 flex items-center justify-center text-xs font-semibold text-[#22201C] border-x border-[#8C8676]/15">${item.qty.toFixed(item.unit === 'kg' ? 1 : 0)}${unitLabel}</span>
+                                <button onclick="updateCartQty(${idx}, 1)" class="w-8 h-8 flex items-center justify-center text-[#2C4A34] text-xs hover:bg-[#2C4A34]/5 active:bg-[#2C4A34]/10 transition-colors"><i class="fas fa-plus"></i></button>
                             </div>
-                            <span class="text-base font-bold text-[#22201C]">R$ ${(item.finalPrice * item.qty).toFixed(2)}</span>
+                            <span class="text-base font-bold text-[#22201C]">R$ ${(item.finalPrice * item.qty).toFixed(2).replace('.', ',')}</span>
                         </div>
                     </div>
                 </div>
@@ -3773,7 +3773,7 @@ if (!item.sizes && flavor && item.variants && item.variants[flavor]) {
             const details = [item.size, item.flavor].filter(Boolean).join(' - ');
             const itemName = details ? item.name + ' - ' + details : item.name;
 
-            return '- ' + qtyText + ' • ' + itemName + ' (R$ ' + item.finalPrice.toFixed(2) + '/' + unitText + ')';
+            return '- ' + qtyText + ' • ' + itemName + ' (R$ ' + item.finalPrice.toFixed(2).replace('.', ',') + '/' + unitText + ')';
         }
 
         function formatWhatsAppOrderDate(value) {
@@ -3814,7 +3814,7 @@ if (!item.sizes && flavor && item.variants && item.variants[flavor]) {
             }
             const itemsText = cart.map(formatWhatsAppCartItem).join('\n');
             let total = cart.reduce((acc, item) => acc + (item.finalPrice * item.qty), 0);
-            const deliveryText = activeFulfillment === 'Entrega' ? '\nTaxa de Entrega: R$ ' + DELIVERY_FEE.toFixed(2) : '';
+            const deliveryText = activeFulfillment === 'Entrega' ? '\nTaxa de Entrega: R$ ' + DELIVERY_FEE.toFixed(2).replace('.', ',') : '';
             if(activeFulfillment === 'Entrega') total += DELIVERY_FEE;
             const fulfillmentInfo = activeFulfillment === 'Entrega' ? 'Entrega: ' + document.getElementById('delivery-address').value : 'Retirada: ' + document.getElementById('pickup-location').value;
             const selectedDate = document.getElementById('order-date').value;
@@ -3825,7 +3825,7 @@ if (!item.sizes && flavor && item.variants && item.variants[flavor]) {
             const prontaEntregaInfoText = activeOrderType === 'Pronta entrega'
                 ? '\nAtendimento: Vamos consultar a disponibilidade imediata para você e confirmar em seguida.'
                 : '';
-            const message = 'Olá, gostaria de fazer um pedido, aguardo confirmação\n'+'Pedido • Delícias da Vovó\n' + '__________________________\n' + 'Cliente: ' + name + '\n' + 'Tipo: ' + activeOrderType + encomendaDateTimeText + prontaEntregaInfoText + '\n' + fulfillmentInfo + deliveryText + '\n\n' + 'Pedido\n' + itemsText + '\n\n' + 'Total aproximado: R$ ' + total.toFixed(2);
+            const message = 'Olá, gostaria de fazer um pedido, aguardo confirmação\n'+'Pedido • Delícias da Vovó\n' + '__________________________\n' + 'Cliente: ' + name + '\n' + 'Tipo: ' + activeOrderType + encomendaDateTimeText + prontaEntregaInfoText + '\n' + fulfillmentInfo + deliveryText + '\n\n' + 'Pedido\n' + itemsText + '\n\n' + 'Total aproximado: R$ ' + total.toFixed(2).replace('.', ',');
             window.open('https://wa.me/' + WHATSAPP_NUMBER + '?text=' + encodeURIComponent(message), '_blank');
         }
 
@@ -4115,14 +4115,14 @@ function createProductListItem(item) {
     let priceText;
     if (item.isKit) {
         const kitTotal = getKitComputedTotal(item, 10);
-        priceText = 'a partir de R$ ' + (kitTotal / 10).toFixed(2) + '/pessoa';
+        priceText = 'a partir de R$ ' + (kitTotal / 10).toFixed(2).replace('.', ',') + '/pessoa';
     } else if (hasSizes) {
-        priceText = 'a partir de R$ ' + item.sizes[0].price.toFixed(2);
+        priceText = 'a partir de R$ ' + item.sizes[0].price.toFixed(2).replace('.', ',');
     } else if (item.units && item.units[0] === 'kg') {
-        priceText = 'R$ ' + (item.priceKg || 0).toFixed(2) + '/kg';
+        priceText = 'R$ ' + (item.priceKg || 0).toFixed(2).replace('.', ',') + '/kg';
     } else {
         const basePrice = item.price || item.priceKg || 0;
-        priceText = 'R$ ' + basePrice.toFixed(2) + (hasKg ? '/un' : '/un');
+        priceText = 'R$ ' + basePrice.toFixed(2).replace('.', ',') + (hasKg ? '/un' : '/un');
     }
 
     const flavorCount = hasFlavors ? item.flavors.length : 0;
@@ -4211,9 +4211,6 @@ function buildProductModalContent(item) {
     return `
         <div class="relative h-[24vh] max-h-56 min-h-[140px] overflow-hidden bg-[#ECE9E1]">
             <img id="modal-img" src="${escapeHtml(imgSrc)}" onerror="handleImgError(this)" class="w-full h-full object-cover">
-            <button onclick="closeProductModal()" class="absolute top-3 right-3 w-10 h-10 bg-black/35 backdrop-blur-sm rounded-full flex items-center justify-center z-10 active:scale-90 transition-all">
-                <i class="fas fa-times text-white text-sm"></i>
-            </button>
             ${hasMultiImg ? `
                 <button onclick="modalPrevImage()" class="absolute left-3 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white w-9 h-9 rounded-full shadow-md flex items-center justify-center active:scale-90 transition-all">
                     <i class="fas fa-chevron-left text-xs text-[#22201C]"></i>
@@ -4265,14 +4262,14 @@ function buildProductModalContent(item) {
             ` : ''}
 
             <div class="flex items-center justify-between pt-1">
-                <div class="flex items-center gap-2 bg-[#ECE9E1] p-1 rounded-full">
-                    <button onclick="changeModalQty(-1)" class="w-10 h-10 rounded-full bg-white flex items-center justify-center shadow-sm hover:bg-[#2C4A34] hover:text-white transition-all active:scale-90"><i class="fas fa-minus text-xs"></i></button>
-                    <input type="number" id="modal-qty" value="${initialQty}" step="${item.units && item.units[0] === 'kg' ? '0.1' : '1'}" oninput="updateModalPricePreview()" class="w-12 bg-transparent text-center text-sm font-bold text-[#22201C] focus:outline-none">
-                    <button onclick="changeModalQty(1)" class="w-10 h-10 rounded-full bg-white flex items-center justify-center shadow-sm hover:bg-[#2C4A34] hover:text-white transition-all active:scale-90"><i class="fas fa-plus text-xs"></i></button>
+                <div class="inline-flex items-stretch bg-white rounded-2xl shadow-sm border border-[#8C8676]/15 overflow-hidden">
+                    <button onclick="changeModalQty(-1)" class="w-11 h-11 flex items-center justify-center text-[#2C4A34] text-sm hover:bg-[#2C4A34]/5 active:bg-[#2C4A34]/10 transition-colors"><i class="fas fa-minus"></i></button>
+                    <input type="number" id="modal-qty" value="${initialQty}" step="${item.units && item.units[0] === 'kg' ? '0.1' : '1'}" oninput="updateModalPricePreview()" class="w-12 bg-transparent text-center text-sm font-semibold text-[#22201C] border-x border-[#8C8676]/15 focus:outline-none">
+                    <button onclick="changeModalQty(1)" class="w-11 h-11 flex items-center justify-center text-[#2C4A34] text-sm hover:bg-[#2C4A34]/5 active:bg-[#2C4A34]/10 transition-colors"><i class="fas fa-plus"></i></button>
                 </div>
                 <div class="text-right">
-                    <p class="text-2xl font-bold tracking-tighter text-[#2C4A34]" id="modal-price-preview">R$ 0,00</p>
-                    <p class="text-[8px] uppercase text-[#8C8676] font-black tracking-widest" id="modal-unit-price-label"></p>
+                    <p class="text-[27px] leading-none font-extrabold tracking-tight text-[#2C4A34]" id="modal-price-preview">R$ 0,00</p>
+                    <p class="text-[8px] uppercase text-[#8C8676] font-black tracking-widest mt-1.5" id="modal-unit-price-label"></p>
                 </div>
             </div>
 
@@ -4347,8 +4344,8 @@ function updateModalPricePreview() {
         const unitPrice = qty > 0 ? total / qty : 0;
         const lbl = document.getElementById('modal-unit-price-label');
         const prv = document.getElementById('modal-price-preview');
-        if (lbl) lbl.innerText = 'R$ ' + unitPrice.toFixed(2) + ' ' + suffix;
-        if (prv) prv.innerText = 'R$ ' + total.toFixed(2);
+        if (lbl) lbl.innerText = 'R$ ' + unitPrice.toFixed(2).replace('.', ',') + ' ' + suffix;
+        if (prv) prv.innerHTML = '<span class="text-sm font-bold align-top text-[#2C4A34]/70 mr-0.5">R$</span>' + total.toFixed(2).replace('.', ',');
         return;
     }
 
@@ -4375,8 +4372,8 @@ function updateModalPricePreview() {
 
     const lbl = document.getElementById('modal-unit-price-label');
     const prv = document.getElementById('modal-price-preview');
-    if (lbl) lbl.innerText = 'R$ ' + price.toFixed(2) + ' ' + suffix;
-    if (prv) prv.innerText = 'R$ ' + (price * qty).toFixed(2);
+    if (lbl) lbl.innerText = 'R$ ' + price.toFixed(2).replace('.', ',') + ' ' + suffix;
+    if (prv) prv.innerHTML = '<span class="text-sm font-bold align-top text-[#2C4A34]/70 mr-0.5">R$</span>' + (price * qty).toFixed(2).replace('.', ',');
 }
 
 function onModalFlavorChange() {
