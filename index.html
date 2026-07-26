@@ -104,6 +104,61 @@
             user-select: none;
         }
 
+        /* ===== Menu Lateral Retrátil (Departamentos) ===== */
+        .menu-toggle-btn {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+        }
+        .side-group {
+            display: flex;
+            align-items: center;
+            width: 100%;
+            text-align: left;
+            padding: 10px 14px;
+            border-radius: 14px;
+            color: #22201C;
+            font-weight: 600;
+            font-size: 13.5px;
+            font-family: 'Libre Caslon Text', serif;
+            letter-spacing: 0.01em;
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            transition: background 0.18s ease, color 0.18s ease;
+        }
+        .side-group:hover:not(.active) {
+            background: rgba(44, 74, 52, 0.07);
+        }
+        .side-group.active {
+            background: #2C4A34;
+            color: #F4F1EA;
+        }
+        .side-section {
+            margin-top: 2px;
+        }
+        .side-sub {
+            display: flex;
+            flex-direction: column;
+            gap: 1px;
+            padding: 3px 0 8px 20px;
+        }
+        .side-cat {
+            text-align: left;
+            padding: 7px 12px;
+            border-radius: 10px;
+            font-size: 12.5px;
+            color: rgba(40, 30, 14, 0.62);
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            transition: background 0.15s ease, color 0.15s ease;
+        }
+        .side-cat:hover {
+            background: rgba(201, 165, 118, 0.20);
+            color: #22201C;
+        }
+
         /* Botão de Cesta no Header */
         .header-cart-btn {
             background: #B98A4E; /* Caramelo escuro */
@@ -392,8 +447,9 @@
             <div class="max-w-7xl mx-auto px-3 sm:px-6 py-2.5 grid grid-cols-[1fr_auto_1fr] items-center gap-2">
                 <!-- Esquerda: descobrir + busca -->
                 <div class="flex items-center justify-start">
-                    <button onclick="showDiscovery()" class="p-2 hover:bg-white/10 rounded-full transition-all active:scale-90 text-[#F4F1EA]" title="Descobrir categorias" aria-label="Descobrir categorias">
-                        <i class="fas fa-table-cells-large text-[13px]"></i>
+                    <button onclick="toggleSideMenu()" class="menu-toggle-btn p-2 hover:bg-white/10 rounded-full transition-all active:scale-90 text-[#F4F1EA]" title="Categorias" aria-label="Abrir menu de categorias">
+                        <i class="fas fa-bars text-[13px]"></i>
+                        <span class="hidden sm:inline text-[11px] font-semibold tracking-wide">Categorias</span>
                     </button>
                     <button id="search-toggle-btn" onclick="toggleSearch()" class="p-2 hover:bg-white/10 rounded-full transition-all active:scale-90 text-[#F4F1EA]" title="Buscar" aria-label="Buscar">
                         <i id="search-toggle-icon" class="fas fa-search text-[13px]"></i>
@@ -414,13 +470,26 @@
                 </div>
             </div>
 
-            <!-- Navegação por Departamentos (faixa caramelo, selecionado verde) -->
-            <nav class="nav-categoria">
-                <div id="category-nav" class="max-w-7xl mx-auto flex items-center justify-start sm:justify-center gap-1 sm:gap-1.5 overflow-x-auto no-scrollbar py-2 px-3 sm:px-6 scroll-smooth text-[10.5px] sm:text-[11.5px]">
-                    <!-- Injetado via JS -->
-                </div>
-            </nav>
         </header>
+    </div>
+
+    <!-- Menu Lateral Retrátil (Departamentos) -->
+    <div id="side-menu" class="fixed inset-0 z-[70] invisible">
+        <div id="side-menu-overlay" class="absolute inset-0 bg-[#22201C]/50 backdrop-blur-sm opacity-0 transition-opacity duration-300" onclick="closeSideMenu()"></div>
+        <aside id="side-menu-panel" class="absolute inset-y-0 left-0 w-[82%] max-w-xs bg-[#F4F1EA] shadow-[0_20px_60px_rgba(0,0,0,0.4)] -translate-x-full transition-transform duration-300 ease-out flex flex-col">
+            <div class="shrink-0 bg-[#2C4A34] text-[#F4F1EA] px-5 py-4 flex items-center justify-between">
+                <div class="leading-none">
+                    <p class="serif-font text-lg">Categorias</p>
+                    <p class="text-[7px] uppercase font-semibold tracking-[0.32em] text-[#C9A576] mt-1.5">Delícias da Vovó</p>
+                </div>
+                <button onclick="closeSideMenu()" class="w-9 h-9 rounded-full flex items-center justify-center text-[#F4F1EA]/70 hover:text-white hover:bg-white/10 transition-all active:scale-90" aria-label="Fechar menu">
+                    <i class="fas fa-times text-base"></i>
+                </button>
+            </div>
+            <nav id="side-menu-list" class="flex-grow overflow-y-auto custom-scrollbar px-3 py-4">
+                <!-- Injetado via JS -->
+            </nav>
+        </aside>
     </div>
 
     <!-- Overlay de Busca -->
@@ -2537,6 +2606,8 @@ flavors: ['Sonho de Valsa', 'Ouro branco', 'Ninho trufado', 'Pessêgo', 'Amendoi
                 const kitModal = document.getElementById('kit-flavor-modal');
                 const cartModal = document.getElementById('cart-modal');
                 const productModal = document.getElementById('product-detail-modal');
+                const sideMenu = document.getElementById('side-menu');
+                if (!sideMenu.classList.contains('invisible')) { closeSideMenu(); return; }
                 if (!bar.classList.contains('opacity-0')) { toggleSearch(); return; }
                 if (!kitModal.classList.contains('invisible')) { closeKitFlavorModal(); return; }
                 if (!cartModal.classList.contains('invisible')) { closeCart(); return; }
@@ -2580,15 +2651,76 @@ flavors: ['Sonho de Valsa', 'Ouro branco', 'Ninho trufado', 'Pessêgo', 'Amendoi
         }
 
         function renderCategories() {
-            const nav = document.getElementById('category-nav');
-            const btnClass = 'category-btn whitespace-nowrap';
-            const btn = (group, label, active) => {
-                const nameAttr = group.replace(/'/g, "\\'");
-                return `<button onclick="selectGroup('${nameAttr}')" data-group="${group}" class="${btnClass} ${active ? 'active' : ''}">${label}</button>`;
-            };
-            const parts = [ btn('Todos', 'Todos', true) ];
-            MACRO_GROUPS.forEach(group => parts.push(btn(group.name, group.short || group.name, false)));
-            nav.innerHTML = parts.join('<span class="cat-sep">·</span>');
+            const list = document.getElementById('side-menu-list');
+            if (!list) return;
+            const esc = (s) => s.replace(/'/g, "\\'");
+
+            let html = `<button onclick="selectGroupFromMenu('Todos')" data-group="Todos" class="side-group active">
+                <i class="fas fa-utensils mr-2.5 text-[11px] opacity-60"></i>Todos os produtos
+            </button>`;
+
+            MACRO_GROUPS.forEach(group => {
+                html += `<div class="side-section">
+                    <button onclick="selectGroupFromMenu('${esc(group.name)}')" data-group="${esc(group.name)}" class="side-group">${group.name}</button>
+                    <div class="side-sub">`;
+                group.categories.forEach(cat => {
+                    html += `<button onclick="goToCategory('${esc(cat)}')" class="side-cat">${cat}</button>`;
+                });
+                html += `</div></div>`;
+            });
+
+            list.innerHTML = html;
+        }
+
+        // ===== Controle de abertura/fechamento do menu lateral =====
+        function openSideMenu() {
+            const m = document.getElementById('side-menu');
+            m.classList.remove('invisible');
+            requestAnimationFrame(() => {
+                document.getElementById('side-menu-overlay').classList.remove('opacity-0');
+                document.getElementById('side-menu-panel').classList.remove('-translate-x-full');
+            });
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeSideMenu() {
+            const m = document.getElementById('side-menu');
+            document.getElementById('side-menu-overlay').classList.add('opacity-0');
+            document.getElementById('side-menu-panel').classList.add('-translate-x-full');
+            document.body.style.overflow = '';
+            setTimeout(() => m.classList.add('invisible'), 300);
+        }
+
+        function toggleSideMenu() {
+            const m = document.getElementById('side-menu');
+            if (m.classList.contains('invisible')) openSideMenu();
+            else closeSideMenu();
+        }
+
+        function selectGroupFromMenu(name) {
+            selectGroup(name);
+            closeSideMenu();
+        }
+
+        // Ir direto para uma categoria específica (filtra o departamento e rola até ela)
+        function goToCategory(cat) {
+            const groupName = groupForCategory(cat);
+            suppressSpy();
+            activeGroupName = groupName;
+            const group = MACRO_GROUPS.find(g => g.name === groupName);
+            activeGroupCategories = group ? group.categories : null;
+            renderMenu();
+            setActiveGroup(groupName);
+            closeSideMenu();
+            setTimeout(() => {
+                const sec = document.getElementById(sanitizeId(cat));
+                if (sec) {
+                    const header = document.getElementById('main-header');
+                    const offset = (header ? header.offsetHeight : 120) + 16;
+                    const top = sec.getBoundingClientRect().top + window.scrollY - offset;
+                    window.scrollTo({ top: Math.max(0, top), behavior: 'smooth' });
+                }
+            }, 320);
         }
 
         function renderMenu() {
@@ -2872,19 +3004,16 @@ ${getFlavorList(item).map(f => `<option value="${f.label}">${f.label}</option>`)
         let spyScheduled = false;
 
         function setActiveGroup(name) {
-            const nav = document.getElementById('category-nav');
             let activeBtn = null;
-            document.querySelectorAll('.category-btn').forEach(btn => {
+            document.querySelectorAll('.side-group').forEach(btn => {
                 const on = btn.dataset.group === name;
                 btn.classList.toggle('active', on);
                 if (on) activeBtn = btn;
             });
             if (name !== lastActiveCat) {
                 lastActiveCat = name;
-                if (activeBtn && nav) {
-                    const target = activeBtn.offsetLeft - (nav.clientWidth / 2) + (activeBtn.clientWidth / 2);
-                    nav.scrollTo({ left: Math.max(0, target), behavior: 'smooth' });
-                }
+                // Mantém o departamento ativo visível caso o menu lateral esteja aberto
+                if (activeBtn) activeBtn.scrollIntoView({ block: 'nearest' });
             }
         }
 
