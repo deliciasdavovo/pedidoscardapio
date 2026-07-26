@@ -607,7 +607,7 @@
                     <i class="fas fa-times text-base"></i>
                 </button>
             </div>
-            <div id="product-modal-body" class="overflow-y-auto flex-grow custom-scrollbar pb-8">
+            <div id="product-modal-body" class="overflow-y-auto flex-grow custom-scrollbar pb-4">
                 <!-- populado via JS -->
             </div>
         </div>
@@ -4078,7 +4078,7 @@ function buildProductModalContent(item) {
     const hasMultiImg = currentModalImages.length > 1;
 
     return `
-        <div class="relative h-56 overflow-hidden bg-[#ECE9E1]">
+        <div class="relative h-[24vh] max-h-56 min-h-[140px] overflow-hidden bg-[#ECE9E1]">
             <img id="modal-img" src="${escapeHtml(imgSrc)}" onerror="handleImgError(this)" class="w-full h-full object-cover">
             <button onclick="closeProductModal()" class="absolute top-3 right-3 w-10 h-10 bg-black/35 backdrop-blur-sm rounded-full flex items-center justify-center z-10 active:scale-90 transition-all">
                 <i class="fas fa-times text-white text-sm"></i>
@@ -4096,16 +4096,16 @@ function buildProductModalContent(item) {
             ` : ''}
         </div>
 
-        <div class="p-5 space-y-5">
+        <div class="p-5 pt-4 space-y-3.5">
             <div>
                 <p class="text-[9px] uppercase font-black tracking-[0.25em] text-[#8C8676] mb-1">${escapeHtml(item.category)}</p>
-                <h2 class="text-xl serif-font text-[#22201C] leading-snug mb-2">${escapeHtml(item.name)}</h2>
+                <h2 class="text-xl serif-font text-[#22201C] leading-snug mb-1.5">${escapeHtml(item.name)}</h2>
                 <p class="text-[13px] text-[#22201C]/60 leading-relaxed">${escapeHtml(item.description)}</p>
             </div>
 
             ${hasKg ? `
             <div class="flex bg-[#ECE9E1] p-1 rounded-2xl border border-[#8C8676]/5">
-                <button onclick="setModalUnit('un')" id="modal-unit-un" class="flex-1 py-2.5 rounded-xl text-[9px] font-black uppercase bg-[#22201C] text-white transition-all">Unidade</button>
+                <button onclick="setModalUnit('un')" id="modal-unit-un" class="flex-1 py-2.5 rounded-xl text-[9px] font-black uppercase bg-[#2C4A34] text-white transition-all">Unidade</button>
                 <button onclick="setModalUnit('kg')" id="modal-unit-kg" class="flex-1 py-2.5 rounded-xl text-[9px] font-black uppercase text-[#8C8676]/50 transition-all">Kilo</button>
             </div>
             ` : ''}
@@ -4135,17 +4135,17 @@ function buildProductModalContent(item) {
 
             <div class="flex items-center justify-between pt-1">
                 <div class="flex items-center gap-2 bg-[#ECE9E1] p-1 rounded-full">
-                    <button onclick="changeModalQty(-1)" class="w-11 h-11 rounded-full bg-white flex items-center justify-center shadow-sm hover:bg-[#22201C] hover:text-white transition-all active:scale-90"><i class="fas fa-minus text-xs"></i></button>
+                    <button onclick="changeModalQty(-1)" class="w-10 h-10 rounded-full bg-white flex items-center justify-center shadow-sm hover:bg-[#2C4A34] hover:text-white transition-all active:scale-90"><i class="fas fa-minus text-xs"></i></button>
                     <input type="number" id="modal-qty" value="${initialQty}" step="${item.units && item.units[0] === 'kg' ? '0.1' : '1'}" oninput="updateModalPricePreview()" class="w-12 bg-transparent text-center text-sm font-bold text-[#22201C] focus:outline-none">
-                    <button onclick="changeModalQty(1)" class="w-11 h-11 rounded-full bg-white flex items-center justify-center shadow-sm hover:bg-[#22201C] hover:text-white transition-all active:scale-90"><i class="fas fa-plus text-xs"></i></button>
+                    <button onclick="changeModalQty(1)" class="w-10 h-10 rounded-full bg-white flex items-center justify-center shadow-sm hover:bg-[#2C4A34] hover:text-white transition-all active:scale-90"><i class="fas fa-plus text-xs"></i></button>
                 </div>
                 <div class="text-right">
-                    <p class="text-2xl font-bold tracking-tighter text-[#22201C]" id="modal-price-preview">R$ 0,00</p>
+                    <p class="text-2xl font-bold tracking-tighter text-[#2C4A34]" id="modal-price-preview">R$ 0,00</p>
                     <p class="text-[8px] uppercase text-[#8C8676] font-black tracking-widest" id="modal-unit-price-label"></p>
                 </div>
             </div>
 
-            <button onclick="addToCartFromModal()" class="btn-primary w-full py-5 rounded-[1.5rem] text-[10px] uppercase tracking-[0.2em] font-black active:scale-95 flex items-center justify-center gap-3">
+            <button onclick="addToCartFromModal()" class="btn-primary w-full py-4 rounded-[1.5rem] text-[10px] uppercase tracking-[0.2em] font-black active:scale-95 flex items-center justify-center gap-3">
                 <i class="fas fa-shopping-basket"></i>
                 ${item.isKit ? 'Montar Kit' : 'Adicionar à Cesta'}
             </button>
@@ -4155,7 +4155,7 @@ function buildProductModalContent(item) {
 
 function getModalUnit() {
     const btnKg = document.getElementById('modal-unit-kg');
-    return (btnKg && btnKg.classList.contains('bg-[#22201C]')) ? 'kg' : 'un';
+    return (btnKg && btnKg.classList.contains('bg-[#2C4A34]')) ? 'kg' : 'un';
 }
 
 function setModalUnit(unit) {
@@ -4164,12 +4164,12 @@ function setModalUnit(unit) {
     const input = document.getElementById('modal-qty');
     if (!btnUn || !btnKg || !input) return;
     if (unit === 'un') {
-        btnUn.classList.add('bg-[#22201C]', 'text-white'); btnUn.classList.remove('text-[#8C8676]/50');
-        btnKg.classList.remove('bg-[#22201C]', 'text-white'); btnKg.classList.add('text-[#8C8676]/50');
+        btnUn.classList.add('bg-[#2C4A34]', 'text-white'); btnUn.classList.remove('text-[#8C8676]/50');
+        btnKg.classList.remove('bg-[#2C4A34]', 'text-white'); btnKg.classList.add('text-[#8C8676]/50');
         input.value = '1'; input.step = '1';
     } else {
-        btnKg.classList.add('bg-[#22201C]', 'text-white'); btnKg.classList.remove('text-[#8C8676]/50');
-        btnUn.classList.remove('bg-[#22201C]', 'text-white'); btnUn.classList.add('text-[#8C8676]/50');
+        btnKg.classList.add('bg-[#2C4A34]', 'text-white'); btnKg.classList.remove('text-[#8C8676]/50');
+        btnUn.classList.remove('bg-[#2C4A34]', 'text-white'); btnUn.classList.add('text-[#8C8676]/50');
         input.value = '0.5'; input.step = '0.1';
     }
     updateModalPricePreview();
