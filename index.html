@@ -180,12 +180,32 @@
         .btn-primary {
             background: var(--cta);
             color: white;
-            box-shadow: 0 10px 25px rgba(190, 107, 46, 0.28);
-            transition: all 0.3s ease;
+            /* Sombreado estilo Apple system: várias camadas suaves,
+               da sombra de contato à sombra ambiente ampla */
+            box-shadow:
+                0 1px 1px rgba(122, 66, 25, 0.16),
+                0 2px 4px rgba(122, 66, 25, 0.14),
+                0 6px 12px rgba(190, 107, 46, 0.18),
+                0 14px 28px rgba(190, 107, 46, 0.16);
+            transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1),
+                        box-shadow 0.4s cubic-bezier(0.22, 1, 0.36, 1),
+                        background 0.3s ease;
         }
         .btn-primary:hover {
             background: var(--cta-dark);
             transform: translateY(-1px);
+            box-shadow:
+                0 1px 1px rgba(122, 66, 25, 0.18),
+                0 3px 6px rgba(122, 66, 25, 0.16),
+                0 10px 20px rgba(190, 107, 46, 0.22),
+                0 20px 40px rgba(190, 107, 46, 0.18);
+        }
+        .btn-primary:active {
+            transform: translateY(0) scale(0.98);
+            box-shadow:
+                0 1px 1px rgba(122, 66, 25, 0.16),
+                0 2px 4px rgba(122, 66, 25, 0.12),
+                0 4px 8px rgba(190, 107, 46, 0.14);
         }
 
         /* Botão "Adicionar à Cesta" surge no hover do card (desktop),
@@ -519,7 +539,7 @@
     </div>
 
     <!-- Faixa de boas-vindas (verde-pinho) -->
-    <div class="bg-[#2C4A34] text-[#F4F1EA] px-6 pt-1 pb-14 sm:pb-20 -mt-px">
+    <div id="welcome-banner" class="bg-[#2C4A34] text-[#F4F1EA] px-6 pt-1 pb-14 sm:pb-20 -mt-px">
         <div class="max-w-7xl mx-auto">
             <h2 class="serif-font text-xl sm:text-3xl leading-snug">Dê uma olhada<br class="sm:hidden"> no nosso cardápio</h2>
         </div>
@@ -2618,6 +2638,16 @@ flavors: ['Sonho de Valsa', 'Ouro branco', 'Ninho trufado', 'Pessêgo', 'Amendoi
             });
         };
 
+        // Rede de segurança: ao voltar para o site (incluindo quando a página
+        // é restaurada do cache do navegador — ex.: retorno do WhatsApp no
+        // iOS), garante que o body não fique travado (overflow hidden),
+        // evitando a tela em branco/inacessível.
+        window.addEventListener('pageshow', (e) => {
+            if (e.persisted) {
+                document.body.classList.remove('cart-open');
+            }
+        });
+
         function renderDiscovery() {
             const container = document.getElementById('discovery-cards');
             container.innerHTML = MACRO_GROUPS.map((group, i) => {
@@ -2927,18 +2957,28 @@ ${getFlavorList(item).map(f => `<option value="${f.label}">${f.label}</option>`)
             }
         }
 
+        // Esconde a faixa de boas-vindas ("Dê uma olhada no nosso cardápio")
+        // enquanto houver uma busca ativa; mostra novamente quando limpa.
+        function updateWelcomeBanner(term) {
+            const banner = document.getElementById('welcome-banner');
+            if (!banner) return;
+            banner.classList.toggle('hidden', !!(term && term.trim()));
+        }
+
         function clearSearch() {
             const input = document.getElementById('search-input');
             if (input) input.value = '';
             currentSearch = '';
             renderMenu();
             updateSearchUI('');
+            updateWelcomeBanner('');
         }
 
         function handleSearch(val) {
             currentSearch = val;
             renderMenu();
             updateSearchUI(val);
+            updateWelcomeBanner(val);
         }
 
         // Normaliza texto para busca: minúsculas e sem acentos
@@ -3828,6 +3868,10 @@ if (!item.sizes && flavor && item.variants && item.variants[flavor]) {
                 : '';
             const message = 'Olá, gostaria de fazer um pedido, aguardo confirmação\n'+'Pedido • Delícias da Vovó\n' + '__________________________\n' + 'Cliente: ' + name + '\n' + 'Tipo: ' + activeOrderType + encomendaDateTimeText + prontaEntregaInfoText + '\n' + fulfillmentInfo + deliveryText + '\n\n' + 'Pedido\n' + itemsText + '\n\n' + 'Total aproximado: R$ ' + total.toFixed(2);
             window.open('https://wa.me/' + WHATSAPP_NUMBER + '?text=' + encodeURIComponent(message), '_blank');
+            // Fecha a cesta e destrava a página. Sem isso, ao voltar do
+            // WhatsApp o site podia ficar preso/em branco com o modal aberto
+            // e o body travado (overflow hidden).
+            closeCart();
         }
 
         function formatDateLocalISO(date) {
