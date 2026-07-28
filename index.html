@@ -3088,20 +3088,22 @@ ${getFlavorList(item).map(f => `<option value="${f.label}">${f.label}</option>`)
                 bar.classList.add('max-h-52', 'opacity-100');
                 document.getElementById('search-input').focus();
                 if (icon) { icon.className = 'fas fa-times text-lg'; }
+                updateWelcomeBanner(true);
             } else {
                 bar.classList.add('max-h-0', 'opacity-0');
                 bar.classList.remove('max-h-52', 'opacity-100');
                 clearSearch();
+                updateWelcomeBanner(false);
                 if (icon) { icon.className = 'fas fa-search text-lg'; }
             }
         }
 
         // Esconde a faixa de boas-vindas ("Conheça nosso cardápio e faça sua encomenda")
-        // enquanto houver uma busca ativa; mostra novamente quando limpa.
-        function updateWelcomeBanner(term) {
+        // enquanto a busca estiver aberta (com ou sem texto digitado); mostra novamente quando fecha/limpa.
+        function updateWelcomeBanner(searchOpen) {
             const banner = document.getElementById('welcome-banner');
             if (!banner) return;
-            banner.classList.toggle('hidden', !!(term && term.trim()));
+            banner.classList.toggle('hidden', !!searchOpen);
         }
 
         function clearSearch() {
@@ -3110,14 +3112,14 @@ ${getFlavorList(item).map(f => `<option value="${f.label}">${f.label}</option>`)
             currentSearch = '';
             renderMenu();
             updateSearchUI('');
-            updateWelcomeBanner('');
+            updateWelcomeBanner(true);
         }
 
         function handleSearch(val) {
             currentSearch = val;
             renderMenu();
             updateSearchUI(val);
-            updateWelcomeBanner(val);
+            updateWelcomeBanner(true);
         }
 
         // Normaliza texto para busca: minúsculas e sem acentos
