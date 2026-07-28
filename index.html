@@ -2812,7 +2812,15 @@ flavors: ['Sonho de Valsa', 'Ouro branco', 'Ninho trufado', 'Pessêgo', 'Amendoi
                 window.scrollTo({ top: 0 });
                 // 2) verde sai para cima revelando o cardápio
                 requestAnimationFrame(() => sweep.classList.add('reveal'));
-                setTimeout(() => sweep.classList.remove('on', 'reveal', 'busy'), 640);
+                setTimeout(() => {
+                    // Desliga a transição antes de resetar as classes, senão o
+                    // retorno de translateY(-100%) para o estado base (100%)
+                    // é animado e a faixa verde "passa" de novo pela tela.
+                    sweep.style.transition = 'none';
+                    sweep.classList.remove('on', 'reveal', 'busy');
+                    void sweep.offsetHeight;
+                    sweep.style.transition = '';
+                }, 640);
             }, 600);
         }
 
