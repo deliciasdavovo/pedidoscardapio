@@ -3396,8 +3396,8 @@ if (unit === 'kg') {
     price = item.priceKg;
 } 
 else if (item.sizes && item.sizes.length > 0) {
-    const activeIdx = Array.from(document.querySelectorAll(`[id^="size-${id}-"]`)).findIndex(b => b.classList.contains('bg-[#8C8676]'));
-    price = item.sizes[activeIdx].price;
+    const activeIdx = Array.from(document.querySelectorAll(`[id^="size-${id}-"]`)).findIndex(b => b.classList.contains('bg-[#2C4A34]'));
+    price = item.sizes[Math.max(0, activeIdx)].price;
 } 
 else {
     price = item.price;
