@@ -812,7 +812,7 @@
     <!-- Modal de Detalhe do Produto (Mobile) -->
     <div id="product-detail-modal" class="fixed inset-0 z-[75] invisible">
         <div id="product-modal-overlay" class="absolute inset-0 bg-[#22201C]/60 backdrop-blur-sm opacity-0 transition-opacity duration-300" onclick="closeProductModal()"></div>
-        <div id="product-modal-panel" class="absolute inset-x-0 bottom-0 bg-[#F4F1EA] rounded-t-[2rem] shadow-2xl max-h-[92vh] flex flex-col translate-y-full">
+        <div id="product-modal-panel" class="absolute inset-x-0 bottom-0 bg-[#F4F1EA] rounded-t-[2rem] shadow-2xl max-h-[96vh] flex flex-col translate-y-full">
             <div id="product-modal-handle" class="shrink-0 flex items-center justify-between px-5 pt-3 pb-2">
                 <div class="w-8 h-8"></div>
                 <div class="w-12 h-1.5 bg-[#8C8676]/30 rounded-full cursor-pointer" onclick="closeProductModal()"></div>
@@ -4436,6 +4436,7 @@ function closeProductModal() {
 
 function buildProductModalContent(item) {
     const hasKg = item.units && item.units.includes('kg');
+    const hasUnitToggle = item.units && item.units.includes('un') && item.units.includes('kg');
     const hasSizes = item.sizes && item.sizes.length > 0;
     const hasFlavors = item.flavors && item.flavors.length > 0;
     const initialQty = item.isKit ? 10 : (item.units && item.units[0] === 'kg' ? 0.5 : 1);
@@ -4443,7 +4444,7 @@ function buildProductModalContent(item) {
     const hasMultiImg = currentModalImages.length > 1;
 
     return `
-        <div class="relative h-[24vh] max-h-56 min-h-[140px] overflow-hidden bg-[#ECE9E1]">
+        <div class="relative h-[34vh] min-h-[240px] max-h-[340px] overflow-hidden bg-[#ECE9E1]">
             <img id="modal-img" src="${escapeHtml(imgSrc)}" onerror="handleImgError(this)" class="w-full h-full object-cover">
             ${hasMultiImg ? `
                 <button onclick="modalPrevImage()" class="absolute left-3 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white w-9 h-9 rounded-full shadow-md flex items-center justify-center active:scale-90 transition-all">
@@ -4458,26 +4459,26 @@ function buildProductModalContent(item) {
             ` : ''}
         </div>
 
-        <div class="p-5 pt-4 space-y-3.5">
+        <div class="px-5 pt-4 pb-5 space-y-3">
             <div>
-                <p class="text-[11px] uppercase font-semibold tracking-[0.1em] text-[#8C8676] mb-1">${escapeHtml(item.category)}</p>
-                <h2 class="text-xl serif-font text-[#22201C] leading-snug mb-1.5">${escapeHtml(item.name)}</h2>
-                <p class="text-[13px] text-[#22201C]/60 leading-relaxed">${escapeHtml(item.description)}</p>
+                <p class="text-[10px] uppercase font-semibold tracking-[0.12em] text-[#8C8676] mb-0.5">${escapeHtml(item.category)}</p>
+                <h2 class="text-[19px] serif-font text-[#22201C] leading-snug mb-1">${escapeHtml(item.name)}</h2>
+                <p id="modal-description" class="text-[12.5px] text-[#22201C]/55 leading-relaxed">${escapeHtml(item.description)}</p>
             </div>
 
-            ${hasKg ? `
-            <div class="flex bg-[#ECE9E1] p-1 rounded-2xl border border-[#8C8676]/5">
-                <button onclick="setModalUnit('un')" id="modal-unit-un" class="flex-1 py-2.5 rounded-xl text-[13px] font-semibold bg-[#2C4A34] text-white transition-all">Unidade</button>
-                <button onclick="setModalUnit('kg')" id="modal-unit-kg" class="flex-1 py-2.5 rounded-xl text-[13px] font-semibold text-[#8C8676]/50 transition-all">Kilo</button>
+            ${hasUnitToggle ? `
+            <div class="flex bg-[#ECE9E1] p-1 rounded-xl border border-[#8C8676]/5">
+                <button onclick="setModalUnit('un')" id="modal-unit-un" class="flex-1 py-2 rounded-lg text-[12px] font-semibold bg-[#2C4A34] text-white transition-all">Unidade</button>
+                <button onclick="setModalUnit('kg')" id="modal-unit-kg" class="flex-1 py-2 rounded-lg text-[12px] font-semibold text-[#8C8676]/50 transition-all">Kilo</button>
             </div>
             ` : ''}
 
             ${hasSizes ? `
-            <div class="space-y-2">
-                <label class="text-[12px] font-semibold text-[#8C8676]">Tamanho</label>
+            <div class="space-y-1.5">
+                <label class="text-[11px] font-semibold text-[#8C8676]">Escolha o tamanho</label>
                 <div class="grid ${item.sizes.length === 2 ? 'grid-cols-2' : 'grid-cols-3'} gap-1 bg-[#ECE9E1] p-1 rounded-xl">
                     ${item.sizes.map((s, idx) => `
-                        <button onclick="setModalSize(${idx})" id="modal-size-${idx}" class="${idx === 0 ? 'bg-[#8C8676] text-white' : 'text-[#8C8676]/60'} py-2.5 rounded-lg text-[12px] font-medium transition-all">
+                        <button onclick="setModalSize(${idx})" id="modal-size-${idx}" class="${idx === 0 ? 'bg-[#8C8676] text-white' : 'text-[#8C8676]/60'} py-2 rounded-lg text-[11px] font-medium transition-all">
                             ${escapeHtml(s.label)}
                             ${s.description ? `<span class="block text-[8px] font-normal opacity-70 normal-case tracking-normal mt-0.5 leading-tight">${escapeHtml(s.description)}</span>` : ''}
                         </button>
@@ -4487,35 +4488,46 @@ function buildProductModalContent(item) {
             ` : ''}
 
             ${hasFlavors ? `
-            <div class="space-y-2">
-                <label class="text-[12px] font-semibold text-[#8C8676]">Sabor / Tipo</label>
-                <select id="modal-flavor" onchange="onModalFlavorChange()" class="w-full bg-[#ECE9E1] border border-[#8C8676]/10 rounded-xl px-4 py-3.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#8C8676]/20 appearance-none text-[#22201C]">
-                    ${getFlavorList(item).map(f => `<option value="${escapeHtml(f.label)}">${escapeHtml(f.label)}</option>`).join('')}
-                </select>
+            <div class="space-y-1.5">
+                <div class="flex items-center justify-between gap-3">
+                    <label for="modal-flavor" class="text-[12px] font-semibold text-[#2C4A34]">Escolha seu sabor</label>
+                    <span class="text-[10px] text-[#8C8676]/70">Selecione uma opção</span>
+                </div>
+                <div class="relative">
+                    <select id="modal-flavor" onchange="onModalFlavorChange()" class="w-full bg-white border border-[#8C8676]/15 rounded-xl pl-4 pr-11 py-3 text-[13px] focus:outline-none focus:ring-2 focus:ring-[#2C4A34]/15 appearance-none text-[#22201C] shadow-sm">
+                        <option value="" selected disabled>Escolha seu sabor</option>
+                        ${getFlavorList(item).map(f => `<option value="${escapeHtml(f.label)}">${escapeHtml(f.label)}</option>`).join('')}
+                    </select>
+                    <i class="fas fa-chevron-down pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-[10px] text-[#8C8676]"></i>
+                </div>
             </div>
             ` : ''}
 
-            <div class="flex items-center justify-between pt-1">
-                <div class="inline-flex items-stretch bg-white rounded-2xl shadow-sm border border-[#8C8676]/15 overflow-hidden">
-                    <button onclick="changeModalQty(-1)" class="w-11 h-11 flex items-center justify-center text-[#2C4A34] text-sm hover:bg-[#2C4A34]/5 active:bg-[#2C4A34]/10 transition-colors"><i class="fas fa-minus"></i></button>
-                    <input type="number" id="modal-qty" value="${initialQty}" step="${item.units && item.units[0] === 'kg' ? '0.1' : '1'}" oninput="updateModalPricePreview()" class="w-12 bg-transparent text-center text-sm font-semibold text-[#22201C] border-x border-[#8C8676]/15 focus:outline-none">
-                    <button onclick="changeModalQty(1)" class="w-11 h-11 flex items-center justify-center text-[#2C4A34] text-sm hover:bg-[#2C4A34]/5 active:bg-[#2C4A34]/10 transition-colors"><i class="fas fa-plus"></i></button>
+            <div class="flex items-center justify-between gap-4 pt-0.5">
+                <div class="inline-flex items-stretch bg-white rounded-xl shadow-sm border border-[#8C8676]/15 overflow-hidden">
+                    <button onclick="changeModalQty(-1)" class="w-10 h-10 flex items-center justify-center text-[#2C4A34] text-xs hover:bg-[#2C4A34]/5 active:bg-[#2C4A34]/10 transition-colors"><i class="fas fa-minus"></i></button>
+                    <input type="number" id="modal-qty" value="${initialQty}" step="${item.units && item.units[0] === 'kg' ? '0.1' : '1'}" oninput="updateModalPricePreview()" class="w-11 bg-transparent text-center text-[13px] font-semibold text-[#22201C] border-x border-[#8C8676]/15 focus:outline-none">
+                    <button onclick="changeModalQty(1)" class="w-10 h-10 flex items-center justify-center text-[#2C4A34] text-xs hover:bg-[#2C4A34]/5 active:bg-[#2C4A34]/10 transition-colors"><i class="fas fa-plus"></i></button>
                 </div>
-                <div class="text-right">
-                    <p class="text-[27px] leading-none font-extrabold tracking-tight text-[#2C4A34]" id="modal-price-preview">R$ 0,00</p>
-                    <p class="text-[11px] text-[#8C8676] font-semibold mt-1.5" id="modal-unit-price-label"></p>
+                <div class="text-right min-w-0">
+                    <p class="text-[22px] leading-none font-bold tracking-tight text-[#2C4A34]" id="modal-price-preview">R$ 0,00</p>
+                    <p class="text-[10px] text-[#8C8676] font-medium mt-1" id="modal-unit-price-label"></p>
                 </div>
             </div>
 
-            <button onclick="addToCartFromModal()" class="btn-primary w-full py-4 rounded-2xl text-[15px] tracking-[-0.01em] font-semibold active:scale-95 flex items-center justify-center gap-3">
-                <i class="fas fa-shopping-basket"></i>
-                ${item.isKit ? 'Montar Kit' : 'Adicionar à Cesta'}
-            </button>
+            <div class="flex justify-end pt-0.5">
+                <button onclick="addToCartFromModal()" class="btn-primary w-auto min-w-[148px] px-5 py-2.5 rounded-xl text-[13px] tracking-[-0.01em] font-semibold active:scale-95 inline-flex items-center justify-center gap-2.5">
+                    <i class="fas fa-shopping-basket text-xs"></i>
+                    ${item.isKit ? 'Montar Kit' : 'Adicionar'}
+                </button>
+            </div>
         </div>
     `;
 }
 
 function getModalUnit() {
+    const item = MENU_ITEMS.find(i => i.id === currentModalItemId);
+    if (item && Array.isArray(item.units) && item.units.includes('kg') && !item.units.includes('un')) return 'kg';
     const btnKg = document.getElementById('modal-unit-kg');
     return (btnKg && btnKg.classList.contains('bg-[#2C4A34]')) ? 'kg' : 'un';
 }
@@ -4579,7 +4591,7 @@ function updateModalPricePreview() {
         const lbl = document.getElementById('modal-unit-price-label');
         const prv = document.getElementById('modal-price-preview');
         if (lbl) lbl.innerText = 'R$ ' + unitPrice.toFixed(2) + ' ' + suffix;
-        if (prv) prv.innerHTML = '<span class="text-sm font-bold align-top text-[#2C4A34]/70 mr-0.5">R$</span>' + total.toFixed(2);
+        if (prv) prv.innerHTML = '<span class="text-[11px] font-semibold align-top text-[#2C4A34]/65 mr-0.5">R$</span>' + total.toFixed(2);
         return;
     }
 
@@ -4606,8 +4618,9 @@ function updateModalPricePreview() {
 
     const lbl = document.getElementById('modal-unit-price-label');
     const prv = document.getElementById('modal-price-preview');
+    if (typeof price !== 'number' || Number.isNaN(price)) price = 0;
     if (lbl) lbl.innerText = 'R$ ' + price.toFixed(2) + ' ' + suffix;
-    if (prv) prv.innerHTML = '<span class="text-sm font-bold align-top text-[#2C4A34]/70 mr-0.5">R$</span>' + (price * qty).toFixed(2);
+    if (prv) prv.innerHTML = '<span class="text-[11px] font-semibold align-top text-[#2C4A34]/65 mr-0.5">R$</span>' + (price * qty).toFixed(2);
 }
 
 function onModalFlavorChange() {
@@ -4618,6 +4631,8 @@ function onModalFlavorChange() {
     const flavor = select.value;
     if (item.variants && item.variants[flavor]) {
         const variant = item.variants[flavor];
+        const descEl = document.getElementById('modal-description');
+        if (descEl) descEl.textContent = variant.description || item.description;
         const newImages = (variant.images && variant.images.length) ? variant.images
                         : (variant.image ? [variant.image] : null);
         if (newImages && newImages.length) {
@@ -4662,6 +4677,12 @@ function addToCartFromModal() {
     const unit = getModalUnit();
     const flavorSelect = document.getElementById('modal-flavor');
     const flavor = flavorSelect ? flavorSelect.value : null;
+
+    if (item.flavors && item.flavors.length > 0 && !flavor) {
+        showValidationPopup('Escolha um sabor antes de adicionar à cesta.');
+        if (flavorSelect) flavorSelect.focus();
+        return;
+    }
 
     let size = null;
     if (item.sizes && item.sizes.length > 0) {
