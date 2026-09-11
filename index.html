@@ -407,105 +407,181 @@
   }
 }
 
-/* Discovery Overlay */
+/* ===== Tela de Descoberta (abertura do cardápio) ===== */
 #discovery-overlay {
     position: fixed;
     inset: 0;
     z-index: 60;
-    background-color: var(--bg);
     overflow-y: auto;
-    transition: opacity 0.4s ease, transform 0.4s ease;
+    background:
+        radial-gradient(115% 70% at 50% -10%, #FFFCF5 0%, rgba(255, 252, 245, 0) 62%),
+        radial-gradient(80% 55% at 106% 104%, rgba(201, 165, 118, 0.20) 0%, rgba(201, 165, 118, 0) 62%),
+        radial-gradient(70% 50% at -12% 100%, rgba(44, 74, 52, 0.10) 0%, rgba(44, 74, 52, 0) 60%),
+        var(--bg);
+    transition: opacity 0.42s ease, transform 0.52s cubic-bezier(0.22, 1, 0.36, 1), filter 0.42s ease;
 }
+/* Saída: a tela se dissolve para a frente e revela o cardápio por baixo
+   (sem cortina verde subindo/descendo). */
 #discovery-overlay.hiding {
     opacity: 0;
-    transform: scale(0.98);
+    transform: scale(1.03);
+    filter: blur(5px);
     pointer-events: none;
 }
+
+/* Entrada suave dos blocos da tela inicial */
+@keyframes discoveryIn {
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: none; }
+}
+.discovery-in {
+    animation: discoveryIn 0.6s cubic-bezier(0.22, 1, 0.36, 1) backwards;
+}
+
+/* Filete decorativo ao lado da marca */
+.discovery-rule {
+    display: block;
+    height: 1px;
+    width: 2rem;
+    background: linear-gradient(to right, rgba(44, 74, 52, 0), rgba(44, 74, 52, 0.35));
+}
+.discovery-rule.right {
+    background: linear-gradient(to left, rgba(44, 74, 52, 0), rgba(44, 74, 52, 0.35));
+}
+
+/* Cartões de categoria com foto */
 .discovery-card {
     position: relative;
+    display: block;
+    width: 100%;
+    padding: 0;
+    border: none;
     overflow: hidden;
-    background: white;
-    border-radius: 1.5rem;
-    border: 1px solid rgba(158, 118, 78, 0.12);
-    padding: 1.5rem;
+    border-radius: 1.35rem;
     cursor: pointer;
-    transition: all 0.2s ease;
-    box-shadow: 0 2px 16px rgba(90, 62, 43, 0.06);
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    text-align: center;
-    min-height: 90px;
+    text-align: left;
+    aspect-ratio: 4 / 3;
+    /* fundo verde de segurança: o texto continua legível se a foto faltar */
+    background: linear-gradient(155deg, #3B5C42 0%, #22371F 100%);
+    box-shadow: 0 1px 2px rgba(20, 34, 22, 0.05), 0 10px 26px rgba(20, 34, 22, 0.08);
+    transition: transform 0.45s cubic-bezier(0.22, 1, 0.36, 1),
+                box-shadow 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+    -webkit-tap-highlight-color: transparent;
 }
-/* Detalhe verde: barrinha superior verde-pinho */
-.discovery-card::before {
+.discovery-card.wide { aspect-ratio: 16 / 6; }
+.discovery-card-photo {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transform: scale(1.02);
+    transition: transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.discovery-card::after {
     content: "";
     position: absolute;
-    top: 0;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 2.25rem;
-    height: 4px;
-    border-radius: 0 0 999px 999px;
-    background: var(--green);
-    opacity: 1;
-    transition: all 0.2s ease;
+    inset: 0;
+    background:
+        linear-gradient(to top,
+            rgba(18, 30, 20, 0.94) 0%,
+            rgba(18, 30, 20, 0.78) 30%,
+            rgba(18, 30, 20, 0.34) 62%,
+            rgba(18, 30, 20, 0.10) 100%),
+        linear-gradient(rgba(18, 30, 20, 0.12), rgba(18, 30, 20, 0.12));
+}
+.discovery-card-body {
+    position: relative;
+    z-index: 2;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    padding: 0.85rem 0.95rem 0.95rem;
+}
+.discovery-card-title {
+    font-family: 'Lora', serif;
+    font-size: 15px;
+    line-height: 1.2;
+    letter-spacing: -0.01em;
+    color: #F7F4ED;
+}
+.discovery-card-sub {
+    margin-top: 0.2rem;
+    font-size: 11px;
+    line-height: 1.35;
+    color: rgba(247, 244, 237, 0.72);
 }
 .discovery-card:hover {
     transform: translateY(-3px);
-    box-shadow: 0 10px 26px rgba(44, 74, 52, 0.16);
-    border-color: rgba(44, 74, 52, 0.35);
+    box-shadow: 0 4px 10px rgba(20, 34, 22, 0.08), 0 18px 40px rgba(20, 34, 22, 0.16);
 }
-.discovery-card:hover::before {
-    width: 3.5rem;
-    opacity: 1;
-}
-.discovery-card:active {
-    transform: scale(0.97);
+.discovery-card:hover .discovery-card-photo { transform: scale(1.07); }
+.discovery-card:active { transform: scale(0.985); }
+
+@media (min-width: 640px) {
+    /* No desktop a grade define a altura da linha, então cartões de larguras
+       diferentes na mesma linha continuam alinhados. */
+    .discovery-card,
+    .discovery-card.wide,
+    .discovery-card.sm-wide { aspect-ratio: auto; height: 100%; border-radius: 1.5rem; }
+    .discovery-card-body { padding: 1.1rem 1.25rem 1.15rem; }
+    .discovery-card-title { font-size: 17px; }
+    .discovery-card-sub { font-size: 12px; }
 }
 
-/* Botão principal verde da tela inicial */
+/* Botão principal da tela inicial */
 .discovery-cta {
     width: 100%;
-    padding: 1rem 1.25rem;
-    border-radius: 1rem;
+    padding: 0.95rem 1.25rem;
+    border-radius: 999px;
     border: none;
     background: var(--green);
-    color: var(--bg);
-    font-size: 15px;
+    color: #F7F4ED;
+    font-size: 14px;
     font-weight: 600;
-    letter-spacing: -0.01em;
+    letter-spacing: 0.01em;
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 0.6rem;
-    box-shadow: 0 8px 22px rgba(44, 74, 52, 0.24), 0 2px 6px rgba(44, 74, 52, 0.16);
-    transition: transform 0.15s ease, box-shadow 0.2s ease, background 0.2s ease;
+    gap: 0.55rem;
+    box-shadow: 0 1px 2px rgba(20, 34, 22, 0.10), 0 8px 20px rgba(44, 74, 52, 0.16);
+    transition: background 0.25s ease,
+                transform 0.25s cubic-bezier(0.22, 1, 0.36, 1),
+                box-shadow 0.25s ease;
 }
 .discovery-cta:hover {
     background: var(--green-dark);
-    box-shadow: 0 12px 28px rgba(44, 74, 52, 0.30), 0 3px 8px rgba(44, 74, 52, 0.18);
     transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(20, 34, 22, 0.10), 0 12px 26px rgba(44, 74, 52, 0.20);
 }
-.discovery-cta:active { transform: scale(0.98); }
-.discovery-cta i { font-size: 12px; transition: transform 0.2s ease; }
+.discovery-cta:active { transform: scale(0.985); }
+.discovery-cta i { font-size: 11px; transition: transform 0.25s ease; }
 .discovery-cta:hover i { transform: translateX(3px); }
 
-/* Transição verde de tela cheia (o verde sobe cobrindo e revela o cardápio) */
-#discovery-sweep {
-    position: fixed;
-    inset: 0;
-    z-index: 65;
-    background: var(--green);
-    transform: translateY(100%);
-    transition: transform 0.58s cubic-bezier(0.76, 0, 0.24, 1);
-    pointer-events: none;
-    will-change: transform;
+/* Revelação do cardápio por baixo da tela inicial: só um fade calmo */
+@keyframes menuReveal {
+    from { opacity: 0; }
+    to { opacity: 1; }
 }
-#discovery-sweep.on { transform: translateY(0); }
-#discovery-sweep.reveal { transform: translateY(-100%); }
+body.menu-revealing #main-header,
+body.menu-revealing #welcome-banner,
+body.menu-revealing #menu-sheet {
+    animation: menuReveal 0.5s ease both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    #discovery-overlay { transition: opacity 0.2s ease; }
+    #discovery-overlay.hiding { transform: none; filter: none; }
+    .discovery-in { animation: none; }
+    .discovery-card,
+    .discovery-card-photo,
+    .discovery-cta { transition: none; }
+    body.menu-revealing #main-header,
+    body.menu-revealing #welcome-banner,
+    body.menu-revealing #menu-sheet { animation: none; }
+}
 
 /* Mobile product list */
 .product-list-item {
@@ -628,25 +704,28 @@
 
     <!-- Tela de Descoberta -->
     <div id="discovery-overlay">
-        <div class="min-h-screen flex flex-col items-center justify-center px-6 py-14">
-            <div class="w-full max-w-md">
-                <div class="text-center mb-10">
-                    <p class="text-[10px] uppercase font-bold tracking-[0.3em] text-[#2C4A34] mb-3">Delícias da Vovó</p>
-                    <h2 class="text-2xl sm:text-3xl serif-font italic text-[#22201C] leading-snug mb-3">O que você está buscando hoje?</h2>
-                    <span class="inline-block w-10 h-1 rounded-full bg-[#2C4A34] mb-4"></span>
-                    <p class="text-sm text-[#8C8676]/70">Escolha uma categoria para começar</p>
+        <div class="min-h-screen flex flex-col items-center justify-center px-5 sm:px-8 py-9 sm:py-16">
+            <div class="w-full max-w-md sm:max-w-3xl">
+                <div class="text-center mb-6 sm:mb-9 discovery-in" style="animation-delay: 60ms">
+                    <div class="flex items-center justify-center gap-3 mb-4">
+                        <span class="discovery-rule"></span>
+                        <p class="text-[10px] uppercase font-bold tracking-[0.3em] text-[#2C4A34] whitespace-nowrap">Delícias da Vovó</p>
+                        <span class="discovery-rule right"></span>
+                    </div>
+                    <h2 class="text-[27px] sm:text-[38px] serif-font italic text-[#22201C] leading-tight mb-2.5">O que você está buscando hoje?</h2>
+                    <p class="text-[13px] sm:text-sm text-[#8C8676]">Escolha uma categoria — ou veja o cardápio inteiro.</p>
                 </div>
-                <div id="discovery-cards" class="grid grid-cols-2 gap-4 mb-5">
+                <div id="discovery-cards" class="grid grid-cols-2 sm:grid-cols-6 sm:auto-rows-[196px] gap-3 sm:gap-4 mb-5 sm:mb-7">
                     <!-- Injetado via JS -->
                 </div>
-                <button onclick="enterMenu()" class="discovery-cta" aria-label="Ver o cardápio completo">
-                    Ver cardápio completo <i class="fas fa-arrow-right"></i>
-                </button>
+                <div class="discovery-in" id="discovery-cta-wrap">
+                    <button onclick="enterMenu()" class="discovery-cta" aria-label="Ver o cardápio completo">
+                        Ver cardápio completo <i class="fas fa-arrow-right"></i>
+                    </button>
+                </div>
             </div>
         </div>
     </div>
-    <!-- Transição verde de tela cheia -->
-    <div id="discovery-sweep"></div>
 
     <!-- Faixa de boas-vindas (verde-pinho) -->
     <div id="welcome-banner" class="bg-[#2C4A34] text-[#F4F1EA] px-6 pt-1 pb-14 sm:pb-20 -mt-px">
@@ -656,7 +735,7 @@
     </div>
 
     <!-- Conteúdo Principal (folha arredondada encaixando no cabeçalho) -->
-    <div class="relative z-10 -mt-10 sm:-mt-14 bg-[#F4F1EA] rounded-t-[2rem] sm:rounded-t-[2.75rem] shadow-[0_-16px_44px_rgba(20,34,22,0.14)] min-h-screen">
+    <div id="menu-sheet" class="relative z-10 -mt-10 sm:-mt-14 bg-[#F4F1EA] rounded-t-[2rem] sm:rounded-t-[2.75rem] shadow-[0_-16px_44px_rgba(20,34,22,0.14)] min-h-screen">
         <div class="w-11 h-1.5 bg-[#8C8676]/30 rounded-full mx-auto mt-3.5 sm:mt-4"></div>
         <main id="menu-container" class="max-w-7xl mx-auto px-4 sm:px-6 pt-7 sm:pt-10 space-y-12 sm:space-y-24 pb-32 sm:pb-48">
             <!-- Produtos injetados via JS -->
@@ -836,11 +915,11 @@
         const PRONTA_ENTREGA_MSG = 'Pedidos para hoje (pronta entrega): ligue (11) 4013-5248.';
         
         const MACRO_GROUPS = [
-            { name: 'Coffees Sugeridos & Cestas', short: 'Coffees & Cestas', subtitle: 'Kits prontos para grupos e cestas especiais', categories: ['Coffee Breaks', 'Cestas de café da manhã', 'Bebidas'] },
-            { name: 'Salgados & Lanches', short: 'Salgados & Lanches', subtitle: 'Petiscos, lanches e salgadinhos', categories: ['Pão de bolinha', 'Mini salgados', 'Salgados assados', 'Lanches frios', 'Tortas & Quiches'] },
-            { name: 'Bolos & Doces', short: 'Bolos & Doces', subtitle: 'Bolos, doces e quitutes', categories: ['Bolos caseiros', 'Doces panificação', 'Bolachas & biscoitos', 'Bolos gelados', 'Docinhos festa'] },
-            { name: 'Sobremesas', short: 'Sobremesas', subtitle: 'Para se mimar com algo especial', categories: ['Mini sobremesas', 'Sobremesas unitárias', 'Tortas doces', 'Sobremesas clássicas'] },
-            { name: 'Especiais', short: 'Especiais', subtitle: 'Edições limitadas e sazonais', categories: ['Especiais de Natal'] },
+            { name: 'Coffees Sugeridos & Cestas', short: 'Coffees & Cestas', subtitle: 'Kits prontos e cestas especiais', cover: 'img/cesta-de-cafe-da-manha.png', categories: ['Coffee Breaks', 'Cestas de café da manhã', 'Bebidas'] },
+            { name: 'Salgados & Lanches', short: 'Salgados & Lanches', subtitle: 'Petiscos, lanches e salgadinhos', cover: 'img/mini-pizza.png', categories: ['Pão de bolinha', 'Mini salgados', 'Salgados assados', 'Lanches frios', 'Tortas & Quiches'] },
+            { name: 'Bolos & Doces', short: 'Bolos & Doces', subtitle: 'Bolos, doces e quitutes', cover: 'img/bolo-redondo.jpg', categories: ['Bolos caseiros', 'Doces panificação', 'Bolachas & biscoitos', 'Bolos gelados', 'Docinhos festa'] },
+            { name: 'Sobremesas', short: 'Sobremesas', subtitle: 'Para se mimar com algo especial', cover: 'img/torta-morango.png', categories: ['Mini sobremesas', 'Sobremesas unitárias', 'Tortas doces', 'Sobremesas clássicas'] },
+            { name: 'Especiais', short: 'Especiais', subtitle: 'Edições limitadas e sazonais', cover: 'img/guirlanda-de-pistache.jpg', categories: ['Especiais de Natal'] },
         ];
 
         const CATEGORIES = [
@@ -2775,62 +2854,93 @@ flavors: ['Sonho de Valsa', 'Ouro branco', 'Ninho trufado', 'Pessêgo', 'Amendoi
             }
         });
 
+        // Escapes para montar o HTML dos cartões com segurança
+        const escHtml = (s) => String(s)
+            .replace(/&/g, '&amp;').replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+        const escJsAttr = (s) => escHtml(String(s).replace(/\\/g, '\\\\').replace(/'/g, "\\'"));
+
         function renderDiscovery() {
             const container = document.getElementById('discovery-cards');
+            const ctaWrap = document.getElementById('discovery-cta-wrap');
+            const total = MACRO_GROUPS.length;
+            const rest = total % 3; // quantos cartões sobram na última linha do desktop
+
             container.innerHTML = MACRO_GROUPS.map((group, i) => {
-                const isLastOdd = i === MACRO_GROUPS.length - 1 && MACRO_GROUPS.length % 2 !== 0;
-                const groupNameAttr = group.name.replace(/'/g, "\\'");
-                return `<div class="discovery-card ${isLastOdd ? 'col-span-2' : ''}" onclick="hideDiscovery('${groupNameAttr}')">
-                    <h3 class="serif-font text-base font-semibold text-[#22201C] leading-tight mb-1">${group.name}</h3>
-                    <p class="text-xs text-[#8C8676]/80 leading-relaxed">${group.subtitle}</p>
-                </div>`;
+                const groupNameAttr = escJsAttr(group.name);
+                const isLastOdd = i === total - 1 && total % 2 !== 0;
+
+                // Desktop usa uma grade de 6 colunas: 3 cartões por linha (2 colunas cada).
+                // A última linha incompleta se divide igualmente para não deixar buraco.
+                let desktopSpan = 'sm:col-span-2';
+                if (rest && i >= total - rest) {
+                    desktopSpan = rest === 1 ? 'sm:col-span-6' : 'sm:col-span-3';
+                }
+                // Cartão largo: sozinho na última linha (celular) ou ocupando a linha toda (desktop)
+                const wide = isLastOdd;
+                const smWide = rest === 1 && i === total - 1;
+
+                const photo = group.cover
+                    ? `<img src="${group.cover}" alt="" class="discovery-card-photo" decoding="async" fetchpriority="high" onerror="this.remove()">`
+                    : '';
+
+                return `<button type="button" class="discovery-card discovery-in ${wide ? 'wide' : ''} ${smWide ? 'sm-wide' : ''} ${isLastOdd ? 'col-span-2' : ''} ${desktopSpan}"
+                        style="animation-delay: ${140 + i * 70}ms"
+                        onclick="hideDiscovery('${groupNameAttr}')"
+                        aria-label="Ver ${escHtml(group.name)}">
+                    ${photo}
+                    <span class="discovery-card-body">
+                        <span class="discovery-card-title">${escHtml(group.short || group.name)}</span>
+                        <span class="discovery-card-sub">${escHtml(group.subtitle)}</span>
+                    </span>
+                </button>`;
             }).join('');
+
+            if (ctaWrap) ctaWrap.style.animationDelay = `${140 + total * 70}ms`;
         }
 
         function showDiscovery() {
             const overlay = document.getElementById('discovery-overlay');
             overlay.classList.remove('hiding');
             overlay.style.display = '';
-            const sweep = document.getElementById('discovery-sweep');
-            if (sweep) sweep.classList.remove('on', 'reveal', 'busy');
+            document.body.classList.remove('menu-revealing');
+            discoveryBusy = false;
         }
 
-        // Transição verde: o verde sobe cobrindo a tela e revela o cardápio completo
-        function enterMenu() {
-            const sweep = document.getElementById('discovery-sweep');
-            if (!sweep || sweep.classList.contains('busy')) return;
-            sweep.classList.add('busy', 'on');
-            // 1) verde termina de cobrir a tela → troca o conteúdo por baixo
+        // Transição para o cardápio: a tela inicial se dissolve para a frente
+        // enquanto o cardápio aparece por baixo. Sem cortina verde.
+        let discoveryBusy = false;
+
+        function leaveDiscovery(applySelection) {
+            if (discoveryBusy) return;
+            const overlay = document.getElementById('discovery-overlay');
+            if (!overlay || overlay.style.display === 'none') { applySelection(); return; }
+
+            discoveryBusy = true;
+            const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+            const duration = reduceMotion ? 200 : 460;
+
+            // O cardápio já é montado por baixo, então a dissolução revela o conteúdo final.
+            window.scrollTo({ top: 0 });
+            applySelection();
+
+            overlay.classList.add('hiding');
+            document.body.classList.add('menu-revealing');
+
             setTimeout(() => {
-                const overlay = document.getElementById('discovery-overlay');
                 overlay.style.display = 'none';
                 overlay.classList.remove('hiding');
-                activeGroupName = 'Todos';
-                activeGroupCategories = null;
-                renderMenu();
-                setActiveGroup('Todos');
-                window.scrollTo({ top: 0 });
-                // 2) verde sai para cima revelando o cardápio
-                requestAnimationFrame(() => sweep.classList.add('reveal'));
-                setTimeout(() => sweep.classList.remove('on', 'reveal', 'busy'), 640);
-            }, 600);
+                document.body.classList.remove('menu-revealing');
+                discoveryBusy = false;
+            }, duration);
+        }
+
+        function enterMenu() {
+            leaveDiscovery(() => selectGroup('Todos'));
         }
 
         function hideDiscovery(groupName) {
-            const overlay = document.getElementById('discovery-overlay');
-            overlay.classList.add('hiding');
-            setTimeout(() => {
-                overlay.style.display = 'none';
-                if (groupName) {
-                    selectGroup(groupName);
-                } else {
-                    activeGroupName = 'Todos';
-                    activeGroupCategories = null;
-                    renderMenu();
-                    setActiveGroup('Todos');
-                    window.scrollTo({ top: 0, behavior: 'smooth' });
-                }
-            }, 400);
+            leaveDiscovery(() => selectGroup(groupName || 'Todos'));
         }
 
         function renderCategories() {
