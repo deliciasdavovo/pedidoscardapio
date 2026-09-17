@@ -1,0 +1,34 @@
+name: Aplicar redesign da pagina inicial
+
+on:
+  push:
+    paths:
+      - '.github/workflows/apply-home-redesign.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Aplicar redesign
+        run: python .github/scripts/redesign_home.py
+
+      - name: Commitar alteracoes
+        run: |
+          if git diff --quiet -- index.html; then
+            echo "Sem alteracoes para commitar"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html
+          git commit -m "Redesenha pagina inicial em estilo editorial"
+          git push
