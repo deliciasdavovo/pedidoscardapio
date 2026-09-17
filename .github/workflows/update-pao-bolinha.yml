@@ -14,64 +14,28 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Atualizar precos, peso e visual dos cards
+        shell: bash
         run: |
           python - <<'PY'
           from pathlib import Path
+          import re
 
           path = Path('index.html')
           text = path.read_text(encoding='utf-8')
 
-          old_salgado = """{
-  id: 'pb_pao_bolinha_salgado',
-  name: 'Pão de Bolinha Salgado',
-  description: 'Massa caseira (30 bolinhas recheadas).',
-  category: 'Pão de bolinha',
-  image: 'img/pao-de-bolinha-salgado.png',
-  price: 45.00,
-  units: ['un'],
-  flavors: ['Quatro Queijos', 'Frango', 'Presunto e Queijo']
-},"""
-          new_salgado = """{
-  id: 'pb_pao_bolinha_salgado',
-  name: 'Pão de Bolinha Salgado',
-  description: '30 bolinhas recheadas · aprox. 500 g',
-  category: 'Pão de bolinha',
-  image: 'img/pao-de-bolinha-salgado.png',
-  price: 68.60,
-  units: ['un'],
-  flavors: ['Quatro Queijos', 'Frango', 'Presunto e Queijo']
-},"""
+          def update_item(source, item_id, description, price):
+              pattern = rf"(id: '{re.escape(item_id)}',[\s\S]*?description: ')[^']*(',[\s\S]*?price: )[0-9.]+(,)"
+              updated, count = re.subn(pattern, lambda m: m.group(1) + description + m.group(2) + price + m.group(3), source, count=1)
+              if count != 1:
+                  raise SystemExit(f'Produto {item_id} não encontrado para atualização.')
+              return updated
 
-          old_doce = """{
-  id: 'pb_pao_bolinha_doce',
-  name: 'Pão de Bolinha Doce',
-  description: 'Massa caseira (30 bolinhas recheadas).',
-  category: 'Pão de bolinha',
-  image: 'img/pao-de-bolinha-doce.jpg',
-  price: 42.00,
-  units: ['un'],
-  flavors: ['Chocolate', 'Doce de leite', 'Misto', 'Goiabada']
-},"""
-          new_doce = """{
-  id: 'pb_pao_bolinha_doce',
-  name: 'Pão de Bolinha Doce',
-  description: '30 bolinhas recheadas · aprox. 500 g',
-  category: 'Pão de bolinha',
-  image: 'img/pao-de-bolinha-doce.jpg',
-  price: 82.00,
-  units: ['un'],
-  flavors: ['Chocolate', 'Doce de leite', 'Misto', 'Goiabada']
-},"""
-
-          if old_salgado not in text:
-              raise SystemExit('Bloco do pão de bolinha salgado não encontrado.')
-          if old_doce not in text:
-              raise SystemExit('Bloco do pão de bolinha doce não encontrado.')
-
-          text = text.replace(old_salgado, new_salgado, 1)
-          text = text.replace(old_doce, new_doce, 1)
+          text = update_item(text, 'pb_pao_bolinha_salgado', '30 bolinhas recheadas · aprox. 500 g', '68.60')
+          text = update_item(text, 'pb_pao_bolinha_doce', '30 bolinhas recheadas · aprox. 500 g', '82.00')
 
           replacements = [
               ('border-radius: 2.5rem;', 'border-radius: 1.5rem;'),
@@ -79,13 +43,13 @@ jobs:
               ('transition: all 0.5s cubic-bezier(0.2, 0.8, 0.2, 1);', 'transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;'),
               ('class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-[1s]"', 'class="w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-500"'),
               ('<div class="p-8 flex flex-col flex-grow">', '<div class="p-6 sm:p-7 flex flex-col flex-grow">'),
-              ('<div class="mb-5">\n                            <h3 class="text-2xl serif-font mb-2 group-hover:text-[#8C8676] transition-colors">${item.name}</h3>', '<div class="mb-4">\n                            <h3 class="text-[22px] leading-tight serif-font mb-1.5 text-[#22201C] group-hover:text-[#2C4A34] transition-colors">${item.name}</h3>'),
+              ('<h3 class="text-2xl serif-font mb-2 group-hover:text-[#8C8676] transition-colors">${item.name}</h3>', '<h3 class="text-[22px] leading-tight serif-font mb-2 group-hover:text-[#2C4A34] transition-colors">${item.name}</h3>'),
               ('class="product-desc text-[13px] leading-relaxed text-[#22201C]/60"', 'class="product-desc text-[13px] leading-[1.55] text-[#22201C]/55"'),
               ('class="text-[13px] font-semibold text-[#8C8676] mt-2" id="unit-price-label-${item.id}"', 'class="text-[18px] leading-none font-bold tracking-[-0.02em] text-[#BE6B2E] mt-3" id="unit-price-label-${item.id}"'),
-              ('<div class="mt-auto pt-6 border-t border-[#8C8676]/10 space-y-5">', '<div class="mt-auto pt-5 border-t border-[#8C8676]/12 space-y-4">'),
+              ('<div class="mt-auto pt-6 border-t border-[#8C8676]/10 space-y-5">', '<div class="mt-auto pt-5 border-t border-[#8C8676]/10 space-y-4">'),
               ('class="w-full bg-[#ECE9E1] border border-[#8C8676]/10 rounded-xl px-4 py-2 text-xs', 'class="w-full min-h-[42px] bg-[#F4F1EA] border border-[#8C8676]/15 rounded-xl px-4 py-2.5 text-xs'),
-              ('<div class="flex items-center justify-between">', '<div class="flex items-center justify-between gap-4">'),
-              ('<div class="text-right">\n                                    <p class="text-xl font-bold tracking-tight" id="price-preview-${item.id}">', '<div class="text-right min-w-[104px]">\n                                    <p class="text-lg font-bold tracking-[-0.02em] text-[#22201C]" id="price-preview-${item.id}">'),
+              ('class="inline-flex items-stretch bg-white rounded-2xl shadow-sm border border-[#8C8676]/15 overflow-hidden"', 'class="inline-flex items-stretch bg-white rounded-xl shadow-sm border border-[#8C8676]/15 overflow-hidden"'),
+              ('<p class="text-xl font-bold tracking-tight" id="price-preview-${item.id}">', '<p class="text-lg font-bold tracking-[-0.02em] text-[#22201C]" id="price-preview-${item.id}">'),
               ('<p class="text-[11px] text-[#8C8676] font-semibold" id="price-label-${item.id}">Total</p>', '<p class="text-[10px] uppercase tracking-[0.08em] text-[#8C8676] font-semibold mt-0.5" id="price-label-${item.id}">Total</p>'),
               ('class="btn-primary w-full py-4 rounded-2xl text-[15px]', 'class="btn-primary w-full py-3.5 rounded-xl text-[14px]'),
               ('R$ ${initialPrice.toFixed(2)} ${unitSuffix}', "R$ ${initialPrice.toFixed(2).replace('.', ',')} ${unitSuffix}"),
@@ -97,22 +61,18 @@ jobs:
           ]
 
           for old, new in replacements:
-              if old not in text:
-                  print('Aviso: trecho visual não encontrado:', old[:90])
-                  continue
-              text = text.replace(old, new, 1)
+              if old in text:
+                  text = text.replace(old, new, 1)
 
           path.write_text(text, encoding='utf-8')
           PY
 
       - name: Commitar alteracoes
+        shell: bash
         run: |
+          rm -f .github/workflows/update-pao-bolinha.yml
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add index.html
-          if git diff --cached --quiet; then
-            echo "Nenhuma alteracao necessaria."
-            exit 0
-          fi
+          git add index.html .github/workflows/update-pao-bolinha.yml
           git commit -m "Atualiza paes de bolinha e padroniza cards"
           git push
