@@ -1,0 +1,72 @@
+name: Atualizar precos das cestas
+
+on:
+  push:
+    paths:
+      - '.github/workflows/update-cesta-prices-temp.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  update-prices:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Atualizar valores das cestas
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import re
+
+          path = Path('index.html')
+          text = path.read_text(encoding='utf-8')
+
+          start = text.index("id: 'cst1'")
+          end = text.index("id: 'cb1'", start)
+          block = text[start:end]
+
+          # O preço-base do card acompanha a primeira opção (Cesta Amarela).
+          block, n_base = re.subn(r"(image: 'img/cesta-de-cafe-da-manha\.png',\s*\n\s*price:)\s*\d+(?:\.\d+)?", r"\g<1> 166.00", block, count=1)
+          if n_base != 1:
+              raise SystemExit(f'Preço-base: esperado 1 campo, encontrado {n_base}.')
+
+          prices = {
+              'Cesta Amarela': 166.00,
+              'Cesta Violeta': 233.00,
+              'Cesta Laranja': 321.00,
+              'Cesta Azul': 209.00,
+          }
+
+          for name, price in prices.items():
+              pattern = rf"('{re.escape(name)}'\s*:\s*\{{\s*\n\s*price:)\s*\d+(?:\.\d+)?"
+              block, count = re.subn(pattern, lambda m, p=price: f"{m.group(1)} {p:.2f}", block, count=1)
+              if count != 1:
+                  raise SystemExit(f'{name}: esperado 1 preço, encontrado {count}.')
+
+          text = text[:start] + block + text[end:]
+          path.write_text(text, encoding='utf-8')
+          PY
+
+      - name: Conferir alteracoes
+        shell: bash
+        run: |
+          grep -A55 "id: 'cst1'" index.html | head -60
+          git diff --check
+
+      - name: Salvar no repositorio
+        shell: bash
+        run: |
+          if git diff --quiet -- index.html; then
+            echo 'Nenhuma alteracao necessaria.'
+            exit 0
+          fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add index.html
+          git commit -m 'Atualiza preços das cestas de café da manhã'
+          git push
