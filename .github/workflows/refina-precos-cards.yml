@@ -1,0 +1,382 @@
+name: Refinar precos e opcoes dos cards
+
+on:
+  push:
+    paths:
+      - '.github/workflows/refina-precos-cards.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  refine:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Refinar cards e pesos aproximados
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          path = Path('index.html')
+          text = path.read_text(encoding='utf-8')
+
+          def replace_once(old, new, label):
+              global text
+              count = text.count(old)
+              if count != 1:
+                  raise SystemExit(f'{label}: esperado 1 trecho, encontrado {count}.')
+              text = text.replace(old, new, 1)
+
+          # Pão de bolinha: os valores informados são por kg; cada unidade tem aprox. 500 g.
+          old_salgado = """{
+  id: 'pb_pao_bolinha_salgado',
+  name: 'Pão de Bolinha Salgado',
+  description: '30 bolinhas recheadas · aprox. 500 g',
+  category: 'Pão de bolinha',
+  image: 'img/pao-de-bolinha-salgado.png',
+  price: 68.60,
+  units: ['un'],
+  flavors: ['Quatro Queijos', 'Frango', 'Presunto e Queijo']
+},"""
+          new_salgado = """{
+  id: 'pb_pao_bolinha_salgado',
+  name: 'Pão de Bolinha Salgado',
+  description: '30 bolinhas recheadas.',
+  category: 'Pão de bolinha',
+  image: 'img/pao-de-bolinha-salgado.png',
+  price: 34.30,
+  priceKg: 68.60,
+  approxWeightG: 500,
+  units: ['un'],
+  flavors: ['Quatro Queijos', 'Frango', 'Presunto e Queijo']
+},"""
+          replace_once(old_salgado, new_salgado, 'Pão de Bolinha Salgado')
+
+          old_doce = """{
+  id: 'pb_pao_bolinha_doce',
+  name: 'Pão de Bolinha Doce',
+  description: '30 bolinhas recheadas · aprox. 500 g',
+  category: 'Pão de bolinha',
+  image: 'img/pao-de-bolinha-doce.jpg',
+  price: 82.00,
+  units: ['un'],
+  flavors: ['Chocolate', 'Doce de leite', 'Misto', 'Goiabada']
+},"""
+          new_doce = """{
+  id: 'pb_pao_bolinha_doce',
+  name: 'Pão de Bolinha Doce',
+  description: '30 bolinhas recheadas.',
+  category: 'Pão de bolinha',
+  image: 'img/pao-de-bolinha-doce.jpg',
+  price: 41.00,
+  priceKg: 82.00,
+  approxWeightG: 500,
+  units: ['un'],
+  flavors: ['Chocolate', 'Doce de leite', 'Misto', 'Goiabada']
+},"""
+          replace_once(old_doce, new_doce, 'Pão de Bolinha Doce')
+
+          # Helpers exclusivos do bloco de produto.
+          anchor = """        function createProductCard(item) {
+"""
+          helpers = r'''        function formatProductMoney(value) {
+            return Number(value || 0).toLocaleString('pt-BR', {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            });
+        }
+
+        function formatProductUnitSuffix(unit, isKit = false) {
+            if (isKit) return '/ pessoa';
+            return unit === 'kg' ? '/ kg' : '/ unidade';
+        }
+
+        function getApproxUnitWeightG(item, id = null, unitPriceOverride = null) {
+            if (!item) return null;
+            if (typeof item.approxWeightG === 'number' && item.approxWeightG > 0) {
+                return Math.round(item.approxWeightG);
+            }
+
+            const descMatch = String(item.description || '').match(/aprox\.?\s*(\d+(?:[.,]\d+)?)\s*g/i);
+            if (descMatch) {
+                return Math.round(parseFloat(descMatch[1].replace(',', '.')));
+            }
+
+            if (!Array.isArray(item.units) || !item.units.includes('un') || !item.units.includes('kg')) {
+                return null;
+            }
+
+            let unitPrice = Number(unitPriceOverride ?? item.price);
+            let kgPrice = Number(item.priceKg);
+
+            let selectedSize = null;
+            if (Array.isArray(item.sizes) && item.sizes.length) {
+                let sizeIndex = 0;
+                if (id) {
+                    const buttons = Array.from(document.querySelectorAll(`[id^="size-${id}-"]`));
+                    const activeIndex = buttons.findIndex(btn => btn.classList.contains('bg-[#2C4A34]'));
+                    if (activeIndex >= 0) sizeIndex = activeIndex;
+                }
+                selectedSize = item.sizes[sizeIndex] || item.sizes[0];
+                if (selectedSize && typeof selectedSize.price === 'number') unitPrice = selectedSize.price;
+                if (selectedSize && typeof selectedSize.priceKg === 'number') kgPrice = selectedSize.priceKg;
+            }
+
+            let flavor = null;
+            if (id) flavor = document.getElementById('flavor-' + id)?.value || null;
+            if (!flavor && Array.isArray(item.flavors) && item.flavors.length) {
+                const first = item.flavors[0];
+                flavor = typeof first === 'string' ? first : first?.label;
+            }
+            const variant = flavor && item.variants ? item.variants[flavor] : null;
+            if (variant) {
+                if (typeof variant.price === 'number') unitPrice = variant.price;
+                if (typeof variant.priceKg === 'number') kgPrice = variant.priceKg;
+            }
+
+            if (!Number.isFinite(unitPrice) || unitPrice <= 0 || !Number.isFinite(kgPrice) || kgPrice <= 0) {
+                return null;
+            }
+
+            const rawGrams = (unitPrice / kgPrice) * 1000;
+            const step = rawGrams < 40 ? 5 : 10;
+            return Math.max(step, Math.round(rawGrams / step) * step);
+        }
+
+        function updateProductPriceDisplay(item, id, unit, price) {
+            const valueEl = document.getElementById('unit-price-value-' + id);
+            const suffixEl = document.getElementById('unit-price-suffix-' + id);
+            const approxEl = document.getElementById('approx-weight-label-' + id);
+
+            if (valueEl) valueEl.textContent = formatProductMoney(price);
+            if (suffixEl) suffixEl.textContent = formatProductUnitSuffix(unit, !!item?.isKit);
+
+            const approxWeight = unit === 'un' ? getApproxUnitWeightG(item, id, price) : null;
+            if (approxEl) {
+                approxEl.textContent = approxWeight ? `aprox. ${approxWeight} g por unidade` : '';
+                approxEl.classList.toggle('hidden', !approxWeight);
+            }
+        }
+
+        function createProductCard(item) {
+'''
+          replace_once(anchor, helpers, 'Inserção dos helpers de preço')
+
+          replace_once(
+              """            const unitSuffix = item.isKit ? '/pessoa' : (item.units[0] === 'kg' ? '/kg' : '/un');
+
+            return `
+""",
+              """            const initialUnit = item.isKit ? 'un' : item.units[0];
+            const unitSuffix = formatProductUnitSuffix(initialUnit, item.isKit);
+            const initialApproxWeight = initialUnit === 'un' ? getApproxUnitWeightG(item, null, initialPrice) : null;
+
+            return `
+""",
+              'Variáveis iniciais do preço'
+          )
+
+          old_price_markup = """                            <p class=\"text-[18px] leading-none font-bold tracking-[-0.02em] text-[#BE6B2E] mt-3\" id=\"unit-price-label-${item.id}\">
+                                R$ ${initialPrice.toFixed(2).replace('.', ',')} ${unitSuffix}
+                            </p>
+"""
+          new_price_markup = """                            <div class=\"product-price-block mt-3\" id=\"unit-price-label-${item.id}\">
+                                <div class=\"flex items-baseline gap-1.5\">
+                                    <span class=\"product-price-currency\">R$</span>
+                                    <span class=\"product-price-value\" id=\"unit-price-value-${item.id}\">${formatProductMoney(initialPrice)}</span>
+                                    <span class=\"product-price-suffix\" id=\"unit-price-suffix-${item.id}\">${unitSuffix}</span>
+                                </div>
+                                <p id=\"approx-weight-label-${item.id}\" class=\"product-approx-weight ${initialApproxWeight ? '' : 'hidden'}\">${initialApproxWeight ? `aprox. ${initialApproxWeight} g por unidade` : ''}</p>
+                            </div>
+"""
+          replace_once(old_price_markup, new_price_markup, 'Bloco visual do preço')
+
+          old_toggle = """                            <div class=\"flex bg-[#ECE9E1] p-1 rounded-2xl border border-[#8C8676]/5\">
+                                <button onclick=\"setCardUnit('${item.id}', 'un')\" id=\"unit-un-${item.id}\" class=\"unit-btn active flex-1 py-2 rounded-xl text-[12px] font-semibold bg-[#22201C] text-white\">Unidade</button>
+                                <button onclick=\"setCardUnit('${item.id}', 'kg')\" id=\"unit-kg-${item.id}\" class=\"unit-btn flex-1 py-2 rounded-xl text-[12px] font-semibold text-[#8C8676]/50\">Kilo</button>
+                            </div>
+"""
+          new_toggle = """                            <div class=\"product-unit-toggle grid grid-cols-2 gap-1 p-1 rounded-xl\">
+                                <button onclick=\"setCardUnit('${item.id}', 'un')\" id=\"unit-un-${item.id}\" class=\"unit-btn active py-2.5 rounded-lg text-[12px] font-semibold bg-[#2C4A34] text-white\">Unidade</button>
+                                <button onclick=\"setCardUnit('${item.id}', 'kg')\" id=\"unit-kg-${item.id}\" class=\"unit-btn py-2.5 rounded-lg text-[12px] font-semibold text-[#8C8676]/70\">Por kg</button>
+                            </div>
+"""
+          replace_once(old_toggle, new_toggle, 'Seletor unidade/kg')
+
+          old_flavor = """                            <div class=\"space-y-2\">
+                                <label class=\"text-[12px] font-semibold text-[#8C8676]\">Sabor/Tipo</label>
+                                <select id=\"flavor-${item.id}\" onchange=\"onFlavorChange('${item.id}')\" class=\"w-full min-h-[42px] bg-[#F4F1EA] border border-[#8C8676]/15 rounded-xl px-4 py-2.5 text-xs focus:outline-none focus:ring-2 focus:ring-[#8C8676]/20 appearance-none text-[#22201C]\">
+${getFlavorList(item).map(f => `<option value=\"${f.label}\">${f.label}</option>`).join('')}                                </select>
+                            </div>
+"""
+          new_flavor = """                            <div class=\"space-y-2\">
+                                <label class=\"product-option-label\" for=\"flavor-${item.id}\">Escolha o sabor</label>
+                                <div class=\"relative\">
+                                    <select id=\"flavor-${item.id}\" onchange=\"onFlavorChange('${item.id}')\" class=\"product-option-select w-full min-h-[46px] rounded-xl pl-4 pr-10 py-2.5 text-[13px] focus:outline-none appearance-none text-[#22201C]\">
+${getFlavorList(item).map(f => `<option value=\"${f.label}\">${f.label}</option>`).join('')}                                    </select>
+                                    <i class=\"fas fa-chevron-down absolute right-4 top-1/2 -translate-y-1/2 text-[10px] text-[#2C4A34]/60 pointer-events-none\"></i>
+                                </div>
+                            </div>
+"""
+          replace_once(old_flavor, new_flavor, 'Seletor de sabor')
+
+          old_add = """                                <button onclick=\"addToCart('${item.id}')\" class=\"btn-primary w-full py-3.5 rounded-xl text-[14px] tracking-[-0.01em] font-semibold active:scale-95\">
+                                    ${item.isKit ? 'Montar Kit' : 'Adicionar à Cesta'}
+                                </button>
+"""
+          new_add = """                                <button onclick=\"addToCart('${item.id}')\" class=\"btn-primary product-add-btn w-full py-3.5 rounded-xl text-[14px] tracking-[-0.01em] font-semibold active:scale-[0.99] flex items-center justify-center gap-2\">
+                                    <span>${item.isKit ? 'Montar kit' : 'Adicionar à cesta'}</span>
+                                    <i class=\"fas fa-arrow-right text-[11px] opacity-80\"></i>
+                                </button>
+"""
+          replace_once(old_add, new_add, 'Botão adicionar')
+
+          # Atualiza as cores do controle Unidade/kg no JS.
+          old_unit_js = """            if (unit === 'un') {
+                btnUn.classList.add('active', 'bg-[#22201C]', 'text-white'); btnUn.classList.remove('text-[#8C8676]/50');
+                btnKg.classList.remove('active', 'bg-[#22201C]', 'text-white'); btnKg.classList.add('text-[#8C8676]/50');
+                input.value = \"1\"; input.step = \"1\";
+            } else {
+                btnKg.classList.add('active', 'bg-[#22201C]', 'text-white'); btnKg.classList.remove('text-[#8C8676]/50');
+                btnUn.classList.remove('active', 'bg-[#22201C]', 'text-white'); btnUn.classList.add('text-[#8C8676]/50');
+                input.value = \"0.5\"; input.step = \"0.1\";
+            }
+"""
+          new_unit_js = """            if (unit === 'un') {
+                btnUn.classList.add('active', 'bg-[#2C4A34]', 'text-white'); btnUn.classList.remove('text-[#8C8676]/70');
+                btnKg.classList.remove('active', 'bg-[#2C4A34]', 'text-white'); btnKg.classList.add('text-[#8C8676]/70');
+                input.value = \"1\"; input.step = \"1\";
+            } else {
+                btnKg.classList.add('active', 'bg-[#2C4A34]', 'text-white'); btnKg.classList.remove('text-[#8C8676]/70');
+                btnUn.classList.remove('active', 'bg-[#2C4A34]', 'text-white'); btnUn.classList.add('text-[#8C8676]/70');
+                input.value = \"0.5\"; input.step = \"0.1\";
+            }
+"""
+          replace_once(old_unit_js, new_unit_js, 'Lógica visual Unidade/kg')
+
+          # Atualização dinâmica do preço e do peso aproximado.
+          old_kit_update = """    document.getElementById('unit-price-label-' + id).innerText = 'R$ ' + unitPrice.toFixed(2).replace('.', ',') + ' ' + suffix;
+    document.getElementById('price-preview-' + id).innerText = 'R$ ' + total.toFixed(2).replace('.', ',');
+    return;
+"""
+          new_kit_update = """    updateProductPriceDisplay(item, id, 'un', unitPrice);
+    document.getElementById('price-preview-' + id).innerText = 'R$ ' + formatProductMoney(total);
+    return;
+"""
+          replace_once(old_kit_update, new_kit_update, 'Atualização de preço dos kits')
+
+          old_regular_update = """            document.getElementById('unit-price-label-' + id).innerText = 'R$ ' + price.toFixed(2).replace('.', ',') + ' ' + suffix;
+            document.getElementById('price-preview-' + id).innerText = 'R$ ' + (price * qty).toFixed(2).replace('.', ',');
+"""
+          new_regular_update = """            updateProductPriceDisplay(item, id, unit, price);
+            document.getElementById('price-preview-' + id).innerText = 'R$ ' + formatProductMoney(price * qty);
+"""
+          replace_once(old_regular_update, new_regular_update, 'Atualização dinâmica do preço')
+
+          # O valor total inicial também usa o formato brasileiro.
+          replace_once(
+              """<p class=\"text-lg font-bold tracking-[-0.02em] text-[#22201C]\" id=\"price-preview-${item.id}\">R$ ${(initialPrice * initialQty).toFixed(2).replace('.', ',')}</p>""",
+              """<p class=\"text-lg font-bold tracking-[-0.02em] text-[#22201C]\" id=\"price-preview-${item.id}\">R$ ${formatProductMoney(initialPrice * initialQty)}</p>""",
+              'Total inicial'
+          )
+
+          # CSS específico, sem alterar a estrutura geral dos cards.
+          css_anchor = """.product-desc.expanded {
+  display: block;
+  -webkit-line-clamp: unset;
+  overflow: visible;
+}
+"""
+          css_extra = """.product-desc.expanded {
+  display: block;
+  -webkit-line-clamp: unset;
+  overflow: visible;
+}
+
+/* Refinamento do bloco comercial dos cards */
+.product-price-currency {
+  color: #BE6B2E;
+  font-size: 12px;
+  font-weight: 700;
+}
+.product-price-value {
+  color: #22201C;
+  font-size: 24px;
+  line-height: 1;
+  font-weight: 700;
+  letter-spacing: -0.035em;
+}
+.product-price-suffix {
+  color: rgba(140, 134, 118, 0.9);
+  font-size: 11px;
+  font-weight: 600;
+}
+.product-approx-weight {
+  margin-top: 7px;
+  color: rgba(44, 74, 52, 0.68);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+}
+.product-unit-toggle {
+  background: #F4F1EA;
+  border: 1px solid rgba(140, 134, 118, 0.14);
+}
+.product-option-label {
+  display: block;
+  color: rgba(44, 74, 52, 0.72);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.11em;
+  text-transform: uppercase;
+}
+.product-option-select {
+  background: #FAF8F3;
+  border: 1px solid rgba(44, 74, 52, 0.16);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+}
+.product-option-select:focus {
+  background: #FFFFFF;
+  border-color: rgba(44, 74, 52, 0.40);
+  box-shadow: 0 0 0 3px rgba(44, 74, 52, 0.08);
+}
+.product-add-btn {
+  background: #2C4A34 !important;
+  box-shadow: 0 1px 2px rgba(32, 54, 31, 0.16), 0 7px 18px rgba(32, 54, 31, 0.14) !important;
+}
+.product-add-btn:hover {
+  background: #20361F !important;
+  box-shadow: 0 2px 4px rgba(32, 54, 31, 0.18), 0 10px 22px rgba(32, 54, 31, 0.16) !important;
+}
+.product-card .add-reveal {
+  opacity: 1;
+  transform: none;
+  pointer-events: auto;
+}
+"""
+          replace_once(css_anchor, css_extra, 'CSS comercial dos cards')
+
+          path.write_text(text, encoding='utf-8')
+          PY
+
+      - name: Validar e commitar
+        shell: bash
+        run: |
+          grep -q "price: 34.30" index.html
+          grep -q "priceKg: 68.60" index.html
+          grep -q "price: 41.00" index.html
+          grep -q "priceKg: 82.00" index.html
+          grep -q "approxWeightG: 500" index.html
+          grep -q "Escolha o sabor" index.html
+          grep -q "product-add-btn" index.html
+          rm -f .github/workflows/refina-precos-cards.yml
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html .github/workflows/refina-precos-cards.yml
+          git commit -m "Refina preços, peso aproximado e opções dos cards"
+          git push
