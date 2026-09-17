@@ -196,8 +196,8 @@ new_html = r'''
             </div>
 
             <section class="discovery-hero">
-                <h1 class="discovery-title">Sabores que <em>aproximam</em></h1>
-                <p class="discovery-subtitle">Escolha uma categoria para encontrar o que você procura.</p>
+                <h1 class="discovery-title">O que você está procurando hoje?</h1>
+                <p class="discovery-subtitle">Escolha uma categoria abaixo.</p>
             </section>
 
             <p class="discovery-section-label">Cardápio</p>
