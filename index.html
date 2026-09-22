@@ -865,7 +865,7 @@
     <div id="checkout-modal" class="fixed inset-0 z-[65] invisible">
         <div id="checkout-overlay" class="absolute inset-0 bg-[#22201C]/70 backdrop-blur-md opacity-0 transition-opacity duration-300" onclick="closeCheckout()"></div>
 
-        <div id="checkout-panel" class="absolute inset-y-0 right-0 w-full max-w-lg bg-[#F4F1EA] shadow-2xl translate-x-full transition-transform duration-500 flex flex-col h-full">
+        <div id="checkout-panel" class="absolute inset-y-0 right-0 w-full max-w-lg bg-[#F4F1EA] shadow-2xl translate-x-full transition-transform duration-500 flex flex-col h-full overflow-hidden">
             <div class="px-6 sm:px-8 py-5 sm:py-6 border-b border-[#8C8676]/10 bg-white flex items-center justify-between shrink-0">
                 <div>
                     <p class="text-[11px] uppercase tracking-[0.12em] font-semibold text-[#8C8676] mb-1">Última etapa</p>
@@ -876,16 +876,16 @@
                 </button>
             </div>
 
-            <div class="flex-grow min-h-0 overflow-y-auto px-6 sm:px-8 py-6 space-y-6 custom-scrollbar">
+            <div class="flex-grow min-h-0 overflow-y-auto px-5 sm:px-8 py-5 sm:py-6 space-y-5 custom-scrollbar">
                 <button type="button" onclick="backToCart()" class="inline-flex items-center gap-2 text-[13px] font-semibold text-[#8C8676] hover:text-[#22201C] transition-colors">
                     <i class="fas fa-arrow-left text-xs"></i>
                     Voltar à cesta
                 </button>
 
-                <div class="bg-white rounded-[1.6rem] border border-[#8C8676]/10 p-5 space-y-5 shadow-sm">
+                <div class="space-y-5">
                     <div class="space-y-2">
                         <label class="text-[12px] font-semibold text-[#8C8676] ml-1">Seu nome</label>
-                        <input type="text" id="order-name" placeholder="Como podemos te chamar?" class="w-full bg-[#ECE9E1]/50 border border-[#8C8676]/10 rounded-2xl px-5 py-3.5 text-sm focus:outline-none focus:ring-4 focus:ring-[#8C8676]/5 transition-all">
+                        <input type="text" id="order-name" name="name" autocomplete="name" placeholder="Como podemos te chamar?" class="w-full bg-[#ECE9E1]/50 border border-[#8C8676]/10 rounded-2xl px-5 py-3.5 text-sm focus:outline-none focus:ring-4 focus:ring-[#8C8676]/5 transition-all">
                     </div>
 
                     <div class="space-y-3">
@@ -895,21 +895,21 @@
                                 <i class="fas fa-info"></i>
                             </button>
                         </div>
-                        <div id="sched-fields" class="grid grid-cols-2 gap-3">
+                        <div id="sched-fields" class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                             <div class="space-y-1">
                                 <label class="text-[11px] font-semibold text-[#8C8676] ml-1 block">Data</label>
-                                <input type="date" id="order-date" class="w-full bg-[#ECE9E1]/50 rounded-xl px-3 py-3 text-sm border border-[#8C8676]/10 outline-none">
+                                <input type="date" id="order-date" class="w-full min-w-0 bg-[#ECE9E1]/50 rounded-xl px-3 py-3 text-sm border border-[#8C8676]/10 outline-none">
                             </div>
                             <div class="space-y-1">
                                 <label class="text-[11px] font-semibold text-[#8C8676] ml-1 block">Horário</label>
-                                <input type="time" id="order-time" class="w-full bg-[#ECE9E1]/50 rounded-xl px-3 py-3 text-sm border border-[#8C8676]/10 outline-none">
+                                <input type="time" id="order-time" class="w-full min-w-0 bg-[#ECE9E1]/50 rounded-xl px-3 py-3 text-sm border border-[#8C8676]/10 outline-none">
                             </div>
                         </div>
                         <p class="text-[10px] text-[#8C8676]/70 leading-relaxed">Encomendas a partir de amanhã. Para pronta entrega hoje, ligue <a href="tel:+551140135248" class="font-semibold underline text-[#22201C]">(11) 4013-5248</a>.</p>
                     </div>
                 </div>
 
-                <div class="bg-white rounded-[1.6rem] border border-[#8C8676]/10 p-5 space-y-5 shadow-sm">
+                <div class="pt-5 border-t border-[#8C8676]/10 space-y-5">
                     <div class="space-y-2">
                         <label class="text-[12px] font-semibold text-[#8C8676] ml-1">Como prefere receber?</label>
                         <div class="toggle-container">
@@ -930,10 +930,11 @@
                         <div id="delivery-address-container" class="hidden space-y-4">
                             <div class="space-y-2">
                                 <label class="text-[11px] font-semibold text-[#8C8676] ml-1 block">CEP da entrega</label>
-                                <div class="flex gap-2">
+                                <div class="grid grid-cols-1 sm:grid-cols-[minmax(0,1fr)_auto] gap-2">
                                     <input
                                         type="text"
                                         id="delivery-cep"
+                                        name="postal-code"
                                         inputmode="numeric"
                                         maxlength="9"
                                         autocomplete="postal-code"
@@ -941,7 +942,7 @@
                                         oninput="handleDeliveryCepInput(this)"
                                         class="flex-1 min-w-0 bg-[#ECE9E1]/50 border border-[#8C8676]/10 rounded-2xl px-5 py-3.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#8C8676]/20 transition-all"
                                     >
-                                    <button type="button" onclick="lookupDeliveryCep()" class="shrink-0 px-4 rounded-2xl bg-[#22201C] text-white text-[12px] font-semibold active:scale-95 transition-all">
+                                    <button type="button" onclick="lookupDeliveryCep()" class="w-full sm:w-auto shrink-0 px-5 py-3.5 rounded-2xl bg-[#22201C] text-white text-[12px] font-semibold active:scale-95 transition-all">
                                         Calcular
                                     </button>
                                 </div>
@@ -953,7 +954,7 @@
 
                             <div class="space-y-2">
                                 <label class="text-[11px] font-semibold text-[#8C8676] ml-1 block">Endereço</label>
-                                <input type="text" id="delivery-address" oninput="this.dataset.autoFilled='false'" placeholder="Rua, número, bairro e complemento" class="w-full bg-[#ECE9E1]/50 border border-[#8C8676]/10 rounded-2xl px-5 py-3.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#8C8676]/20 transition-all">
+                                <input type="text" id="delivery-address" name="street-address" autocomplete="street-address" oninput="this.dataset.autoFilled='false'" placeholder="Rua, número, bairro e complemento" class="w-full bg-[#ECE9E1]/50 border border-[#8C8676]/10 rounded-2xl px-5 py-3.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#8C8676]/20 transition-all">
                             </div>
 
                             <div id="special-delivery-note" class="hidden rounded-2xl bg-[#F3EEE5] border border-[#8C8676]/10 px-4 py-3 text-[11px] leading-relaxed text-[#6E665A]">
@@ -964,7 +965,7 @@
                 </div>
             </div>
 
-            <div class="shrink-0 bg-white border-t border-[#8C8676]/10 px-6 sm:px-8 pt-4 pb-6 space-y-3">
+            <div class="shrink-0 bg-white border-t border-[#8C8676]/10 px-5 sm:px-8 pt-4 pb-[max(1.5rem,env(safe-area-inset-bottom))] space-y-3">
                 <div id="delivery-fee-row" class="hidden flex justify-between items-center text-[13px] text-[#8C8676]">
                     <span class="font-medium">Taxa de entrega</span>
                     <span id="delivery-fee-value" class="font-bold">Informe o CEP</span>
@@ -2948,13 +2949,16 @@ flavors: ['Sonho de Valsa', 'Ouro branco', 'Ninho trufado', 'Pessêgo', 'Amendoi
         let toastAutoHideTimer = null;
         let toastCleanupTimer = null;
         let pendingKitSelection = null;
+        const CHECKOUT_PREFS_KEY = 'delicias_checkout_preferences_v1';
+        const WHATSAPP_RETURN_KEY = 'delicias_return_from_whatsapp';
 
         window.onload = () => {
             renderCategories();
             renderMenu();
             renderDiscovery();
             setOrderType('Encomenda');
-            setFulfillment('Retirada');
+            restoreCheckoutPreferences();
+            bindCheckoutPreferencePersistence();
             initModalSwipe();
             window.addEventListener('scroll', onScrollSpy, { passive: true });
 
@@ -2976,17 +2980,52 @@ flavors: ['Sonho de Valsa', 'Ouro branco', 'Ninho trufado', 'Pessêgo', 'Amendoi
             });
         };
 
-        // Rede de segurança: ao voltar para o site (incluindo quando a página
-        // é restaurada do cache do navegador — ex.: retorno do WhatsApp no
-        // iOS), garante que o body não fique travado (overflow hidden),
-        // evitando a tela em branco/inacessível.
-        window.addEventListener('pageshow', (e) => {
-            if (e.persisted) {
-                document.body.classList.remove('cart-open');
-                const checkoutModal = document.getElementById('checkout-modal');
-                if (checkoutModal) checkoutModal.classList.add('invisible');
-            }
+        // Rede de segurança para retornos de apps externos (ex.: WhatsApp).
+        // Fecha imediatamente qualquer camada de pedido que tenha ficado
+        // congelada pelo navegador antes do fim de uma animação.
+        function resetOrderLayersImmediately() {
+            const checkoutModal = document.getElementById('checkout-modal');
+            const checkoutOverlay = document.getElementById('checkout-overlay');
+            const checkoutPanel = document.getElementById('checkout-panel');
+            const cartModal = document.getElementById('cart-modal');
+            const cartOverlay = document.getElementById('cart-overlay');
+            const cartPanel = document.getElementById('cart-panel');
+
+            if (checkoutOverlay) checkoutOverlay.classList.remove('opacity-100');
+            if (checkoutPanel) checkoutPanel.classList.add('translate-x-full');
+            if (checkoutModal) checkoutModal.classList.add('invisible');
+
+            if (cartOverlay) cartOverlay.classList.remove('opacity-100');
+            if (cartPanel) cartPanel.classList.add('translate-x-full');
+            if (cartModal) cartModal.classList.add('invisible');
+
+            document.body.classList.remove('cart-open');
+        }
+
+        function handleReturnFromWhatsApp() {
+            let returning = false;
+            try {
+                returning = sessionStorage.getItem(WHATSAPP_RETURN_KEY) === '1';
+            } catch (_) {}
+
+            if (!returning) return;
+            resetOrderLayersImmediately();
+
+            try {
+                sessionStorage.removeItem(WHATSAPP_RETURN_KEY);
+            } catch (_) {}
+        }
+
+        window.addEventListener('pageshow', () => {
+            resetOrderLayersImmediately();
+            handleReturnFromWhatsApp();
         });
+
+        document.addEventListener('visibilitychange', () => {
+            if (!document.hidden) handleReturnFromWhatsApp();
+        });
+
+        window.addEventListener('focus', handleReturnFromWhatsApp);
 
         function renderDiscovery() {
             const container = document.getElementById('discovery-cards');
@@ -3638,6 +3677,68 @@ if (!item.sizes && selectedFlavor && item.variants && item.variants[selectedFlav
             document.getElementById('price-preview-' + id).innerText = 'R$ ' + (price * qty).toFixed(2).replace('.', ',');
         }
 
+        function readCheckoutPreferences() {
+            try {
+                return JSON.parse(localStorage.getItem(CHECKOUT_PREFS_KEY) || '{}') || {};
+            } catch (_) {
+                return {};
+            }
+        }
+
+        function saveCheckoutPreferences() {
+            const prefs = {
+                name: document.getElementById('order-name')?.value?.trim() || '',
+                fulfillment: activeFulfillment,
+                pickupLocation: document.getElementById('pickup-location')?.value || 'Matriz',
+                cep: document.getElementById('delivery-cep')?.value || '',
+                address: document.getElementById('delivery-address')?.value?.trim() || ''
+            };
+
+            try {
+                localStorage.setItem(CHECKOUT_PREFS_KEY, JSON.stringify(prefs));
+            } catch (_) {}
+        }
+
+        function restoreCheckoutPreferences() {
+            const prefs = readCheckoutPreferences();
+
+            const nameInput = document.getElementById('order-name');
+            const pickup = document.getElementById('pickup-location');
+            const cepInput = document.getElementById('delivery-cep');
+            const addressInput = document.getElementById('delivery-address');
+
+            if (nameInput && prefs.name) nameInput.value = prefs.name;
+            if (pickup && prefs.pickupLocation) pickup.value = prefs.pickupLocation;
+
+            if (cepInput && prefs.cep) {
+                cepInput.value = formatCepValue(prefs.cep);
+            }
+
+            if (addressInput && prefs.address) {
+                addressInput.value = prefs.address;
+                addressInput.dataset.autoFilled = 'false';
+            }
+
+            setFulfillment(prefs.fulfillment === 'Entrega' ? 'Entrega' : 'Retirada');
+
+            if (prefs.fulfillment === 'Entrega' && (prefs.cep || '').replace(/\D/g, '').length === 8) {
+                setTimeout(() => lookupDeliveryCep(), 0);
+            }
+        }
+
+        function bindCheckoutPreferencePersistence() {
+            const nameInput = document.getElementById('order-name');
+            const pickup = document.getElementById('pickup-location');
+            const cepInput = document.getElementById('delivery-cep');
+            const addressInput = document.getElementById('delivery-address');
+
+            [nameInput, cepInput, addressInput].forEach(el => {
+                if (el) el.addEventListener('input', saveCheckoutPreferences);
+            });
+
+            if (pickup) pickup.addEventListener('change', saveCheckoutPreferences);
+        }
+
         // LÓGICA DO CARRINHO
         function openCart() {
             document.getElementById('cart-modal').classList.remove('invisible');
@@ -4261,6 +4362,7 @@ if (!item.sizes && flavor && item.variants && item.variants[flavor]) {
                         (calculatedDeliveryFee ? '.' : ' — taxa a consultar.');
                 }
 
+                saveCheckoutPreferences();
                 updateCartSummary();
             } catch (error) {
                 calculatedDeliveryFee = null;
@@ -4415,6 +4517,7 @@ if (!item.sizes && flavor && item.variants && item.variants[flavor]) {
             document.getElementById('pickup-location-container').classList.toggle('hidden', method === 'Entrega');
             document.getElementById('delivery-address-container').classList.toggle('hidden', method === 'Retirada');
             updateCartSummary();
+            saveCheckoutPreferences();
         }
 
         function formatWhatsAppCartItem(item) {
@@ -4529,8 +4632,18 @@ if (!item.sizes && flavor && item.variants && item.variants[flavor]) {
                 'Pedido\n' + itemsText + '\n\n' +
                 totalLabel + total.toFixed(2);
 
+            saveCheckoutPreferences();
+
+            try {
+                sessionStorage.setItem(WHATSAPP_RETURN_KEY, '1');
+            } catch (_) {}
+
+            // Fecha tudo de forma síncrona antes de sair para o WhatsApp.
+            // Assim, se o navegador suspender a página imediatamente,
+            // ela já fica pronta para ser retomada no cardápio.
+            resetOrderLayersImmediately();
+
             window.open('https://wa.me/' + WHATSAPP_NUMBER + '?text=' + encodeURIComponent(message), '_blank');
-            closeCheckout();
         }
 
         function formatDateLocalISO(date) {
