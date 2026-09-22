@@ -3387,12 +3387,16 @@ flavors: ['Sonho de Valsa', 'Ouro branco', 'Ninho trufado', 'Pessêgo', 'Amendoi
             const hasKg = item.units.includes('kg');
             const hasSizes = item.sizes && item.sizes.length > 0;
             const hasFlavors = item.flavors && item.flavors.length > 0;
+            const estimatedUnit = hasEstimatedUnitPrice(item);
             
             const initialQty = item.isKit ? 10 : (item.units[0] === 'kg' ? 0.5 : 1);
             const initialPrice = item.isKit
                 ? (getKitComputedTotal(item, initialQty) / initialQty)
                 : (hasSizes ? item.sizes[0].price : (item.units[0] === 'kg' ? item.priceKg : item.price));
             const unitSuffix = item.isKit ? '/pessoa' : (item.units[0] === 'kg' ? '/kg' : '/un');
+            const initialPriceLabel = estimatedUnit
+                ? `R$ ${item.priceKg.toFixed(2).replace('.', ',')}/kg <span class="block text-[11px] font-medium text-[#8C8676] mt-1">aprox. R$ ${item.price.toFixed(2).replace('.', ',')}/un</span>`
+                : `R$ ${initialPrice.toFixed(2).replace('.', ',')} ${unitSuffix}`;
 
             return `
                 <div class="product-card group relative flex flex-col h-full overflow-hidden">
@@ -3433,18 +3437,19 @@ flavors: ['Sonho de Valsa', 'Ouro branco', 'Ninho trufado', 'Pessêgo', 'Amendoi
                             <button id="desc-toggle-${item.id}" onclick="toggleDescription('${item.id}')" class="hidden mt-1 text-[12px] font-semibold text-[#8C8676] hover:text-[#233A29] transition-colors">
                                 Ver mais
                             </button>
-                            <p class="text-[18px] leading-none font-bold tracking-[-0.02em] text-[#BE6B2E] mt-3" id="unit-price-label-${item.id}">
-                                R$ ${initialPrice.toFixed(2).replace('.', ',')} ${unitSuffix}
-                            </p>
+                            <div class="text-[18px] leading-tight font-bold tracking-[-0.02em] text-[#BE6B2E] mt-3" id="unit-price-label-${item.id}">
+                                ${initialPriceLabel}
+                            </div>
                         </div>
                         
                         <div class="mt-auto pt-5 border-t border-[#8C8676]/10 space-y-4">
                             <!-- Toggle Un/Kg (só quando o produto é vendido nas duas unidades) -->
                             ${(hasKg && item.units.includes('un')) ? `
                             <div class="flex bg-[#ECE9E1] p-1 rounded-2xl border border-[#8C8676]/5">
-                                <button onclick="setCardUnit('${item.id}', 'un')" id="unit-un-${item.id}" class="unit-btn active flex-1 py-2 rounded-xl text-[12px] font-semibold bg-[#22201C] text-white">Unidade</button>
-                                <button onclick="setCardUnit('${item.id}', 'kg')" id="unit-kg-${item.id}" class="unit-btn flex-1 py-2 rounded-xl text-[12px] font-semibold text-[#8C8676]/50">Kilo</button>
+                                <button onclick="setCardUnit('${item.id}', 'un')" id="unit-un-${item.id}" class="unit-btn active flex-1 py-2 rounded-xl text-[12px] font-semibold bg-[#22201C] text-white">Unidade aprox.</button>
+                                <button onclick="setCardUnit('${item.id}', 'kg')" id="unit-kg-${item.id}" class="unit-btn flex-1 py-2 rounded-xl text-[12px] font-semibold text-[#8C8676]/50">Quilo</button>
                             </div>
+                            <p class="text-[10px] leading-relaxed text-[#8C8676]/75 px-1">Preço oficial por quilo. O valor por unidade é uma estimativa e pode variar conforme o peso.</p>
                             ` : ''}
 
                             <!-- Seleção de Tamanho (Aro) -->
@@ -3768,44 +3773,50 @@ ${getFlavorList(item).map(f => `<option value="${f.label}">${f.label}</option>`)
             const unit = getSelectedUnit(id);
             let price;
             let suffix = item.isKit ? '/pessoa' : (unit === 'kg' ? '/kg' : '/un');
-if (item.isKit) {
-    const total = getKitComputedTotal(item, qty);
-    const unitPrice = qty > 0 ? total / qty : 0;
-    document.getElementById('unit-price-label-' + id).innerText = 'R$ ' + unitPrice.toFixed(2).replace('.', ',') + ' ' + suffix;
-    document.getElementById('price-preview-' + id).innerText = 'R$ ' + total.toFixed(2).replace('.', ',');
-    return;
-}
-if (unit === 'kg') {
-    price = item.priceKg;
-} 
-else if (item.sizes && item.sizes.length > 0) {
-    const activeIdx = Array.from(document.querySelectorAll(`[id^="size-${id}-"]`)).findIndex(b => b.classList.contains('bg-[#2C4A34]'));
-    price = item.sizes[Math.max(0, activeIdx)].price;
-} 
-else {
-    price = item.price;
-}
-            // preço por sabor SOMENTE se NÃO tiver sizes
-const select = document.getElementById(`flavor-${id}`);
-const selectedFlavor = select ? select.value : null;
 
-if (!item.sizes && selectedFlavor && item.variants && item.variants[selectedFlavor]) {
-    const variant = item.variants[selectedFlavor];
+            if (item.isKit) {
+                const total = getKitComputedTotal(item, qty);
+                const unitPrice = qty > 0 ? total / qty : 0;
+                document.getElementById('unit-price-label-' + id).innerText = 'R$ ' + unitPrice.toFixed(2).replace('.', ',') + ' ' + suffix;
+                document.getElementById('price-preview-' + id).innerText = 'R$ ' + total.toFixed(2).replace('.', ',');
+                return;
+            }
 
-    if (unit === 'kg' && typeof variant.priceKg === 'number') {
-        price = variant.priceKg;
-    }
+            if (unit === 'kg') {
+                price = item.priceKg;
+            } else if (item.sizes && item.sizes.length > 0) {
+                const activeIdx = Array.from(document.querySelectorAll(`[id^="size-${id}-"]`)).findIndex(b => b.classList.contains('bg-[#2C4A34]'));
+                price = item.sizes[Math.max(0, activeIdx)].price;
+            } else {
+                price = item.price;
+            }
 
-    if (unit !== 'kg' && typeof variant.price === 'number') {
-        price = variant.price;
-    }
-}
+            const select = document.getElementById(`flavor-${id}`);
+            const selectedFlavor = select ? select.value : null;
 
-            document.getElementById('unit-price-label-' + id).innerText = 'R$ ' + price.toFixed(2).replace('.', ',') + ' ' + suffix;
-            document.getElementById('price-preview-' + id).innerText = 'R$ ' + (price * qty).toFixed(2).replace('.', ',');
+            if (!item.sizes && selectedFlavor && item.variants && item.variants[selectedFlavor]) {
+                const variant = item.variants[selectedFlavor];
+
+                if (unit === 'kg' && typeof variant.priceKg === 'number') {
+                    price = variant.priceKg;
+                }
+
+                if (unit !== 'kg' && typeof variant.price === 'number') {
+                    price = variant.price;
+                }
+            }
+
+            const isEstimatedUnit = unit === 'un' && hasEstimatedUnitPrice(item);
+            const priceLabel = isEstimatedUnit
+                ? 'aprox. R$ ' + price.toFixed(2).replace('.', ',') + ' /un'
+                : 'R$ ' + price.toFixed(2).replace('.', ',') + ' ' + suffix;
+
+            document.getElementById('unit-price-label-' + id).innerText = priceLabel;
+            document.getElementById('price-preview-' + id).innerText =
+                (isEstimatedUnit ? 'aprox. ' : '') + 'R$ ' + (price * qty).toFixed(2).replace('.', ',');
         }
 
-        function readCheckoutPreferences() {
+function readCheckoutPreferences() {
             try {
                 return JSON.parse(localStorage.getItem(CHECKOUT_PREFS_KEY) || '{}') || {};
             } catch (_) {
@@ -4594,6 +4605,7 @@ if (!item.sizes && flavor && item.variants && item.variants[flavor]) {
             }
             container.innerHTML = cart.map((item, idx) => {
                 const unitLabel = item.unit === 'kg' ? 'kg' : 'un';
+                const estimatedUnit = item.unit === 'un' && hasEstimatedUnitPrice(item);
                 return `
                 <div class="bg-white p-4 sm:p-5 rounded-[2rem] border border-[#8C8676]/10 flex gap-4 sm:gap-5 animate-fade shadow-sm">
                     <img src="${item.image}" onerror="handleImgError(this)" class="w-14 h-14 sm:w-16 sm:h-16 object-cover rounded-2xl shadow-md">
@@ -4605,7 +4617,8 @@ if (!item.sizes && flavor && item.variants && item.variants[flavor]) {
                                     ${item.size ? `<span class="text-[11px] bg-[#8C8676]/10 text-[#8C8676] px-2 py-0.5 rounded-full font-semibold">${item.size}</span>` : ''}
                                     ${item.flavor ? `<span class="text-[11px] bg-[#22201C]/5 text-[#22201C] px-2.5 py-1 rounded-full font-semibold">Sabor: ${item.flavor}</span>` : ''}
                                 </div>
-                                <p class="text-[12px] text-[#8C8676]/70 font-medium mt-1">R$ ${item.finalPrice.toFixed(2)} /${unitLabel}</p>
+                                <p class="text-[12px] text-[#8C8676]/70 font-medium mt-1">${estimatedUnit ? 'aprox. ' : ''}R$ ${item.finalPrice.toFixed(2).replace('.', ',')} /${unitLabel}</p>
+                                ${estimatedUnit ? '<p class="text-[10px] leading-relaxed text-[#8C8676]/60 mt-1">Valor unitário estimado pelo peso. O preço final é calculado por quilo.</p>' : ''}
                             </div>
                             <button onclick="removeFromCart(${idx})" class="text-red-300 hover:text-red-600 transition-colors p-2">
                                 <i class="fas fa-trash-alt text-sm"></i>
@@ -4617,7 +4630,7 @@ if (!item.sizes && flavor && item.variants && item.variants[flavor]) {
                                 <span class="min-w-[2.5rem] px-1 flex items-center justify-center text-xs font-semibold text-[#22201C] border-x border-[#8C8676]/15">${item.qty.toFixed(item.unit === 'kg' ? 1 : 0)}${unitLabel}</span>
                                 <button onclick="updateCartQty(${idx}, 1)" class="w-8 h-8 flex items-center justify-center text-[#2C4A34] text-xs hover:bg-[#2C4A34]/5 active:bg-[#2C4A34]/10 transition-colors"><i class="fas fa-plus"></i></button>
                             </div>
-                            <span class="text-base font-bold text-[#22201C]">R$ ${(item.finalPrice * item.qty).toFixed(2)}</span>
+                            <span class="text-base font-bold text-[#22201C]">${estimatedUnit ? 'aprox. ' : ''}R$ ${(item.finalPrice * item.qty).toFixed(2).replace('.', ',')}</span>
                         </div>
                     </div>
                 </div>
@@ -4656,6 +4669,7 @@ if (!item.sizes && flavor && item.variants && item.variants[flavor]) {
             const isKg = item.unit === 'kg';
             const qtyText = item.qty.toFixed(isKg ? 1 : 0).replace('.', ',') + (isKg ? ' kg' : ' un');
             const unitLabel = isKg ? 'kg' : 'un';
+            const estimatedUnit = !isKg && hasEstimatedUnitPrice(item);
             const subtotal = item.finalPrice * item.qty;
 
             const lines = [
@@ -4671,13 +4685,18 @@ if (!item.sizes && flavor && item.variants && item.variants[flavor]) {
                 lines.push('   Sabor: ' + item.flavor);
             }
 
-            lines.push('   Valor ' + unitLabel + ': ' + formatWhatsAppMoney(item.finalPrice));
-            lines.push('   *Subtotal: ' + formatWhatsAppMoney(subtotal) + '*');
+            lines.push('   Valor ' + unitLabel + ': ' + (estimatedUnit ? 'aprox. ' : '') + formatWhatsAppMoney(item.finalPrice));
+
+            if (estimatedUnit) {
+                lines.push('   _Valor por unidade estimado pelo peso; preço oficial calculado por quilo._');
+            }
+
+            lines.push('   *Subtotal' + (estimatedUnit ? ' estimado' : '') + ': ' + formatWhatsAppMoney(subtotal) + '*');
 
             return lines.join('\n');
         }
 
-        function formatWhatsAppOrderDate(value) {
+function formatWhatsAppOrderDate(value) {
             const date = parseDateInputValue(value);
             if (!date) return value;
 
@@ -5197,6 +5216,27 @@ function drawShareProductImage(ctx, img, width) {
     return imageHeight;
 }
 
+function hasEstimatedUnitPrice(item) {
+    return !!(
+        item &&
+        Array.isArray(item.units) &&
+        item.units.includes('kg') &&
+        item.units.includes('un') &&
+        typeof item.priceKg === 'number' &&
+        typeof item.price === 'number'
+    );
+}
+
+function getEstimatedUnitPriceText(item) {
+    if (!hasEstimatedUnitPrice(item)) return '';
+    return 'aprox. R$ ' + item.price.toFixed(2).replace('.', ',') + '/un';
+}
+
+function getKgPriceText(item) {
+    if (!item || typeof item.priceKg !== 'number') return '';
+    return 'R$ ' + item.priceKg.toFixed(2).replace('.', ',') + '/kg';
+}
+
 function getSharePriceLines(item) {
     const lines = [];
 
@@ -5212,6 +5252,12 @@ function getSharePriceLines(item) {
                 lines.push(size.label + '  ·  R$ ' + size.price.toFixed(2).replace('.', ','));
             }
         });
+        return lines;
+    }
+
+    if (hasEstimatedUnitPrice(item)) {
+        lines.push('Preço por quilo  ·  R$ ' + item.priceKg.toFixed(2).replace('.', ','));
+        lines.push('Unidade estimada  ·  aprox. R$ ' + item.price.toFixed(2).replace('.', ','));
         return lines;
     }
 
@@ -5270,6 +5316,10 @@ function getShareItemStartingPrice(item) {
         if (prices.length) return 'a partir de R$ ' + Math.min(...prices).toFixed(2).replace('.', ',');
     }
 
+    if (hasEstimatedUnitPrice(item)) {
+        return getKgPriceText(item);
+    }
+
     if (item.units && item.units[0] === 'kg' && typeof item.priceKg === 'number') {
         return 'R$ ' + item.priceKg.toFixed(2).replace('.', ',') + '/kg';
     }
@@ -5301,6 +5351,7 @@ async function buildProductShareBlob(item) {
     const width = 1080;
     const flavors = getShareFlavorLabels(item);
     const mainPrice = getShareItemStartingPrice(item);
+    const estimatedUnitText = getEstimatedUnitPriceText(item);
     const weightText = getShareWeightText(item);
 
     // Mantém o formato 4:5 nos produtos comuns e ganha um pouco de altura
@@ -5336,7 +5387,7 @@ async function buildProductShareBlob(item) {
     ctx.fillRect(0, 0, width, height);
 
     const panelExtra = Math.max(0, flavors.length - 6) * 18;
-    const panelHeight = Math.min(660, 470 + panelExtra + (weightText ? 34 : 0));
+    const panelHeight = Math.min(690, 470 + panelExtra + (weightText ? 34 : 0) + (estimatedUnitText ? 42 : 0));
     const panelX = 78;
     const panelY = height - panelHeight - 58;
     const panelWidth = width - (panelX * 2);
@@ -5443,6 +5494,12 @@ async function buildProductShareBlob(item) {
     ctx.fillStyle = '#2C4A34';
     ctx.font = "700 48px 'DM Sans', sans-serif";
     ctx.fillText(priceValue || 'Consulte', left, priceY + 18);
+
+    if (estimatedUnitText) {
+        ctx.fillStyle = '#817D74';
+        ctx.font = "600 20px 'DM Sans', sans-serif";
+        ctx.fillText(estimatedUnitText + ' · estimativa pelo peso', left, priceY + 54);
+    }
 
     const buttonWidth = 286;
     const buttonHeight = 78;
@@ -5754,14 +5811,16 @@ function createProductListItem(item) {
     let priceText;
     if (item.isKit) {
         const kitTotal = getKitComputedTotal(item, 10);
-        priceText = 'a partir de R$ ' + (kitTotal / 10).toFixed(2) + '/pessoa';
+        priceText = 'a partir de R$ ' + (kitTotal / 10).toFixed(2).replace('.', ',') + '/pessoa';
     } else if (hasSizes) {
-        priceText = 'a partir de R$ ' + item.sizes[0].price.toFixed(2);
+        priceText = 'a partir de R$ ' + item.sizes[0].price.toFixed(2).replace('.', ',');
+    } else if (hasEstimatedUnitPrice(item)) {
+        priceText = 'R$ ' + item.priceKg.toFixed(2).replace('.', ',') + '/kg · aprox. R$ ' + item.price.toFixed(2).replace('.', ',') + '/un';
     } else if (item.units && item.units[0] === 'kg') {
-        priceText = 'R$ ' + (item.priceKg || 0).toFixed(2) + '/kg';
+        priceText = 'R$ ' + (item.priceKg || 0).toFixed(2).replace('.', ',') + '/kg';
     } else {
         const basePrice = item.price || item.priceKg || 0;
-        priceText = 'R$ ' + basePrice.toFixed(2) + (hasKg ? '/un' : '/un');
+        priceText = 'R$ ' + basePrice.toFixed(2).replace('.', ',') + '/un';
     }
 
     const flavorCount = hasFlavors ? item.flavors.length : 0;
@@ -5791,6 +5850,7 @@ function createProductListItem(item) {
                     <span class="text-[13px] text-[#BE6B2E]" style="font-family: 'DM Sans', sans-serif; font-weight: 700; letter-spacing: -0.01em;">${priceText}</span>
                     ${flavorBadge}${kitBadge}
                 </div>
+                ${hasEstimatedUnitPrice(item) ? '<p class="text-[9px] text-[#8C8676]/70 mt-1">valor por unidade estimado pelo peso</p>' : ''}
             </div>
             <i class="fas fa-chevron-right text-[#8C8676]/30 shrink-0 text-sm ml-1"></i>
         </div>
@@ -5879,9 +5939,10 @@ function buildProductModalContent(item) {
 
             ${hasUnitToggle ? `
             <div class="flex bg-[#ECE9E1] p-1 rounded-xl border border-[#8C8676]/5">
-                <button onclick="setModalUnit('un')" id="modal-unit-un" class="flex-1 py-2 rounded-lg text-[12px] font-semibold bg-[#2C4A34] text-white transition-all">Unidade</button>
-                <button onclick="setModalUnit('kg')" id="modal-unit-kg" class="flex-1 py-2 rounded-lg text-[12px] font-semibold text-[#8C8676]/50 transition-all">Kilo</button>
+                <button onclick="setModalUnit('un')" id="modal-unit-un" class="flex-1 py-2 rounded-lg text-[12px] font-semibold bg-[#2C4A34] text-white transition-all">Unidade aprox.</button>
+                <button onclick="setModalUnit('kg')" id="modal-unit-kg" class="flex-1 py-2 rounded-lg text-[12px] font-semibold text-[#8C8676]/50 transition-all">Quilo</button>
             </div>
+            <p class="text-[10px] leading-relaxed text-[#8C8676]/80 px-1">Preço oficial por quilo. O valor por unidade é estimado e pode variar conforme o peso real.</p>
             ` : ''}
 
             ${hasSizes ? `
@@ -6001,8 +6062,8 @@ function updateModalPricePreview() {
         const unitPrice = qty > 0 ? total / qty : 0;
         const lbl = document.getElementById('modal-unit-price-label');
         const prv = document.getElementById('modal-price-preview');
-        if (lbl) lbl.innerText = 'R$ ' + unitPrice.toFixed(2) + ' ' + suffix;
-        if (prv) prv.innerHTML = '<span class="text-[11px] font-semibold align-top text-[#2C4A34]/65 mr-0.5">R$</span>' + total.toFixed(2);
+        if (lbl) lbl.innerText = 'R$ ' + unitPrice.toFixed(2).replace('.', ',') + ' ' + suffix;
+        if (prv) prv.innerHTML = '<span class="text-[11px] font-semibold align-top text-[#2C4A34]/65 mr-0.5">R$</span>' + total.toFixed(2).replace('.', ',');
         return;
     }
 
@@ -6030,8 +6091,16 @@ function updateModalPricePreview() {
     const lbl = document.getElementById('modal-unit-price-label');
     const prv = document.getElementById('modal-price-preview');
     if (typeof price !== 'number' || Number.isNaN(price)) price = 0;
-    if (lbl) lbl.innerText = 'R$ ' + price.toFixed(2) + ' ' + suffix;
-    if (prv) prv.innerHTML = '<span class="text-[11px] font-semibold align-top text-[#2C4A34]/65 mr-0.5">R$</span>' + (price * qty).toFixed(2);
+
+    const isEstimatedUnit = unit === 'un' && hasEstimatedUnitPrice(item);
+    if (lbl) lbl.innerText = isEstimatedUnit
+        ? 'aprox. R$ ' + price.toFixed(2).replace('.', ',') + ' /un'
+        : 'R$ ' + price.toFixed(2).replace('.', ',') + ' ' + suffix;
+
+    if (prv) prv.innerHTML =
+        (isEstimatedUnit ? '<span class="text-[10px] font-semibold text-[#8C8676] mr-1">aprox.</span>' : '') +
+        '<span class="text-[11px] font-semibold align-top text-[#2C4A34]/65 mr-0.5">R$</span>' +
+        (price * qty).toFixed(2).replace('.', ',');
 }
 
 function onModalFlavorChange() {
