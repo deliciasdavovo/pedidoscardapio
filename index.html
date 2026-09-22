@@ -431,8 +431,10 @@
     display: flex;
     flex-direction: column;
     justify-content: center;
+    align-items: center;
 }
 .discovery-brand {
+    width: 100%;
     text-align: center;
     margin-bottom: clamp(20px, 4.2vh, 34px);
 }
@@ -452,17 +454,25 @@
     background: rgba(44, 74, 52, 0.52);
 }
 .discovery-hero {
+    width: 100%;
+    max-width: 460px;
+    margin: 0 auto clamp(18px, 3.8vh, 30px);
     text-align: center;
-    margin-bottom: clamp(18px, 3.8vh, 30px);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }
 .discovery-title {
-    margin: 0;
+    width: 100%;
+    margin: 0 auto;
     font-family: 'Lora', serif;
     font-size: clamp(34px, 9.6vw, 48px);
-    line-height: 1.03;
+    line-height: 1.05;
     font-weight: 400;
     letter-spacing: -0.035em;
     color: #22201C;
+    text-align: center;
+    text-wrap: balance;
 }
 .discovery-title em {
     display: inline;
@@ -480,6 +490,7 @@
     color: rgba(34, 32, 28, 0.52);
 }
 .discovery-section-label {
+    width: 100%;
     margin: 0 0 10px;
     font-family: 'DM Sans', sans-serif;
     font-size: 9px;
@@ -490,47 +501,63 @@
     text-align: center;
 }
 #discovery-cards {
+    width: 100%;
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 9px;
+    gap: 10px;
 }
 .discovery-card {
-    min-height: clamp(58px, 8.8vh, 72px);
-    padding: 0 15px;
+    min-height: clamp(92px, 12.5vh, 112px);
+    padding: 15px 12px 13px;
     border: 1px solid rgba(44, 74, 52, 0.12);
-    border-radius: 16px;
+    border-radius: 18px;
     background: #EEE5D4;
     color: #22201C;
     cursor: pointer;
     display: flex;
+    flex-direction: column;
     align-items: center;
-    justify-content: space-between;
-    gap: 12px;
-    text-align: left;
+    justify-content: center;
+    gap: 9px;
+    text-align: center;
     box-shadow: none;
     transition: background 0.18s ease, transform 0.18s ease, border-color 0.18s ease;
 }
 .discovery-card::before { display: none; }
 .discovery-card:hover {
-    transform: translateY(-1px);
+    transform: translateY(-2px);
     background: #E9DEC9;
     border-color: rgba(44, 74, 52, 0.20);
     box-shadow: none;
 }
 .discovery-card:active { transform: scale(0.985); }
 .discovery-card-wide { grid-column: 1 / -1; }
+.discovery-card-icon {
+    width: 30px;
+    height: 30px;
+    border: 1px solid rgba(44, 74, 52, 0.16);
+    border-radius: 999px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: #2C4A34;
+    background: rgba(245, 240, 231, 0.56);
+    font-size: 11px;
+}
 .discovery-card-title {
+    max-width: 150px;
     font-family: 'Lora', serif;
     font-size: clamp(14px, 4vw, 17px);
-    line-height: 1.12;
+    line-height: 1.16;
     font-weight: 400;
     letter-spacing: -0.02em;
+    text-align: center;
+}
+.discovery-card-wide .discovery-card-title {
+    max-width: none;
 }
 .discovery-arrow {
-    flex: 0 0 auto;
-    color: #2C4A34;
-    font-size: 10px;
-    opacity: 0.74;
+    display: none;
 }
 .discovery-cta {
     width: 100%;
@@ -548,8 +575,8 @@
     cursor: pointer;
     display: flex;
     align-items: center;
-    justify-content: space-between;
-    gap: 16px;
+    justify-content: center;
+    gap: 10px;
     box-shadow: none;
     transition: background 0.18s ease, transform 0.18s ease;
 }
@@ -572,7 +599,9 @@
     .discovery-subtitle { margin-top: 8px; font-size: 11px; }
     .discovery-section-label { margin-bottom: 8px; }
     #discovery-cards { gap: 7px; }
-    .discovery-card { min-height: 52px; border-radius: 14px; }
+    .discovery-card { min-height: 76px; padding: 10px 9px; gap: 6px; border-radius: 14px; }
+    .discovery-card-icon { width: 25px; height: 25px; font-size: 9px; }
+    .discovery-card-title { font-size: 13px; }
     .discovery-cta { min-height: 48px; margin-top: 8px; border-radius: 14px; }
     .discovery-footnote { margin-top: 9px; font-size: 11px; }
 }
@@ -1011,11 +1040,11 @@
         const PRONTA_ENTREGA_MSG = 'Pedidos para hoje (pronta entrega): ligue (11) 4013-5248.';
         
         const MACRO_GROUPS = [
-            { name: 'Coffees Sugeridos & Cestas', short: 'Coffees & Cestas', subtitle: 'Kits prontos para grupos e cestas especiais', categories: ['Coffee Breaks', 'Cestas de café da manhã', 'Bebidas'] },
-            { name: 'Salgados & Lanches', short: 'Salgados & Lanches', subtitle: 'Petiscos, lanches e salgadinhos', categories: ['Pão de bolinha', 'Mini salgados', 'Salgados assados', 'Lanches frios', 'Tortas & Quiches'] },
-            { name: 'Bolos & Doces', short: 'Bolos & Doces', subtitle: 'Bolos, doces e quitutes', categories: ['Bolos caseiros', 'Doces panificação', 'Bolachas & biscoitos', 'Bolos gelados', 'Docinhos festa'] },
-            { name: 'Sobremesas', short: 'Sobremesas', subtitle: 'Para se mimar com algo especial', categories: ['Mini sobremesas', 'Sobremesas unitárias', 'Tortas doces', 'Sobremesas clássicas'] },
-            { name: 'Especiais', short: 'Especiais', subtitle: 'Edições limitadas e sazonais', categories: ['Especiais de Natal'] },
+            { name: 'Coffees Sugeridos & Cestas', short: 'Coffees & Cestas', icon: 'fa-mug-hot', subtitle: 'Kits prontos para grupos e cestas especiais', categories: ['Coffee Breaks', 'Cestas de café da manhã', 'Bebidas'] },
+            { name: 'Salgados & Lanches', short: 'Salgados & Lanches', icon: 'fa-bread-slice', subtitle: 'Petiscos, lanches e salgadinhos', categories: ['Pão de bolinha', 'Mini salgados', 'Salgados assados', 'Lanches frios', 'Tortas & Quiches'] },
+            { name: 'Bolos & Doces', short: 'Bolos & Doces', icon: 'fa-cake-candles', subtitle: 'Bolos, doces e quitutes', categories: ['Bolos caseiros', 'Doces panificação', 'Bolachas & biscoitos', 'Bolos gelados', 'Docinhos festa'] },
+            { name: 'Sobremesas', short: 'Sobremesas', icon: 'fa-spoon', subtitle: 'Para se mimar com algo especial', categories: ['Mini sobremesas', 'Sobremesas unitárias', 'Tortas doces', 'Sobremesas clássicas'] },
+            { name: 'Especiais', short: 'Especiais', icon: 'fa-star', subtitle: 'Edições limitadas e sazonais', categories: ['Especiais de Natal'] },
         ];
 
         const CATEGORIES = [
@@ -2968,8 +2997,8 @@ flavors: ['Sonho de Valsa', 'Ouro branco', 'Ninho trufado', 'Pessêgo', 'Amendoi
                 const groupNameAttr = group.name.replace(/'/g, "\'");
                 return `
                     <button type="button" class="discovery-card ${isLastOdd ? 'discovery-card-wide' : ''}" onclick="hideDiscovery('${groupNameAttr}')">
+                        <span class="discovery-card-icon" aria-hidden="true"><i class="fas ${group.icon || 'fa-circle'}"></i></span>
                         <span class="discovery-card-title">${group.short || group.name}</span>
-                        <i class="fas fa-chevron-right discovery-arrow"></i>
                     </button>`;
             }).join('');
         }
