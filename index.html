@@ -5444,34 +5444,14 @@ async function buildProductShareBlob(item) {
     createShareRoundedRectPath(ctx, innerX, innerY, innerWidth, innerHeight, 58);
     ctx.clip();
 
-    // base preenchida com a própria imagem para não ficar “vazio”
+    // deixa só uma imagem: a que preenche toda a moldura
     if (img && img.width && img.height) {
         drawShareCoverImage(ctx, img, innerX, innerY, innerWidth, innerHeight);
-        ctx.fillStyle = 'rgba(250,247,242,0.10)';
+        ctx.fillStyle = 'rgba(250,247,242,0.08)';
         ctx.fillRect(innerX, innerY, innerWidth, innerHeight);
     } else {
         ctx.fillStyle = '#F5F0E7';
         ctx.fillRect(innerX, innerY, innerWidth, innerHeight);
-    }
-
-    // imagem inteira do produto por cima, maior e melhor encaixada
-    if (img && img.width && img.height) {
-        const containPadding = 0;
-        const availableWidth = innerWidth - containPadding * 2;
-        const availableHeight = innerHeight - containPadding * 2;
-
-        const scale = Math.min(availableWidth / img.width, availableHeight / img.height);
-        const drawWidth = img.width * scale;
-        const drawHeight = img.height * scale;
-        const drawX = innerX + (innerWidth - drawWidth) / 2;
-        const drawY = innerY + (innerHeight - drawHeight) / 2;
-
-        ctx.save();
-        ctx.shadowColor = 'rgba(34, 32, 28, 0.10)';
-        ctx.shadowBlur = 12;
-        ctx.shadowOffsetY = 4;
-        ctx.drawImage(img, drawX, drawY, drawWidth, drawHeight);
-        ctx.restore();
     }
 
     ctx.restore();
