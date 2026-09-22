@@ -4520,13 +4520,33 @@ if (!item.sizes && flavor && item.variants && item.variants[flavor]) {
             saveCheckoutPreferences();
         }
 
-        function formatWhatsAppCartItem(item) {
-            const qtyText = item.qty.toFixed(item.unit === 'kg' ? 1 : 0) + (item.unit === 'kg' ? 'kg' : 'un');
-            const unitText = item.unit === 'kg' ? 'kg' : 'un';
-            const details = [item.size, item.flavor].filter(Boolean).join(' - ');
-            const itemName = details ? item.name + ' - ' + details : item.name;
+        function formatWhatsAppMoney(value) {
+            return 'R$ ' + Number(value || 0).toFixed(2).replace('.', ',');
+        }
 
-            return '- ' + qtyText + ' • ' + itemName + ' (R$ ' + item.finalPrice.toFixed(2) + '/' + unitText + ')';
+        function formatWhatsAppCartItem(item, index) {
+            const isKg = item.unit === 'kg';
+            const qtyText = item.qty.toFixed(isKg ? 1 : 0).replace('.', ',') + (isKg ? ' kg' : ' un');
+            const unitLabel = isKg ? 'kg' : 'un';
+            const subtotal = item.finalPrice * item.qty;
+
+            const lines = [
+                (index + 1) + '. *' + item.name + '*',
+                '   Quantidade: ' + qtyText
+            ];
+
+            if (item.size) {
+                lines.push('   Tamanho: ' + item.size);
+            }
+
+            if (item.flavor) {
+                lines.push('   Sabor: ' + item.flavor);
+            }
+
+            lines.push('   Valor ' + unitLabel + ': ' + formatWhatsAppMoney(item.finalPrice));
+            lines.push('   *Subtotal: ' + formatWhatsAppMoney(subtotal) + '*');
+
+            return lines.join('\n');
         }
 
         function formatWhatsAppOrderDate(value) {
@@ -4583,7 +4603,7 @@ if (!item.sizes && flavor && item.variants && item.variants[flavor]) {
                 if (!validarDataEncomenda(true, true) || !validarHorarioEncomenda(true, true)) return;
             }
 
-            const itemsText = cart.map(formatWhatsAppCartItem).join('\n');
+            const itemsText = cart.map((item, index) => formatWhatsAppCartItem(item, index)).join('\n\n');
             let total = cart.reduce((acc, item) => acc + (item.finalPrice * item.qty), 0);
             const deliveryFee = activeFulfillment === 'Entrega' ? getSelectedDeliveryFee() : 0;
 
@@ -4604,8 +4624,8 @@ if (!item.sizes && flavor && item.variants && item.variants[flavor]) {
                 deliveryText =
                     '\nCEP: ' + cepText +
                     distanceText +
-                    '\nTaxa de Entrega: ' + (deliveryFee > 0 ? 'R$ ' + deliveryFee.toFixed(2) : 'a confirmar') +
-                    (reason ? '\nObservação da entrega: ' + reason : '');
+                    '\nTaxa de entrega: ' + (deliveryFee > 0 ? formatWhatsAppMoney(deliveryFee) : '*a confirmar*') +
+                    (reason ? '\nObservação: ' + reason : '');
             }
 
             const fulfillmentInfo = activeFulfillment === 'Entrega'
@@ -4615,22 +4635,32 @@ if (!item.sizes && flavor && item.variants && item.variants[flavor]) {
             const selectedDate = document.getElementById('order-date').value;
             const selectedTime = document.getElementById('order-time').value;
             const encomendaDateTimeText =
-                '\nData da encomenda: ' + formatWhatsAppOrderDate(selectedDate) +
-                '\nHorário da encomenda: ' + selectedTime;
+                '\nData: ' + formatWhatsAppOrderDate(selectedDate) +
+                '\nHorário: ' + selectedTime;
 
             const totalLabel = activeFulfillment === 'Entrega' && !deliveryFee
-                ? 'Subtotal (taxa de entrega a confirmar): R$ '
-                : 'Total aproximado: R$ ';
+                ? '*Subtotal dos produtos:* '
+                : '*Total estimado:* ';
 
             const message =
-                'Olá, gostaria de fazer um pedido, aguardo confirmação\n' +
-                'Pedido • Delícias da Vovó\n' +
-                '__________________________\n' +
+                '*PEDIDO • DELÍCIAS DA VOVÓ*\n' +
+                '__________________________\n\n' +
+
+                '*DADOS DO PEDIDO*\n' +
                 'Cliente: ' + name + '\n' +
-                'Tipo: ' + activeOrderType + encomendaDateTimeText + '\n' +
+                'Tipo: ' + activeOrderType + encomendaDateTimeText + '\n\n' +
+
+                '*RETIRADA / ENTREGA*\n' +
                 fulfillmentInfo + deliveryText + '\n\n' +
-                'Pedido\n' + itemsText + '\n\n' +
-                totalLabel + total.toFixed(2);
+
+                '*ITENS DO PEDIDO*\n\n' +
+                itemsText + '\n\n' +
+                '__________________________\n' +
+                totalLabel + formatWhatsAppMoney(total) +
+                (activeFulfillment === 'Entrega' && !deliveryFee
+                    ? '\n_Taxa de entrega será confirmada pela equipe._'
+                    : '') +
+                '\n\n_Aguardo a confirmação do pedido._';
 
             saveCheckoutPreferences();
 
