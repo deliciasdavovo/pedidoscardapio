@@ -5202,6 +5202,34 @@ function drawShareRoundedRect(ctx, x, y, width, height, radius, fillStyle, strok
     }
 }
 
+
+function createShareRoundedRectPath(ctx, x, y, width, height, radius) {
+    const r = Math.max(0, Math.min(radius, width / 2, height / 2));
+    ctx.beginPath();
+    ctx.moveTo(x + r, y);
+    ctx.lineTo(x + width - r, y);
+    ctx.quadraticCurveTo(x + width, y, x + width, y + r);
+    ctx.lineTo(x + width, y + height - r);
+    ctx.quadraticCurveTo(x + width, y + height, x + width - r, y + height);
+    ctx.lineTo(x + r, y + height);
+    ctx.quadraticCurveTo(x, y + height, x, y + height - r);
+    ctx.lineTo(x, y + r);
+    ctx.quadraticCurveTo(x, y, x + r, y);
+    ctx.closePath();
+}
+
+function drawShareContainImage(ctx, img, x, y, width, height) {
+    if (!img || !img.width || !img.height) return;
+
+    const scale = Math.min(width / img.width, height / img.height);
+    const drawWidth = img.width * scale;
+    const drawHeight = img.height * scale;
+    const drawX = x + (width - drawWidth) / 2;
+    const drawY = y + (height - drawHeight) / 2;
+
+    ctx.drawImage(img, drawX, drawY, drawWidth, drawHeight);
+}
+
 function drawShareProductImage(ctx, img, width) {
     const imageHeight = 560;
 
@@ -5378,19 +5406,29 @@ async function buildProductShareBlob(item) {
 
     const img = await loadShareProductImage(imageSrc);
 
-    // Foto ocupando a arte inteira.
+    // Fundo: mantém a foto ocupando toda a arte, mas com desfoque suave.
+    // Desenhamos um pouco além das bordas para o blur não criar bordas transparentes.
     ctx.fillStyle = '#DDD5C8';
     ctx.fillRect(0, 0, width, height);
 
     if (img && img.width && img.height) {
+        ctx.save();
+        ctx.filter = 'blur(18px)';
+        drawShareCoverImage(ctx, img, -28, -28, width + 56, height + 56);
+        ctx.restore();
+
+        // Um pouco da foto original por cima preserva cor e contraste sem perder o efeito.
+        ctx.save();
+        ctx.globalAlpha = 0.20;
         drawShareCoverImage(ctx, img, 0, 0, width, height);
+        ctx.restore();
     }
 
-    // Véu discreto: preserva a foto, mas mantém moldura e painel legíveis.
+    // Véu discreto: mantém a leitura do card inferior.
     const photoVeil = ctx.createLinearGradient(0, 0, 0, height);
-    photoVeil.addColorStop(0, 'rgba(34,32,28,0.08)');
+    photoVeil.addColorStop(0, 'rgba(34,32,28,0.06)');
     photoVeil.addColorStop(0.55, 'rgba(34,32,28,0.02)');
-    photoVeil.addColorStop(1, 'rgba(34,32,28,0.18)');
+    photoVeil.addColorStop(1, 'rgba(34,32,28,0.16)');
     ctx.fillStyle = photoVeil;
     ctx.fillRect(0, 0, width, height);
 
@@ -5405,6 +5443,26 @@ async function buildProductShareBlob(item) {
     const frameBottom = panelY + 112;
     const frameHeight = Math.max(520, frameBottom - frameY);
 
+    // Dentro da moldura mostramos a foto inteira, sem cortar.
+    // O fundo desfocado continua aparecendo somente fora da moldura.
+    const innerInset = 20;
+    const innerX = frameX + innerInset;
+    const innerY = frameY + innerInset;
+    const innerWidth = frameWidth - (innerInset * 2);
+    const innerHeight = frameHeight - (innerInset * 2);
+
+    ctx.save();
+    createShareRoundedRectPath(ctx, innerX, innerY, innerWidth, innerHeight, 54);
+    ctx.clip();
+
+    // Base clara suave para as sobras laterais/superiores quando a foto
+    // não tem a mesma proporção da moldura.
+    ctx.fillStyle = 'rgba(245,240,231,0.72)';
+    ctx.fillRect(innerX, innerY, innerWidth, innerHeight);
+
+    drawShareContainImage(ctx, img, innerX, innerY, innerWidth, innerHeight);
+    ctx.restore();
+
     drawShareRoundedRect(
         ctx,
         frameX,
@@ -5413,7 +5471,7 @@ async function buildProductShareBlob(item) {
         frameHeight,
         72,
         null,
-        'rgba(255,255,255,0.94)',
+        'rgba(255,255,255,0.96)',
         14
     );
 
