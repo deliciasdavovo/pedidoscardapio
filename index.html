@@ -5366,9 +5366,10 @@ async function buildProductShareBlob(item) {
     }
 
     const infoTop = y;
-    const footerTop = height - 80;
     const dividerX = 532;
-    const dividerBottom = footerTop - 36;
+    // O divisor acompanha toda a área de texto e termina pouco antes
+    // da borda inferior do card.
+    const dividerBottom = height - 72;
     const leftX = left;
     const rightX = dividerX + 44;
     const leftColWidth = dividerX - leftX - 40;
@@ -5427,22 +5428,6 @@ async function buildProductShareBlob(item) {
         ctx.font = "400 29px 'DM Sans', sans-serif";
         shareWrapText(ctx, 'Consulte as opções disponíveis.', rightX, rightY, rightColWidth, 40, 2);
     }
-
-    // Rodapé
-    ctx.strokeStyle = 'rgba(44, 74, 52, 0.12)';
-    ctx.lineWidth = 1;
-    ctx.beginPath();
-    ctx.moveTo(left, footerTop - 22);
-    ctx.lineTo(right, footerTop - 22);
-    ctx.stroke();
-
-    ctx.fillStyle = 'rgba(44, 74, 52, 0.62)';
-    ctx.font = "700 19px 'DM Sans', sans-serif";
-    ctx.fillText('FEITO COM CARINHO DESDE 2005', left, footerTop + 18);
-
-    ctx.textAlign = 'right';
-    ctx.fillText('DELÍCIAS DA VOVÓ', right, footerTop + 18);
-    ctx.textAlign = 'left';
 
     return new Promise((resolve, reject) => {
         try {
@@ -5515,7 +5500,7 @@ async function buildCategoryShareBlob(categoryName) {
     // claramente com cara de cardápio, não de card de produto.
     const menuX = 42;
     const menuTop = listTop - 34;
-    const menuBottom = height - footerSpace + 8;
+    const menuBottom = height - 30;
     drawShareRoundedRect(
         ctx,
         menuX,
@@ -5531,7 +5516,7 @@ async function buildCategoryShareBlob(categoryName) {
     ctx.lineWidth = 2;
     ctx.beginPath();
     ctx.moveTo(dividerX, listTop - 8);
-    ctx.lineTo(dividerX, height - footerSpace - 18);
+    ctx.lineTo(dividerX, height - 70);
     ctx.stroke();
 
     function drawMenuItem(item, x, itemY) {
@@ -5578,20 +5563,11 @@ async function buildCategoryShareBlob(categoryName) {
         drawMenuItem(item, x, itemY);
     });
 
-    const footerY = height - 56;
-    ctx.strokeStyle = 'rgba(44, 74, 52, 0.14)';
-    ctx.lineWidth = 1;
-    ctx.beginPath();
-    ctx.moveTo(side, footerY - 32);
-    ctx.lineTo(width - side, footerY - 32);
-    ctx.stroke();
-
-    ctx.fillStyle = 'rgba(44, 74, 52, 0.62)';
-    ctx.font = "700 18px 'DM Sans', sans-serif";
-    ctx.fillText('FEITO COM CARINHO DESDE 2005', side, footerY);
-
+    // Contagem discreta, sem assinatura/linha de rodapé.
+    ctx.fillStyle = 'rgba(44, 74, 52, 0.50)';
+    ctx.font = "700 17px 'DM Sans', sans-serif";
     ctx.textAlign = 'right';
-    ctx.fillText(items.length + (items.length === 1 ? ' OPÇÃO' : ' OPÇÕES'), width - side, footerY);
+    ctx.fillText(items.length + (items.length === 1 ? ' OPÇÃO' : ' OPÇÕES'), width - side, height - 44);
     ctx.textAlign = 'left';
 
     return new Promise((resolve, reject) => {
