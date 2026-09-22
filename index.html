@@ -5157,7 +5157,7 @@ function drawShareCoverImage(ctx, img, x, y, width, height) {
 }
 
 
-function drawShareRoundedRect(ctx, x, y, width, height, radius, fillStyle, strokeStyle = null) {
+function drawShareRoundedRect(ctx, x, y, width, height, radius, fillStyle, strokeStyle = null, strokeWidth = 2) {
     const r = Math.max(0, Math.min(radius, width / 2, height / 2));
     ctx.beginPath();
     ctx.moveTo(x + r, y);
@@ -5178,7 +5178,7 @@ function drawShareRoundedRect(ctx, x, y, width, height, radius, fillStyle, strok
 
     if (strokeStyle) {
         ctx.strokeStyle = strokeStyle;
-        ctx.lineWidth = 2;
+        ctx.lineWidth = strokeWidth;
         ctx.stroke();
     }
 }
@@ -5292,6 +5292,7 @@ function drawShareSectionLabel(ctx, text, x, y) {
 }
 
 
+
 async function buildProductShareBlob(item) {
     if (document.fonts && document.fonts.ready) {
         try { await document.fonts.ready; } catch (_) {}
@@ -5299,135 +5300,184 @@ async function buildProductShareBlob(item) {
 
     const width = 1080;
     const flavors = getShareFlavorLabels(item);
-    const priceLines = getSharePriceLines(item);
+    const mainPrice = getShareItemStartingPrice(item);
+    const weightText = getShareWeightText(item);
 
-    // Mantém o formato compacto nos produtos simples e cresce só quando
-    // necessário para nunca esconder sabores/recheios ou faixas de preço.
-    const extraFlavorHeight = Math.max(0, flavors.length - 6) * 48;
-    const extraPriceHeight = Math.max(0, priceLines.length - 4) * 42;
-    const height = Math.max(1350, 1350 + Math.max(extraFlavorHeight, extraPriceHeight));
+    // Mantém o formato 4:5 nos produtos comuns e ganha um pouco de altura
+    // apenas quando há muitas opções para que nenhum sabor seja escondido.
+    const extraFlavorHeight = Math.max(0, flavors.length - 10) * 24;
+    const height = 1350 + extraFlavorHeight;
 
     const canvas = document.createElement('canvas');
     canvas.width = width;
     canvas.height = height;
-
     const ctx = canvas.getContext('2d');
-    ctx.fillStyle = '#F5F0E7';
-    ctx.fillRect(0, 0, width, height);
 
     const imageSrc = (item.images && item.images.length)
         ? item.images[0]
         : (item.image || '');
 
     const img = await loadShareProductImage(imageSrc);
-    const imageHeight = drawShareProductImage(ctx, img, width);
 
-    // Superfície arredondada sobre a foto: remete aos cards do sistema sem
-    // sacrificar a área útil da imagem.
-    const cardX = 28;
-    const cardTop = imageHeight - 34;
-    const cardBottom = height - 26;
+    // Foto como fundo total, no estilo do novo card visual.
+    ctx.fillStyle = '#DDD5C8';
+    ctx.fillRect(0, 0, width, height);
+
+    if (img && img.width && img.height) {
+        drawShareCoverImage(ctx, img, 0, 0, width, height);
+    }
+
+    // Véu bem sutil para a moldura branca se manter legível em fotos claras.
+    const photoVeil = ctx.createLinearGradient(0, 0, 0, height);
+    photoVeil.addColorStop(0, 'rgba(34,32,28,0.08)');
+    photoVeil.addColorStop(0.56, 'rgba(34,32,28,0.02)');
+    photoVeil.addColorStop(1, 'rgba(34,32,28,0.16)');
+    ctx.fillStyle = photoVeil;
+    ctx.fillRect(0, 0, width, height);
+
+    const panelExtra = Math.max(0, flavors.length - 6) * 18;
+    const panelHeight = Math.min(660, 470 + panelExtra + (weightText ? 34 : 0));
+    const panelX = 78;
+    const panelY = height - panelHeight - 58;
+    const panelWidth = width - (panelX * 2);
+
+    // Moldura alta arredondada, inspirada no card de referência.
+    const frameX = 112;
+    const frameY = 76;
+    const frameWidth = width - (frameX * 2);
+    const frameBottom = panelY + 118;
+    const frameHeight = Math.max(520, frameBottom - frameY);
+
     drawShareRoundedRect(
         ctx,
-        cardX,
-        cardTop,
-        width - (cardX * 2),
-        cardBottom - cardTop,
-        42,
-        '#FBF8F2',
-        'rgba(44, 74, 52, 0.08)'
+        frameX,
+        frameY,
+        frameWidth,
+        frameHeight,
+        72,
+        null,
+        'rgba(255,255,255,0.94)',
+        14
     );
 
-    const left = 78;
-    const right = width - 78;
+    // Card branco flutuante de informações.
+    ctx.save();
+    ctx.shadowColor = 'rgba(34, 32, 28, 0.18)';
+    ctx.shadowBlur = 34;
+    ctx.shadowOffsetY = 14;
+    drawShareRoundedRect(
+        ctx,
+        panelX,
+        panelY,
+        panelWidth,
+        panelHeight,
+        48,
+        '#FBF8F2'
+    );
+    ctx.restore();
+
+    const left = panelX + 58;
+    const right = panelX + panelWidth - 58;
     const contentWidth = right - left;
-    let y = imageHeight + 42;
+    let y = panelY + 64;
 
-    ctx.fillStyle = '#817D74';
-    ctx.font = "700 23px 'DM Sans', sans-serif";
-    ctx.fillText(String(item.category || 'CARDÁPIO').toUpperCase(), left, y);
+    // Categoria
+    ctx.fillStyle = '#B27845';
+    ctx.font = "700 22px 'DM Sans', sans-serif";
+    ctx.fillText(String(item.category || 'CARDÁPIO'), left, y);
 
-    // Mais respiro entre categoria e título.
-    y += 82;
-
+    // Título
+    y += 64;
     ctx.fillStyle = '#22201C';
-    ctx.font = "400 80px 'Lora', serif";
-    y = shareWrapText(ctx, item.name, left, y, contentWidth, 86, 2);
-    y += 20;
+    ctx.font = "400 60px 'Lora', serif";
+    y = shareWrapText(ctx, item.name, left, y, contentWidth, 66, 2);
+    y += 16;
 
-    const shortDescription = getShareShortDescription(item);
-    if (shortDescription) {
-        ctx.fillStyle = '#77736C';
-        ctx.font = "400 31px 'DM Sans', sans-serif";
-        y = shareWrapText(ctx, shortDescription, left, y, contentWidth, 44, 2);
-        y += 32;
+    // Sabores/recheios — sempre mostra todos.
+    if (flavors.length) {
+        ctx.fillStyle = '#6F6B63';
+        ctx.font = "500 25px 'DM Sans', sans-serif";
+        const flavorText = 'Sabores / recheios: ' + flavors.join(' · ');
+        y = shareWrapText(ctx, flavorText, left, y, contentWidth, 34, Infinity);
+        y += 10;
     } else {
-        y += 12;
+        const shortDescription = getShareShortDescription(item);
+        if (shortDescription) {
+            ctx.fillStyle = '#6F6B63';
+            ctx.font = "400 25px 'DM Sans', sans-serif";
+            y = shareWrapText(ctx, shortDescription, left, y, contentWidth, 34, 3);
+            y += 10;
+        }
     }
 
-    const infoTop = y;
-    const dividerX = 532;
-    // O divisor acompanha toda a área de texto e termina pouco antes
-    // da borda inferior do card.
-    const dividerBottom = height - 72;
-    const leftX = left;
-    const rightX = dividerX + 44;
-    const leftColWidth = dividerX - leftX - 40;
-    const rightColWidth = right - rightX;
+    if (weightText) {
+        ctx.fillStyle = '#8A857C';
+        ctx.font = "500 21px 'DM Sans', sans-serif";
+        y = shareWrapText(ctx, 'Peso aproximado: ' + weightText, left, y + 4, contentWidth, 30, 2);
+        y += 6;
+    }
 
-    ctx.strokeStyle = 'rgba(44, 74, 52, 0.16)';
+    // Pequeno detalhe caramelo, no mesmo vocabulário visual do cardápio.
+    ctx.strokeStyle = 'rgba(190, 107, 46, 0.52)';
     ctx.lineWidth = 2;
     ctx.beginPath();
-    ctx.moveTo(dividerX, infoTop - 8);
-    ctx.lineTo(dividerX, dividerBottom);
+    ctx.moveTo(left, y + 8);
+    ctx.lineTo(left + 96, y + 8);
     ctx.stroke();
 
-    // Coluna esquerda: valores + peso
-    let leftY = infoTop;
-    drawShareSectionLabel(ctx, 'Valores', leftX, leftY);
-    leftY += 44;
+    // Área inferior: preço à esquerda + CTA visual à direita.
+    const bottomY = panelY + panelHeight - 62;
+    const priceY = bottomY - 70;
 
-    ctx.fillStyle = '#22201C';
-    ctx.font = "600 32px 'DM Sans', sans-serif";
-    priceLines.forEach(line => {
-        if (leftY > dividerBottom - 42) return;
-        leftY = shareWrapText(ctx, line, leftX, leftY, leftColWidth, 42, 2);
-        leftY += 10;
-    });
+    const priceText = String(mainPrice || '');
+    const priceIndex = priceText.indexOf('R$');
+    const pricePrefix = priceIndex > 0 ? priceText.slice(0, priceIndex).trim() : '';
+    const priceValue = priceIndex >= 0 ? priceText.slice(priceIndex).trim() : priceText;
 
-    const weightText = getShareWeightText(item);
-    if (weightText && leftY < dividerBottom - 82) {
-        leftY += 20;
-        drawShareSectionLabel(ctx, 'Peso aproximado', leftX, leftY);
-        leftY += 40;
-        ctx.fillStyle = '#6F6B63';
-        ctx.font = "400 29px 'DM Sans', sans-serif";
-        shareWrapText(ctx, weightText, leftX, leftY, leftColWidth, 40, 2);
+    if (pricePrefix) {
+        ctx.fillStyle = '#2C4A34';
+        ctx.font = "600 21px 'DM Sans', sans-serif";
+        ctx.fillText(pricePrefix, left, priceY - 34);
     }
 
-    // Coluna direita: mostra TODOS os sabores/recheios.
-    let rightY = infoTop;
-    drawShareSectionLabel(ctx, flavors.length ? 'Sabores / Recheios' : 'Detalhes', rightX, rightY);
-    rightY += 44;
+    ctx.fillStyle = '#2C4A34';
+    ctx.font = "700 48px 'DM Sans', sans-serif";
+    ctx.fillText(priceValue || 'Consulte', left, priceY + 18);
 
-    if (flavors.length) {
-        ctx.font = "400 27px 'DM Sans', sans-serif";
+    const buttonWidth = 286;
+    const buttonHeight = 78;
+    const buttonX = right - buttonWidth;
+    const buttonY = bottomY - buttonHeight;
 
-        flavors.forEach(flavor => {
-            ctx.fillStyle = '#2C4A34';
-            ctx.beginPath();
-            ctx.arc(rightX + 5, rightY - 8, 4, 0, Math.PI * 2);
-            ctx.fill();
+    drawShareRoundedRect(
+        ctx,
+        buttonX,
+        buttonY,
+        buttonWidth,
+        buttonHeight,
+        39,
+        '#2C4A34'
+    );
 
-            ctx.fillStyle = '#5F5B55';
-            rightY = shareWrapText(ctx, flavor, rightX + 22, rightY, rightColWidth - 22, 36, Infinity);
-            rightY += 10;
-        });
-    } else {
-        ctx.fillStyle = '#77736C';
-        ctx.font = "400 29px 'DM Sans', sans-serif";
-        shareWrapText(ctx, 'Consulte as opções disponíveis.', rightX, rightY, rightColWidth, 40, 2);
-    }
+    ctx.fillStyle = '#FFFFFF';
+    ctx.font = "700 25px 'DM Sans', sans-serif";
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText('Encomendar', buttonX + (buttonWidth / 2) - 10, buttonY + (buttonHeight / 2));
+
+    // Seta do CTA
+    ctx.strokeStyle = '#FFFFFF';
+    ctx.lineWidth = 4;
+    ctx.lineCap = 'round';
+    ctx.beginPath();
+    ctx.moveTo(buttonX + buttonWidth - 45, buttonY + 29);
+    ctx.lineTo(buttonX + buttonWidth - 33, buttonY + 39);
+    ctx.lineTo(buttonX + buttonWidth - 45, buttonY + 49);
+    ctx.stroke();
+
+    ctx.textAlign = 'left';
+    ctx.textBaseline = 'alphabetic';
+    ctx.lineCap = 'butt';
 
     return new Promise((resolve, reject) => {
         try {
@@ -5440,7 +5490,6 @@ async function buildProductShareBlob(item) {
         }
     });
 }
-
 
 async function buildCategoryShareBlob(categoryName) {
     if (document.fonts && document.fonts.ready) {
