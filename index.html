@@ -5385,8 +5385,6 @@ async function buildProductShareBlob(item) {
     const shortDescription = getShareShortDescription(item);
     const hasDetailColumn = flavors.length > 0;
 
-    // A altura acompanha o conteúdo. Produtos sem sabores/recheios usam uma
-    // composição de uma coluna, mais compacta e sem espaço vazio artificial.
     const flavorExtra = Math.max(0, flavors.length - 5) * 38;
     const priceExtra = Math.max(0, priceLines.length - 3) * 34;
     const descriptionExtra = shortDescription ? 24 : 0;
@@ -5409,26 +5407,18 @@ async function buildProductShareBlob(item) {
 
     const img = await loadShareProductImage(imageSrc);
 
-    // Fundo: mesma foto em cover, suavemente desfocada.
+    // FUNDO EXTERNO — sem blur, só cover + véu suave
     ctx.fillStyle = '#DDD5C8';
     ctx.fillRect(0, 0, width, height);
 
     if (img && img.width && img.height) {
-        ctx.save();
-        ctx.filter = 'blur(18px)';
-        drawShareCoverImage(ctx, img, -28, -28, width + 56, height + 56);
-        ctx.restore();
-
-        ctx.save();
-        ctx.globalAlpha = 0.20;
         drawShareCoverImage(ctx, img, 0, 0, width, height);
-        ctx.restore();
     }
 
     const photoVeil = ctx.createLinearGradient(0, 0, 0, height);
-    photoVeil.addColorStop(0, 'rgba(34,32,28,0.06)');
-    photoVeil.addColorStop(0.55, 'rgba(34,32,28,0.02)');
-    photoVeil.addColorStop(1, 'rgba(34,32,28,0.16)');
+    photoVeil.addColorStop(0, 'rgba(248,244,238,0.24)');
+    photoVeil.addColorStop(0.55, 'rgba(248,244,238,0.10)');
+    photoVeil.addColorStop(1, 'rgba(34,32,28,0.10)');
     ctx.fillStyle = photoVeil;
     ctx.fillRect(0, 0, width, height);
 
@@ -5436,29 +5426,57 @@ async function buildProductShareBlob(item) {
     const panelY = height - panelHeight - 48;
     const panelWidth = width - (panelX * 2);
 
-    // Moldura central com a foto inteira, sem recorte.
+    // MOLDURA
     const frameX = 110;
     const frameY = 70;
     const frameWidth = width - (frameX * 2);
     const frameBottom = panelY + 112;
     const frameHeight = Math.max(520, frameBottom - frameY);
 
-    const innerInset = 20;
+    const innerInset = 10;
     const innerX = frameX + innerInset;
     const innerY = frameY + innerInset;
     const innerWidth = frameWidth - (innerInset * 2);
     const innerHeight = frameHeight - (innerInset * 2);
 
+    // área da moldura
     ctx.save();
-    createShareRoundedRectPath(ctx, innerX, innerY, innerWidth, innerHeight, 54);
+    createShareRoundedRectPath(ctx, innerX, innerY, innerWidth, innerHeight, 58);
     ctx.clip();
 
-    ctx.fillStyle = 'rgba(245,240,231,0.72)';
-    ctx.fillRect(innerX, innerY, innerWidth, innerHeight);
+    // base preenchida com a própria imagem para não ficar “vazio”
+    if (img && img.width && img.height) {
+        drawShareCoverImage(ctx, img, innerX, innerY, innerWidth, innerHeight);
+        ctx.fillStyle = 'rgba(250,247,242,0.10)';
+        ctx.fillRect(innerX, innerY, innerWidth, innerHeight);
+    } else {
+        ctx.fillStyle = '#F5F0E7';
+        ctx.fillRect(innerX, innerY, innerWidth, innerHeight);
+    }
 
-    drawShareContainImage(ctx, img, innerX, innerY, innerWidth, innerHeight);
+    // imagem inteira do produto por cima, maior e melhor encaixada
+    if (img && img.width && img.height) {
+        const containPadding = 0;
+        const availableWidth = innerWidth - containPadding * 2;
+        const availableHeight = innerHeight - containPadding * 2;
+
+        const scale = Math.min(availableWidth / img.width, availableHeight / img.height);
+        const drawWidth = img.width * scale;
+        const drawHeight = img.height * scale;
+        const drawX = innerX + (innerWidth - drawWidth) / 2;
+        const drawY = innerY + (innerHeight - drawHeight) / 2;
+
+        ctx.save();
+        ctx.shadowColor = 'rgba(34, 32, 28, 0.10)';
+        ctx.shadowBlur = 12;
+        ctx.shadowOffsetY = 4;
+        ctx.drawImage(img, drawX, drawY, drawWidth, drawHeight);
+        ctx.restore();
+    }
+
     ctx.restore();
 
+    // contorno da moldura
     drawShareRoundedRect(
         ctx,
         frameX,
@@ -5471,7 +5489,7 @@ async function buildProductShareBlob(item) {
         14
     );
 
-    // Card branco de informações.
+    // CARD BRANCO
     ctx.save();
     ctx.shadowColor = 'rgba(34, 32, 28, 0.18)';
     ctx.shadowBlur = 34;
@@ -5492,19 +5510,19 @@ async function buildProductShareBlob(item) {
     const contentWidth = right - left;
     let y = panelY + 58;
 
-    // Categoria
+    // categoria
     ctx.fillStyle = '#B27845';
     ctx.font = "700 22px 'DM Sans', sans-serif";
     ctx.fillText(String(item.category || 'CARDÁPIO'), left, y);
 
-    // Nome — com menos distância até a descrição.
+    // nome
     y += 58;
     ctx.fillStyle = '#22201C';
     ctx.font = "400 59px 'Lora', serif";
     y = shareWrapText(ctx, item.name, left, y, contentWidth, 60, 2);
     y -= 26;
 
-    // Descrição logo abaixo do nome.
+    // descrição
     if (shortDescription) {
         ctx.fillStyle = '#6F6B63';
         ctx.font = "400 24px 'DM Sans', sans-serif";
@@ -5514,7 +5532,7 @@ async function buildProductShareBlob(item) {
         y += 8;
     }
 
-    // Detalhe caramelo
+    // detalhe caramelo
     ctx.strokeStyle = 'rgba(190, 107, 46, 0.55)';
     ctx.lineWidth = 2;
     ctx.beginPath();
@@ -5526,7 +5544,6 @@ async function buildProductShareBlob(item) {
     const infoTop = y;
 
     if (!hasDetailColumn) {
-        // Sem sabores/recheios: uma coluna só. Nada de "Detalhes" vazio.
         let infoY = infoTop;
         drawShareSectionLabel(ctx, 'Valores', left, infoY);
         infoY += 42;
@@ -5555,7 +5572,6 @@ async function buildProductShareBlob(item) {
             shareWrapText(ctx, weightText, left, infoY, contentWidth, 33, 3);
         }
     } else {
-        // Com sabores/recheios: mantém a composição em duas colunas.
         const dividerX = Math.round(width / 2);
         const leftX = left;
         const rightX = dividerX + 42;
