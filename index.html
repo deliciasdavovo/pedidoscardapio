@@ -5215,7 +5215,7 @@ function getShareItemStartingPrice(item) {
 
 function drawShareSectionLabel(ctx, text, x, y) {
     ctx.fillStyle = '#2C4A34';
-    ctx.font = "700 19px 'DM Sans', sans-serif";
+    ctx.font = "700 24px 'DM Sans', sans-serif";
     ctx.fillText(String(text || '').toUpperCase(), x, y);
 }
 
@@ -5226,7 +5226,7 @@ async function buildProductShareBlob(item) {
 
     const width = 1080;
     const height = 1350;
-    const imageHeight = 615;
+    const imageHeight = 540;
     const canvas = document.createElement('canvas');
     canvas.width = width;
     canvas.height = height;
@@ -5253,15 +5253,15 @@ async function buildProductShareBlob(item) {
     y += 60;
 
     ctx.fillStyle = '#22201C';
-    ctx.font = "400 68px 'Lora', serif";
-    y = shareWrapText(ctx, item.name, left, y, contentWidth, 74, 2);
+    ctx.font = "400 84px 'Lora', serif";
+    y = shareWrapText(ctx, item.name, left, y, contentWidth, 90, 2);
     y += 18;
 
     const shortDescription = getShareShortDescription(item);
     if (shortDescription) {
         ctx.fillStyle = '#77736C';
-        ctx.font = "400 27px 'DM Sans', sans-serif";
-        y = shareWrapText(ctx, shortDescription, left, y, contentWidth, 39, 2);
+        ctx.font = "400 34px 'DM Sans', sans-serif";
+        y = shareWrapText(ctx, shortDescription, left, y, contentWidth, 48, 2);
         y += 34;
     } else {
         y += 10;
@@ -5290,9 +5290,9 @@ async function buildProductShareBlob(item) {
 
     const priceLines = getSharePriceLines(item);
     ctx.fillStyle = '#22201C';
-    ctx.font = "600 28px 'DM Sans', sans-serif";
+    ctx.font = "600 34px 'DM Sans', sans-serif";
     priceLines.slice(0, 5).forEach(line => {
-        leftY = shareWrapText(ctx, line, leftX, leftY, leftColWidth, 37, 2);
+        leftY = shareWrapText(ctx, line, leftX, leftY, leftColWidth, 45, 2);
         leftY += 10;
     });
 
@@ -5302,8 +5302,8 @@ async function buildProductShareBlob(item) {
         drawShareSectionLabel(ctx, 'Peso aproximado', leftX, leftY);
         leftY += 40;
         ctx.fillStyle = '#6F6B63';
-        ctx.font = "400 27px 'DM Sans', sans-serif";
-        shareWrapText(ctx, weightText, leftX, leftY, leftColWidth, 38, 2);
+        ctx.font = "400 32px 'DM Sans', sans-serif";
+        shareWrapText(ctx, weightText, leftX, leftY, leftColWidth, 44, 2);
     }
 
     // Coluna direita: sabores/recheios
@@ -5313,7 +5313,7 @@ async function buildProductShareBlob(item) {
     rightY += 43;
 
     ctx.fillStyle = '#5F5B55';
-    ctx.font = "400 26px 'DM Sans', sans-serif";
+    ctx.font = "400 31px 'DM Sans', sans-serif";
 
     if (flavors.length) {
         flavors.slice(0, 7).forEach((flavor, index) => {
@@ -5324,19 +5324,19 @@ async function buildProductShareBlob(item) {
             ctx.fill();
 
             ctx.fillStyle = '#5F5B55';
-            rightY = shareWrapText(ctx, flavor, rightX + 22, rightY, rightColWidth - 22, 34, 2);
+            rightY = shareWrapText(ctx, flavor, rightX + 22, rightY, rightColWidth - 22, 42, 2);
             rightY += 12;
         });
 
         if (flavors.length > 7 && rightY < dividerBottom - 20) {
             ctx.fillStyle = '#8A857C';
-            ctx.font = "500 23px 'DM Sans', sans-serif";
+            ctx.font = "600 32px 'DM Sans', sans-serif";
             ctx.fillText('+ ' + (flavors.length - 7) + ' outras opções', rightX, rightY);
         }
     } else {
         ctx.fillStyle = '#77736C';
-        ctx.font = "400 25px 'DM Sans', sans-serif";
-        shareWrapText(ctx, 'Consulte as opções disponíveis.', rightX, rightY, rightColWidth, 36, 2);
+        ctx.font = "400 30px 'DM Sans', sans-serif";
+        shareWrapText(ctx, 'Consulte as opções disponíveis.', rightX, rightY, rightColWidth, 42, 2);
     }
 
     // Rodapé
@@ -5348,7 +5348,7 @@ async function buildProductShareBlob(item) {
     ctx.stroke();
 
     ctx.fillStyle = 'rgba(44, 74, 52, 0.60)';
-    ctx.font = "700 17px 'DM Sans', sans-serif";
+    ctx.font = "700 20px 'DM Sans', sans-serif";
     ctx.textAlign = 'right';
     ctx.fillText('DELÍCIAS DA VOVÓ', right, footerTop + 20);
     ctx.textAlign = 'left';
@@ -5375,7 +5375,7 @@ async function buildCategoryShareBlob(categoryName) {
 
     const width = 1080;
     const height = 1350;
-    const photoHeight = 590;
+    const photoHeight = 520;
     const canvas = document.createElement('canvas');
     canvas.width = width;
     canvas.height = height;
@@ -5421,12 +5421,12 @@ async function buildCategoryShareBlob(categoryName) {
     y += 58;
 
     ctx.fillStyle = '#22201C';
-    ctx.font = "400 66px 'Lora', serif";
-    y = shareWrapText(ctx, categoryName, left, y, contentWidth, 72, 2);
+    ctx.font = "400 80px 'Lora', serif";
+    y = shareWrapText(ctx, categoryName, left, y, contentWidth, 86, 2);
     y += 18;
 
     ctx.fillStyle = '#77736C';
-    ctx.font = "400 27px 'DM Sans', sans-serif";
+    ctx.font = "400 33px 'DM Sans', sans-serif";
     y = shareWrapText(ctx, 'Uma seleção especial do nosso cardápio, feita com carinho.', left, y, contentWidth, 39, 2);
     y += 42;
 
@@ -5441,24 +5441,24 @@ async function buildCategoryShareBlob(categoryName) {
         const col = index % 2;
         const row = Math.floor(index / 2);
         const x = left + col * (colWidth + colGap);
-        const itemY = y + row * 125;
+        const itemY = y + row * 145;
 
         ctx.fillStyle = '#22201C';
         ctx.font = "600 27px 'DM Sans', sans-serif";
-        shareWrapText(ctx, item.name, x, itemY, colWidth, 34, 2);
+        shareWrapText(ctx, item.name, x, itemY, colWidth, 40, 2);
 
         const price = getShareItemStartingPrice(item);
         if (price) {
             ctx.fillStyle = '#2C4A34';
-            ctx.font = "600 23px 'DM Sans', sans-serif";
-            ctx.fillText(price, x, itemY + 76);
+            ctx.font = "700 27px 'DM Sans', sans-serif";
+            ctx.fillText(price, x, itemY + 90);
         }
     });
 
     const moreCount = Math.max(0, items.length - highlights.length);
     if (moreCount > 0) {
         ctx.fillStyle = '#8A857C';
-        ctx.font = "500 22px 'DM Sans', sans-serif";
+        ctx.font = "600 26px 'DM Sans', sans-serif";
         ctx.fillText('+ ' + moreCount + ' outras opções na categoria', left, height - 86);
     }
 
