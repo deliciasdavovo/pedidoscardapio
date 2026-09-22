@@ -5383,17 +5383,27 @@ async function buildProductShareBlob(item) {
     const priceLines = getSharePriceLines(item);
     const weightText = getShareWeightText(item);
     const shortDescription = getShareShortDescription(item);
-    const hasDetailColumn = flavors.length > 0;
 
-    const flavorExtra = Math.max(0, flavors.length - 5) * 38;
-    const priceExtra = Math.max(0, priceLines.length - 3) * 34;
-    const descriptionExtra = shortDescription ? 24 : 0;
-    const weightExtra = weightText ? 70 : 0;
+    const flavorText = flavors.length
+        ? 'Sabores / recheios: ' + flavors.join(' · ')
+        : '';
 
-    const panelHeight = hasDetailColumn
-        ? Math.min(940, 555 + Math.max(flavorExtra, priceExtra + weightExtra) + descriptionExtra)
-        : Math.min(820, 490 + priceExtra + weightExtra + descriptionExtra);
+    const primaryInfoText = flavorText || shortDescription || '';
+    const primaryPrice = getShareItemStartingPrice(item);
 
+    let secondaryPrice = '';
+    if (hasEstimatedUnitPrice(item)) {
+        secondaryPrice = 'aprox. R$ ' + item.price.toFixed(2).replace('.', ',') + '/un · estimativa pelo peso';
+    } else if (item.sizes && item.sizes.length > 1) {
+        secondaryPrice = priceLines.join(' · ');
+    } else if (priceLines.length > 1) {
+        secondaryPrice = priceLines.slice(1).join(' · ');
+    }
+
+    const infoExtra = primaryInfoText.length > 68 ? 34 : 0;
+    const priceExtra = secondaryPrice.length > 78 ? 30 : 0;
+    const titleExtra = String(item.name || '').length > 28 ? 28 : 0;
+    const panelHeight = Math.min(700, 575 + infoExtra + priceExtra + titleExtra);
     const height = Math.max(1350, panelHeight + 670);
 
     const canvas = document.createElement('canvas');
@@ -5407,7 +5417,7 @@ async function buildProductShareBlob(item) {
 
     const img = await loadShareProductImage(imageSrc);
 
-    // FUNDO EXTERNO — sem blur, só cover + véu suave
+    // Fundo externo: foto em cover, sem blur.
     ctx.fillStyle = '#DDD5C8';
     ctx.fillRect(0, 0, width, height);
 
@@ -5416,21 +5426,22 @@ async function buildProductShareBlob(item) {
     }
 
     const photoVeil = ctx.createLinearGradient(0, 0, 0, height);
-    photoVeil.addColorStop(0, 'rgba(248,244,238,0.24)');
-    photoVeil.addColorStop(0.55, 'rgba(248,244,238,0.10)');
-    photoVeil.addColorStop(1, 'rgba(34,32,28,0.10)');
+    photoVeil.addColorStop(0, 'rgba(248,244,238,0.18)');
+    photoVeil.addColorStop(0.58, 'rgba(248,244,238,0.05)');
+    photoVeil.addColorStop(1, 'rgba(34,32,28,0.12)');
     ctx.fillStyle = photoVeil;
     ctx.fillRect(0, 0, width, height);
 
-    const panelX = 70;
-    const panelY = height - panelHeight - 48;
+    // Painel de informações: posição inspirada no card de referência.
+    const panelX = 78;
+    const panelY = height - panelHeight - 50;
     const panelWidth = width - (panelX * 2);
 
-    // MOLDURA
-    const frameX = 110;
+    // Moldura da foto.
+    const frameX = 108;
     const frameY = 70;
     const frameWidth = width - (frameX * 2);
-    const frameBottom = panelY + 112;
+    const frameBottom = panelY + 105;
     const frameHeight = Math.max(520, frameBottom - frameY);
 
     const innerInset = 10;
@@ -5439,16 +5450,12 @@ async function buildProductShareBlob(item) {
     const innerWidth = frameWidth - (innerInset * 2);
     const innerHeight = frameHeight - (innerInset * 2);
 
-    // área da moldura
     ctx.save();
     createShareRoundedRectPath(ctx, innerX, innerY, innerWidth, innerHeight, 58);
     ctx.clip();
 
-    // deixa só uma imagem: a que preenche toda a moldura
     if (img && img.width && img.height) {
         drawShareCoverImage(ctx, img, innerX, innerY, innerWidth, innerHeight);
-        ctx.fillStyle = 'rgba(250,247,242,0.08)';
-        ctx.fillRect(innerX, innerY, innerWidth, innerHeight);
     } else {
         ctx.fillStyle = '#F5F0E7';
         ctx.fillRect(innerX, innerY, innerWidth, innerHeight);
@@ -5456,24 +5463,23 @@ async function buildProductShareBlob(item) {
 
     ctx.restore();
 
-    // contorno da moldura
     drawShareRoundedRect(
         ctx,
         frameX,
         frameY,
         frameWidth,
         frameHeight,
-        72,
+        70,
         null,
         'rgba(255,255,255,0.96)',
         14
     );
 
-    // CARD BRANCO
+    // Card branco.
     ctx.save();
-    ctx.shadowColor = 'rgba(34, 32, 28, 0.18)';
-    ctx.shadowBlur = 34;
-    ctx.shadowOffsetY = 14;
+    ctx.shadowColor = 'rgba(34, 32, 28, 0.16)';
+    ctx.shadowBlur = 30;
+    ctx.shadowOffsetY = 12;
     drawShareRoundedRect(
         ctx,
         panelX,
@@ -5485,139 +5491,67 @@ async function buildProductShareBlob(item) {
     );
     ctx.restore();
 
-    const left = panelX + 56;
-    const right = panelX + panelWidth - 56;
+    const left = panelX + 58;
+    const right = panelX + panelWidth - 58;
     const contentWidth = right - left;
-    let y = panelY + 58;
+    let y = panelY + 62;
 
-    // categoria
+    // Categoria pequena e caramelo.
     ctx.fillStyle = '#B27845';
     ctx.font = "700 22px 'DM Sans', sans-serif";
     ctx.fillText(String(item.category || 'CARDÁPIO'), left, y);
 
-    // nome
-    y += 58;
+    // Nome: elemento principal da hierarquia.
+    y += 62;
     ctx.fillStyle = '#22201C';
-    ctx.font = "400 59px 'Lora', serif";
-    y = shareWrapText(ctx, item.name, left, y, contentWidth, 60, 2);
-    y -= 26;
+    ctx.font = "400 58px 'Lora', serif";
+    y = shareWrapText(ctx, item.name, left, y, contentWidth, 62, 2);
+    y += 18;
 
-    // descrição
-    if (shortDescription) {
+    // Informações principais em linha corrida, como na referência.
+    if (primaryInfoText) {
         ctx.fillStyle = '#6F6B63';
-        ctx.font = "400 24px 'DM Sans', sans-serif";
-        y = shareWrapText(ctx, shortDescription, left, y, contentWidth, 33, 3);
-        y += 10;
-    } else {
+        ctx.font = "500 25px 'DM Sans', sans-serif";
+        y = shareWrapText(ctx, primaryInfoText, left, y, contentWidth, 34, 3);
         y += 8;
     }
 
-    // detalhe caramelo
-    ctx.strokeStyle = 'rgba(190, 107, 46, 0.55)';
+    if (weightText) {
+        ctx.fillStyle = '#8A867E';
+        ctx.font = "500 22px 'DM Sans', sans-serif";
+        y = shareWrapText(
+            ctx,
+            'Peso aproximado: ' + weightText,
+            left,
+            y,
+            contentWidth,
+            31,
+            2
+        );
+        y += 18;
+    }
+
+    // Pequena assinatura gráfica caramelo.
+    ctx.strokeStyle = 'rgba(190, 107, 46, 0.72)';
     ctx.lineWidth = 2;
     ctx.beginPath();
-    ctx.moveTo(left, y + 4);
-    ctx.lineTo(left + 94, y + 4);
+    ctx.moveTo(left, y + 2);
+    ctx.lineTo(left + 96, y + 2);
     ctx.stroke();
 
-    y += 38;
-    const infoTop = y;
+    // Preço ancorado no rodapé do card.
+    const priceY = panelY + panelHeight - 108;
 
-    if (!hasDetailColumn) {
-        let infoY = infoTop;
-        drawShareSectionLabel(ctx, 'Valores', left, infoY);
-        infoY += 42;
+    if (primaryPrice) {
+        ctx.fillStyle = '#2C5437';
+        ctx.font = "700 49px 'DM Sans', sans-serif";
+        ctx.fillText(primaryPrice, left, priceY);
+    }
 
-        ctx.fillStyle = '#22201C';
-        ctx.font = "600 29px 'DM Sans', sans-serif";
-
-        if (priceLines.length) {
-            priceLines.forEach(line => {
-                infoY = shareWrapText(ctx, line, left, infoY, contentWidth, 39, Infinity);
-                infoY += 9;
-            });
-        } else {
-            ctx.fillStyle = '#77736C';
-            ctx.font = "400 25px 'DM Sans', sans-serif";
-            infoY = shareWrapText(ctx, 'Consulte o valor.', left, infoY, contentWidth, 34, 2);
-        }
-
-        if (weightText) {
-            infoY += 18;
-            drawShareSectionLabel(ctx, 'Peso aproximado', left, infoY);
-            infoY += 38;
-
-            ctx.fillStyle = '#6F6B63';
-            ctx.font = "400 24px 'DM Sans', sans-serif";
-            shareWrapText(ctx, weightText, left, infoY, contentWidth, 33, 3);
-        }
-    } else {
-        const dividerX = Math.round(width / 2);
-        const leftX = left;
-        const rightX = dividerX + 42;
-        const leftColWidth = dividerX - leftX - 40;
-        const rightColWidth = right - rightX;
-        const dividerBottom = panelY + panelHeight - 42;
-
-        ctx.strokeStyle = 'rgba(44, 74, 52, 0.16)';
-        ctx.lineWidth = 2;
-        ctx.beginPath();
-        ctx.moveTo(dividerX, infoTop - 10);
-        ctx.lineTo(dividerX, dividerBottom);
-        ctx.stroke();
-
-        let leftY = infoTop;
-        drawShareSectionLabel(ctx, 'Valores', leftX, leftY);
-        leftY += 42;
-
-        ctx.fillStyle = '#22201C';
-        ctx.font = "600 28px 'DM Sans', sans-serif";
-
-        if (priceLines.length) {
-            priceLines.forEach(line => {
-                leftY = shareWrapText(ctx, line, leftX, leftY, leftColWidth, 38, Infinity);
-                leftY += 10;
-            });
-        } else {
-            ctx.fillStyle = '#77736C';
-            ctx.font = "400 25px 'DM Sans', sans-serif";
-            leftY = shareWrapText(ctx, 'Consulte o valor.', leftX, leftY, leftColWidth, 34, 2);
-        }
-
-        if (weightText) {
-            leftY += 22;
-            drawShareSectionLabel(ctx, 'Peso aproximado', leftX, leftY);
-            leftY += 40;
-
-            ctx.fillStyle = '#6F6B63';
-            ctx.font = "400 24px 'DM Sans', sans-serif";
-            shareWrapText(ctx, weightText, leftX, leftY, leftColWidth, 33, 3);
-        }
-
-        let rightY = infoTop;
-        drawShareSectionLabel(ctx, 'Sabores / Recheios', rightX, rightY);
-        rightY += 42;
-
-        ctx.font = "400 23px 'DM Sans', sans-serif";
-
-        flavors.forEach(flavor => {
-            ctx.fillStyle = '#2C4A34';
-            ctx.beginPath();
-            ctx.arc(rightX + 5, rightY - 7, 4, 0, Math.PI * 2);
-            ctx.fill();
-
-            ctx.fillStyle = '#5F5B55';
-            rightY = shareWrapText(
-                ctx,
-                flavor,
-                rightX + 20,
-                rightY,
-                rightColWidth - 20,
-                32,
-                Infinity
-            );
-            rightY += 10;
-        });
+    if (secondaryPrice) {
+        ctx.fillStyle = '#817D75';
+        ctx.font = "600 20px 'DM Sans', sans-serif";
+        shareWrapText(ctx, secondaryPrice, left, priceY + 36, contentWidth, 27, 2);
     }
 
     return new Promise((resolve, reject) => {
