@@ -900,17 +900,37 @@
 
                         <div id="delivery-address-container" class="hidden space-y-4">
                             <div class="space-y-2">
-                                <label class="text-[11px] font-semibold text-[#8C8676] ml-1 block">Bairro</label>
-                                <select id="delivery-neighborhood" onchange="updateCartSummary()" class="w-full bg-[#ECE9E1]/50 border border-[#8C8676]/10 rounded-2xl px-5 py-3.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#8C8676]/20 appearance-none text-[#22201C]">
-                                    <option value="">Selecione o bairro</option>
-                                </select>
-                                <p id="delivery-fee-hint" class="text-[10px] text-[#8C8676]/70 ml-1">Selecione o bairro para ver a taxa de entrega.</p>
+                                <label class="text-[11px] font-semibold text-[#8C8676] ml-1 block">CEP da entrega</label>
+                                <div class="flex gap-2">
+                                    <input
+                                        type="text"
+                                        id="delivery-cep"
+                                        inputmode="numeric"
+                                        maxlength="9"
+                                        autocomplete="postal-code"
+                                        placeholder="00000-000"
+                                        oninput="handleDeliveryCepInput(this)"
+                                        class="flex-1 min-w-0 bg-[#ECE9E1]/50 border border-[#8C8676]/10 rounded-2xl px-5 py-3.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#8C8676]/20 transition-all"
+                                    >
+                                    <button type="button" onclick="lookupDeliveryCep()" class="shrink-0 px-4 rounded-2xl bg-[#22201C] text-white text-[12px] font-semibold active:scale-95 transition-all">
+                                        Calcular
+                                    </button>
+                                </div>
+                                <p id="delivery-cep-status" class="text-[10px] text-[#8C8676]/75 ml-1 leading-relaxed">A taxa é calculada automaticamente pela distância aproximada do CEP.</p>
+                                <button type="button" onclick="askDeliveryFeeOnWhatsApp()" class="text-[11px] font-semibold text-[#2C4A34] underline underline-offset-4 ml-1">
+                                    Não sei meu CEP — consultar no WhatsApp
+                                </button>
                             </div>
+
                             <div class="space-y-2">
                                 <label class="text-[11px] font-semibold text-[#8C8676] ml-1 block">Endereço</label>
-                                <input type="text" id="delivery-address" placeholder="Rua, número e complemento" class="w-full bg-[#ECE9E1]/50 border border-[#8C8676]/10 rounded-2xl px-5 py-3.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#8C8676]/20 transition-all">
+                                <input type="text" id="delivery-address" oninput="this.dataset.autoFilled='false'" placeholder="Rua, número, bairro e complemento" class="w-full bg-[#ECE9E1]/50 border border-[#8C8676]/10 rounded-2xl px-5 py-3.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#8C8676]/20 transition-all">
                             </div>
-                        </div>
+
+                            <div id="special-delivery-note" class="hidden rounded-2xl bg-[#F3EEE5] border border-[#8C8676]/10 px-4 py-3 text-[11px] leading-relaxed text-[#6E665A]">
+                                Pedidos com bolos ou sobremesas têm a taxa confirmada pela equipe, pois o transporte pode precisar ser feito de carro.
+                            </div>
+                        </div>                        </div>
                     </div>
                 </div>
             </div>
@@ -918,7 +938,7 @@
             <div class="shrink-0 bg-white border-t border-[#8C8676]/10 px-6 sm:px-8 pt-4 pb-6 space-y-3">
                 <div id="delivery-fee-row" class="hidden flex justify-between items-center text-[13px] text-[#8C8676]">
                     <span class="font-medium">Taxa de entrega</span>
-                    <span id="delivery-fee-value" class="font-bold">Selecione o bairro</span>
+                    <span id="delivery-fee-value" class="font-bold">Informe o CEP</span>
                 </div>
                 <div class="flex justify-between items-end">
                     <div>
@@ -956,13 +976,36 @@
     <script>
         // CONFIGURAÇÕES E DADOS
         const WHATSAPP_NUMBER = '5511988921216';
-        const DELIVERY_AREAS = [
-            { fee: 13.00, neighborhoods: ['Bairro Alto', 'Centro', 'Vila Nova', 'Vila Gatti', 'Vila Cleto', 'Jardim Faculdade'] },
-            { fee: 15.00, neighborhoods: ['Vila Santa Terezinha', 'Jardim Santana', 'Jardim Corazza', 'Portela', 'Bairro Liberdade', 'Vila Padre Bento', 'Vila Santo Antônio', 'Jardim do Estádio'] },
-            { fee: 18.00, neighborhoods: ['Nossa Senhora da Candelária', 'Presidente Médici', 'Parque do Varvito', 'Jardim Convenção', 'Jardim Alberto Gomes', 'Vila Esperança', 'Jardim São José', 'Vila São José', 'Jardim dos Ipês', 'Mayard'] },
-            { fee: 21.00, neighborhoods: ['Jardim Aeroporto', 'Jardim São Judas', 'Bairro Rancho Grande', 'Jardim Rancho Grande', 'Itu Novo Centro', 'Jardim Paineiras', 'Jardim Paraíso I', 'Jardim Paraíso II', 'Bairro Brasil', 'São Luiz', 'Parque América'] },
-            { fee: 25.00, neighborhoods: ['Cidade Nova', 'Terras de São José', 'Campos de Santo Antônio', 'Plaza Athénée', 'Jardim Europa', 'Jardim Novo Mundo', 'City Castelo'] }
+        const STORE_LOCATION = {
+            cep: '13311020',
+            latitude: -23.2639336,
+            longitude: -47.3052546
+        };
+
+        const DELIVERY_DISTANCE_FEES = [
+            { maxKm: 3, fee: 13.00 },
+            { maxKm: 5, fee: 15.00 },
+            { maxKm: 7, fee: 18.00 },
+            { maxKm: 9, fee: 21.00 },
+            { maxKm: 12, fee: 25.00 }
         ];
+
+        const SPECIAL_DELIVERY_CATEGORIES = [
+            'Bolos caseiros',
+            'Bolos gelados',
+            'Mini sobremesas',
+            'Sobremesas unitárias',
+            'Tortas doces',
+            'Sobremesas',
+            'Sobremesas clássicas'
+        ];
+
+        let calculatedDeliveryFee = null;
+        let calculatedDeliveryDistanceKm = null;
+        let deliveryQuoteReason = '';
+        let deliveryCepData = null;
+        let deliveryCepLookupTimer = null;
+
         const ENCOMENDA_TIME_MIN = "07:30";
         const ENCOMENDA_TIME_MAX = "20:00";
         const PRONTA_ENTREGA_MSG = 'Pedidos para hoje (pronta entrega): ligue (11) 4013-5248.';
@@ -1973,7 +2016,7 @@ price: 34.00,
     sizes: [
                     { label: 'Pequeno', price: 18.00, description: 'Rende aprox. 6 fatias'},
                     { label: 'Vitrine', price: 28.00, description: 'Rende aprox. 8 fatias' },
-                    { label: 'Tam. familia', price: 72.00, description: 'Rende aprox. 20 fatias' }
+                    { label: 'Tam. familia', price: 75.00, description: 'Rende aprox. 20 fatias' }
                 ]
 },
 {
@@ -2881,7 +2924,6 @@ flavors: ['Sonho de Valsa', 'Ouro branco', 'Ninho trufado', 'Pessêgo', 'Amendoi
             renderCategories();
             renderMenu();
             renderDiscovery();
-            renderDeliveryNeighborhoods();
             setOrderType('Encomenda');
             setFulfillment('Retirada');
             initModalSwipe();
@@ -4074,76 +4116,198 @@ if (!item.sizes && flavor && item.variants && item.variants[flavor]) {
             else { cart.push({ ...item, qty, unit, flavor, size, finalPrice, image: imageOverride || item.image }); }
         }
 
-        function renderDeliveryNeighborhoods() {
-            const select = document.getElementById('delivery-neighborhood');
-            if (!select) return;
-
-            const neighborhoods = DELIVERY_AREAS
-                .flatMap(area => area.neighborhoods.map(neighborhood => ({ neighborhood, fee: area.fee })))
-                .sort((a, b) => a.neighborhood.localeCompare(b.neighborhood, 'pt-BR'));
-
-            select.innerHTML =
-                '<option value="">Selecione o bairro</option>' +
-                neighborhoods.map(item =>
-                    '<option value="' + item.neighborhood + '" data-fee="' + item.fee.toFixed(2) + '">' +
-                    item.neighborhood +
-                    '</option>'
-                ).join('') +
-                '<option value="__consultar__">Outro bairro — consultar</option>';
+        function cartRequiresSpecialDelivery() {
+            return cart.some(item => SPECIAL_DELIVERY_CATEGORIES.includes(item.category));
         }
 
-        function getSelectedDeliveryFee() {
-            const select = document.getElementById('delivery-neighborhood');
-            const option = select?.selectedOptions?.[0];
-            if (!option || option.value === '__consultar__') return null;
-            return option.dataset?.fee ? Number(option.dataset.fee) : 0;
+        function formatCepValue(value) {
+            const digits = String(value || '').replace(/\D/g, '').slice(0, 8);
+            return digits.length > 5 ? digits.slice(0, 5) + '-' + digits.slice(5) : digits;
         }
 
-        function getSelectedDeliveryNeighborhood() {
-            const select = document.getElementById('delivery-neighborhood');
-            const option = select?.selectedOptions?.[0];
-            if (!option || !option.value) return '';
-            return option.value === '__consultar__' ? 'Outro bairro' : option.value;
+        function handleDeliveryCepInput(input) {
+            input.value = formatCepValue(input.value);
+
+            calculatedDeliveryFee = null;
+            calculatedDeliveryDistanceKm = null;
+            deliveryQuoteReason = '';
+            deliveryCepData = null;
+
+            const status = document.getElementById('delivery-cep-status');
+            if (status) status.innerText = 'A taxa é calculada automaticamente pela distância aproximada do CEP.';
+
+            if (deliveryCepLookupTimer) clearTimeout(deliveryCepLookupTimer);
+            const cep = input.value.replace(/\D/g, '');
+
+            if (cep.length === 8) {
+                deliveryCepLookupTimer = setTimeout(() => lookupDeliveryCep(), 350);
+            }
+
+            updateCartSummary();
+        }
+
+        function calculateDistanceKm(lat1, lon1, lat2, lon2) {
+            const toRad = degrees => degrees * Math.PI / 180;
+            const earthRadiusKm = 6371;
+            const dLat = toRad(lat2 - lat1);
+            const dLon = toRad(lon2 - lon1);
+            const a =
+                Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+                Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) *
+                Math.sin(dLon / 2) * Math.sin(dLon / 2);
+            return earthRadiusKm * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+        }
+
+        function feeForDistance(distanceKm) {
+            return DELIVERY_DISTANCE_FEES.find(range => distanceKm <= range.maxKm)?.fee ?? null;
+        }
+
+        async function lookupDeliveryCep() {
+            const input = document.getElementById('delivery-cep');
+            const status = document.getElementById('delivery-cep-status');
+            const addressInput = document.getElementById('delivery-address');
+            const cep = (input?.value || '').replace(/\D/g, '');
+
+            if (cep.length !== 8) {
+                calculatedDeliveryFee = null;
+                calculatedDeliveryDistanceKm = null;
+                deliveryQuoteReason = '';
+                if (status) status.innerText = 'Digite um CEP com 8 números.';
+                updateCartSummary();
+                return;
+            }
+
+            if (status) status.innerText = 'Consultando CEP e calculando a taxa…';
+
+            try {
+                const response = await fetch('https://brasilapi.com.br/api/cep/v2/' + cep);
+                if (!response.ok) throw new Error('CEP não encontrado');
+
+                const data = await response.json();
+                deliveryCepData = data;
+
+                const autoAddress = [data.street, data.neighborhood].filter(Boolean).join(' - ');
+                if (autoAddress && addressInput && (!addressInput.value || addressInput.dataset.autoFilled === 'true')) {
+                    addressInput.value = autoAddress;
+                    addressInput.dataset.autoFilled = 'true';
+                }
+
+                if (data.city && String(data.city).toLowerCase() !== 'itu') {
+                    calculatedDeliveryFee = null;
+                    calculatedDeliveryDistanceKm = null;
+                    deliveryQuoteReason = 'CEP fora de Itu';
+                    if (status) status.innerText = [data.street, data.neighborhood, data.city].filter(Boolean).join(' · ') + ' — taxa a consultar.';
+                    updateCartSummary();
+                    return;
+                }
+
+                const latitude = Number(data.location?.coordinates?.latitude);
+                const longitude = Number(data.location?.coordinates?.longitude);
+
+                if (!Number.isFinite(latitude) || !Number.isFinite(longitude) || (latitude === 0 && longitude === 0)) {
+                    calculatedDeliveryFee = null;
+                    calculatedDeliveryDistanceKm = null;
+                    deliveryQuoteReason = 'CEP sem coordenadas disponíveis';
+                    if (status) status.innerText = 'CEP encontrado, mas a distância não pôde ser calculada. Taxa a consultar.';
+                    updateCartSummary();
+                    return;
+                }
+
+                const distanceKm = calculateDistanceKm(
+                    STORE_LOCATION.latitude,
+                    STORE_LOCATION.longitude,
+                    latitude,
+                    longitude
+                );
+
+                calculatedDeliveryDistanceKm = distanceKm;
+                calculatedDeliveryFee = feeForDistance(distanceKm);
+                deliveryQuoteReason = calculatedDeliveryFee ? '' : 'Distância acima da faixa automática';
+
+                const place = [data.street, data.neighborhood].filter(Boolean).join(' · ');
+                if (status) {
+                    status.innerText = place +
+                        (place ? ' — ' : '') +
+                        'aprox. ' + distanceKm.toFixed(1).replace('.', ',') + ' km da Matriz' +
+                        (calculatedDeliveryFee ? '.' : ' — taxa a consultar.');
+                }
+
+                updateCartSummary();
+            } catch (error) {
+                calculatedDeliveryFee = null;
+                calculatedDeliveryDistanceKm = null;
+                deliveryQuoteReason = 'Não foi possível calcular pelo CEP';
+                deliveryCepData = null;
+                if (status) status.innerText = 'Não conseguimos calcular esse CEP agora. Você pode consultar a taxa pelo WhatsApp.';
+                updateCartSummary();
+            }
         }
 
         function deliveryNeedsQuote() {
-            return document.getElementById('delivery-neighborhood')?.value === '__consultar__';
+            return cartRequiresSpecialDelivery() || Boolean(deliveryQuoteReason);
+        }
+
+        function getSelectedDeliveryFee() {
+            if (deliveryNeedsQuote()) return null;
+            return calculatedDeliveryFee;
+        }
+
+        function getDeliveryCep() {
+            return (document.getElementById('delivery-cep')?.value || '').replace(/\D/g, '');
+        }
+
+        function askDeliveryFeeOnWhatsApp() {
+            const address = document.getElementById('delivery-address')?.value?.trim();
+            const items = cart.length
+                ? '\n\nItens no carrinho:\n' + cart.map(item => '- ' + item.name + (item.flavor ? ' - ' + item.flavor : '')).join('\n')
+                : '';
+            const addressText = address
+                ? '\nEndereço: ' + address
+                : '\nEndereço: vou informar aqui na conversa.';
+            const message = 'Olá! Não sei meu CEP e gostaria de consultar a taxa de entrega.' + addressText + items;
+            window.open('https://wa.me/' + WHATSAPP_NUMBER + '?text=' + encodeURIComponent(message), '_blank');
         }
 
         function updateCartSummary() {
-            let total = cart.reduce((acc, item) => acc + (item.finalPrice * item.qty), 0);
+            const subtotal = cart.reduce((acc, item) => acc + (item.finalPrice * item.qty), 0);
+            let total = subtotal;
             const count = cart.length;
             const feeRow = document.getElementById('delivery-fee-row');
             const feeValue = document.getElementById('delivery-fee-value');
+            const specialNote = document.getElementById('special-delivery-note');
+            const specialDelivery = cartRequiresSpecialDelivery();
+
+            if (specialNote) specialNote.classList.toggle('hidden', !specialDelivery);
 
             if (activeFulfillment === 'Entrega' && count > 0) {
                 const deliveryFee = getSelectedDeliveryFee();
-                const feeHint = document.getElementById('delivery-fee-hint');
+                if (feeRow) feeRow.classList.remove('hidden');
 
-                feeRow.classList.remove('hidden');
-
-                if (deliveryNeedsQuote()) {
-                    feeValue.innerText = 'Consultar';
-                    if (feeHint) feeHint.innerText = 'Esse bairro precisa de confirmação da taxa pelo WhatsApp.';
+                if (specialDelivery) {
+                    if (feeValue) feeValue.innerText = 'A consultar';
+                } else if (deliveryNeedsQuote()) {
+                    if (feeValue) feeValue.innerText = 'A consultar';
                 } else if (deliveryFee > 0) {
                     total += deliveryFee;
-                    feeValue.innerText = 'R$ ' + deliveryFee.toFixed(2).replace('.', ',');
-                    if (feeHint) feeHint.innerText = 'Taxa calculada conforme o bairro selecionado.';
+                    if (feeValue) feeValue.innerText = 'R$ ' + deliveryFee.toFixed(2).replace('.', ',');
                 } else {
-                    feeValue.innerText = 'Selecione o bairro';
-                    if (feeHint) feeHint.innerText = 'Selecione o bairro para ver a taxa de entrega.';
+                    if (feeValue) feeValue.innerText = 'Informe o CEP';
                 }
-            } else {
+            } else if (feeRow) {
                 feeRow.classList.add('hidden');
             }
+
             document.getElementById('cart-badge').innerText = count;
             document.getElementById('cart-badge').classList.toggle('hidden', count === 0);
-            document.getElementById('header-total').innerText = 'R$ ' + total.toFixed(2);
-            document.getElementById('sticky-total').innerText = 'R$ ' + total.toFixed(2);
+            document.getElementById('header-total').innerText = 'R$ ' + subtotal.toFixed(2);
+            document.getElementById('sticky-total').innerText = 'R$ ' + subtotal.toFixed(2);
+
             const reviewTotal = document.getElementById('cart-review-total');
-            if (reviewTotal) reviewTotal.innerText = 'R$ ' + total.toFixed(2);
+            if (reviewTotal) reviewTotal.innerText = 'R$ ' + subtotal.toFixed(2);
+
             const finalTotal = document.getElementById('cart-final-total');
             if (finalTotal) finalTotal.innerText = 'R$ ' + total.toFixed(2);
+
             document.getElementById('sticky-cart-count').innerText = count;
             const bar = document.getElementById('sticky-cart-bar');
             if (count > 0) bar.classList.remove('translate-y-40'); else bar.classList.add('translate-y-40');
@@ -4260,37 +4424,83 @@ if (!item.sizes && flavor && item.variants && item.variants[flavor]) {
                 document.getElementById('order-name').focus();
                 return;
             }
-            if (activeFulfillment === 'Entrega' && !getSelectedDeliveryNeighborhood()) {
-                showValidationPopup('Por favor, selecione o bairro da entrega!');
-                document.getElementById('delivery-neighborhood').focus();
-                return;
-            }
-            if (activeFulfillment === 'Entrega' && !document.getElementById('delivery-address').value) {
-                showValidationPopup('Por favor, informe o endereço!');
+
+            const address = document.getElementById('delivery-address')?.value?.trim() || '';
+            const cep = getDeliveryCep();
+            const specialDelivery = cartRequiresSpecialDelivery();
+
+            if (activeFulfillment === 'Entrega' && !address) {
+                showValidationPopup('Por favor, informe o endereço da entrega!');
                 document.getElementById('delivery-address').focus();
                 return;
             }
+
+            if (
+                activeFulfillment === 'Entrega' &&
+                !specialDelivery &&
+                !deliveryNeedsQuote() &&
+                cep.length !== 8
+            ) {
+                showValidationPopup('Informe o CEP para calcular a taxa ou use a opção de consultar pelo WhatsApp.');
+                document.getElementById('delivery-cep').focus();
+                return;
+            }
+
             if (activeOrderType === 'Encomenda') {
                 configurarRestricoesEncomenda();
                 if (!validarDataEncomenda(true, true) || !validarHorarioEncomenda(true, true)) return;
             }
+
             const itemsText = cart.map(formatWhatsAppCartItem).join('\n');
             let total = cart.reduce((acc, item) => acc + (item.finalPrice * item.qty), 0);
             const deliveryFee = activeFulfillment === 'Entrega' ? getSelectedDeliveryFee() : 0;
-            const deliveryNeighborhood = activeFulfillment === 'Entrega' ? getSelectedDeliveryNeighborhood() : '';
-            const deliveryText = activeFulfillment === 'Entrega'
-                ? '\nBairro: ' + deliveryNeighborhood + '\nTaxa de Entrega: ' + (deliveryNeedsQuote() ? 'a confirmar' : 'R$ ' + deliveryFee.toFixed(2))
-                : '';
-            if (activeFulfillment === 'Entrega' && deliveryFee > 0) total += deliveryFee;
-            const fulfillmentInfo = activeFulfillment === 'Entrega' ? 'Entrega: ' + document.getElementById('delivery-address').value : 'Retirada: ' + document.getElementById('pickup-location').value;
+
+            if (activeFulfillment === 'Entrega' && deliveryFee > 0) {
+                total += deliveryFee;
+            }
+
+            let deliveryText = '';
+            if (activeFulfillment === 'Entrega') {
+                const cepText = cep.length === 8 ? formatCepValue(cep) : 'não informado';
+                const distanceText = calculatedDeliveryDistanceKm != null
+                    ? '\nDistância aproximada: ' + calculatedDeliveryDistanceKm.toFixed(1).replace('.', ',') + ' km'
+                    : '';
+                const reason = specialDelivery
+                    ? 'pedido com bolo/sobremesa — confirmar transporte'
+                    : deliveryQuoteReason;
+
+                deliveryText =
+                    '\nCEP: ' + cepText +
+                    distanceText +
+                    '\nTaxa de Entrega: ' + (deliveryFee > 0 ? 'R$ ' + deliveryFee.toFixed(2) : 'a confirmar') +
+                    (reason ? '\nObservação da entrega: ' + reason : '');
+            }
+
+            const fulfillmentInfo = activeFulfillment === 'Entrega'
+                ? 'Entrega: ' + address
+                : 'Retirada: ' + document.getElementById('pickup-location').value;
+
             const selectedDate = document.getElementById('order-date').value;
             const selectedTime = document.getElementById('order-time').value;
-            const encomendaDateTimeText = '\nData da encomenda: ' + formatWhatsAppOrderDate(selectedDate) + '\nHorário da encomenda: ' + selectedTime;
-            const message = 'Olá, gostaria de fazer um pedido, aguardo confirmação\n'+'Pedido • Delícias da Vovó\n' + '__________________________\n' + 'Cliente: ' + name + '\n' + 'Tipo: ' + activeOrderType + encomendaDateTimeText + '\n' + fulfillmentInfo + deliveryText + '\n\n' + 'Pedido\n' + itemsText + '\n\n' + 'Total aproximado: R$ ' + total.toFixed(2);
+            const encomendaDateTimeText =
+                '\nData da encomenda: ' + formatWhatsAppOrderDate(selectedDate) +
+                '\nHorário da encomenda: ' + selectedTime;
+
+            const totalLabel = activeFulfillment === 'Entrega' && !deliveryFee
+                ? 'Subtotal (taxa de entrega a confirmar): R$ '
+                : 'Total aproximado: R$ ';
+
+            const message =
+                'Olá, gostaria de fazer um pedido, aguardo confirmação\n' +
+                'Pedido • Delícias da Vovó\n' +
+                '__________________________\n' +
+                'Cliente: ' + name + '\n' +
+                'Tipo: ' + activeOrderType + encomendaDateTimeText + '\n' +
+                fulfillmentInfo + deliveryText + '\n\n' +
+                'Pedido\n' + itemsText + '\n\n' +
+                totalLabel + total.toFixed(2);
+
             window.open('https://wa.me/' + WHATSAPP_NUMBER + '?text=' + encodeURIComponent(message), '_blank');
-            // Fecha a cesta e destrava a página. Sem isso, ao voltar do
-            // WhatsApp o site podia ficar preso/em branco com o modal aberto
-            // e o body travado (overflow hidden).
             closeCheckout();
         }
 
