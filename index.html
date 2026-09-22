@@ -5417,18 +5417,27 @@ async function buildProductShareBlob(item) {
 
     const img = await loadShareProductImage(imageSrc);
 
-    // Fundo externo: foto em cover, sem blur.
+    // Fundo externo: suave e "desfocado visualmente", sem usar blur.
     ctx.fillStyle = '#DDD5C8';
     ctx.fillRect(0, 0, width, height);
 
     if (img && img.width && img.height) {
         drawShareCoverImage(ctx, img, 0, 0, width, height);
+
+        // Camada leitosa para apagar detalhes do fundo sem causar o efeito de tontura.
+        ctx.fillStyle = 'rgba(248,244,238,0.42)';
+        ctx.fillRect(0, 0, width, height);
+
+        // Segunda camada sutil para deixar o fundo mais uniforme.
+        ctx.fillStyle = 'rgba(255,255,255,0.10)';
+        ctx.fillRect(0, 0, width, height);
     }
 
     const photoVeil = ctx.createLinearGradient(0, 0, 0, height);
-    photoVeil.addColorStop(0, 'rgba(248,244,238,0.18)');
-    photoVeil.addColorStop(0.58, 'rgba(248,244,238,0.05)');
-    photoVeil.addColorStop(1, 'rgba(34,32,28,0.12)');
+    photoVeil.addColorStop(0, 'rgba(255,255,255,0.10)');
+    photoVeil.addColorStop(0.35, 'rgba(248,244,238,0.16)');
+    photoVeil.addColorStop(0.72, 'rgba(248,244,238,0.26)');
+    photoVeil.addColorStop(1, 'rgba(34,32,28,0.16)');
     ctx.fillStyle = photoVeil;
     ctx.fillRect(0, 0, width, height);
 
@@ -5454,11 +5463,12 @@ async function buildProductShareBlob(item) {
     createShareRoundedRectPath(ctx, innerX, innerY, innerWidth, innerHeight, 58);
     ctx.clip();
 
+    ctx.fillStyle = '#F5F0E7';
+    ctx.fillRect(innerX, innerY, innerWidth, innerHeight);
+
     if (img && img.width && img.height) {
-        drawShareCoverImage(ctx, img, innerX, innerY, innerWidth, innerHeight);
-    } else {
-        ctx.fillStyle = '#F5F0E7';
-        ctx.fillRect(innerX, innerY, innerWidth, innerHeight);
+        // Exibe a foto inteira do produto dentro da moldura, sem recortes.
+        drawShareContainImage(ctx, img, innerX, innerY, innerWidth, innerHeight);
     }
 
     ctx.restore();
