@@ -5175,6 +5175,30 @@ function drawShareCoverImage(ctx, img, x, y, width, height) {
     ctx.drawImage(img, sx, sy, sw, sh, x, y, width, height);
 }
 
+function drawShareBlurredBackground(ctx, img, width, height) {
+    if (!img || !img.width || !img.height) return;
+
+    // Reduzir a foto antes de ampliá-la elimina os detalhes mesmo em
+    // navegadores cujo filtro de canvas produz um blur muito discreto.
+    const softCanvas = document.createElement('canvas');
+    const softWidth = 96;
+    const softHeight = Math.max(96, Math.round(height * (softWidth / width)));
+    softCanvas.width = softWidth;
+    softCanvas.height = softHeight;
+
+    const softCtx = softCanvas.getContext('2d');
+    softCtx.imageSmoothingEnabled = true;
+    softCtx.imageSmoothingQuality = 'high';
+    drawShareCoverImage(softCtx, img, 0, 0, softWidth, softHeight);
+
+    ctx.save();
+    ctx.imageSmoothingEnabled = true;
+    ctx.imageSmoothingQuality = 'high';
+    ctx.filter = 'blur(16px)';
+    ctx.drawImage(softCanvas, -36, -36, width + 72, height + 72);
+    ctx.restore();
+}
+
 
 function drawShareRoundedRect(ctx, x, y, width, height, radius, fillStyle, strokeStyle = null, strokeWidth = 2) {
     const r = Math.max(0, Math.min(radius, width / 2, height / 2));
@@ -5592,9 +5616,11 @@ async function buildProductShareBlob(item) {
         ? Math.max(priceBlockHeight, flavorBlockHeight)
         : priceBlockHeight;
 
+    // O fundo creme acompanha o conteúdo e termina logo após a última linha.
+    // A altura mínima serve apenas para manter o equilíbrio nos cards curtos.
     const panelHeight = Math.max(
-        hasDetailColumn ? 650 : 560,
-        headerHeight + infoHeight + 52
+        360,
+        Math.ceil(headerHeight + infoHeight + 30)
     );
     const height = Math.max(1350, panelHeight + 670);
 
@@ -5609,25 +5635,22 @@ async function buildProductShareBlob(item) {
 
     const img = await loadShareProductImage(imageSrc);
 
-    // Fundo externo com desfoque real; a ampliação evita bordas transparentes.
+    // Fundo realmente fora de foco: baixa resolução + ampliação suave + blur.
     ctx.fillStyle = '#DDD5C8';
     ctx.fillRect(0, 0, width, height);
 
     if (img && img.width && img.height) {
-        ctx.save();
-        ctx.filter = 'blur(20px)';
-        drawShareCoverImage(ctx, img, -32, -32, width + 64, height + 64);
-        ctx.restore();
+        drawShareBlurredBackground(ctx, img, width, height);
 
-        // Véu leve: preserva as cores da foto sem deixá-la branca.
-        ctx.fillStyle = 'rgba(248,244,238,0.16)';
+        // Véu mínimo apenas para separar o fundo da moldura.
+        ctx.fillStyle = 'rgba(248,244,238,0.06)';
         ctx.fillRect(0, 0, width, height);
     }
 
     const photoVeil = ctx.createLinearGradient(0, 0, 0, height);
-    photoVeil.addColorStop(0, 'rgba(255,255,255,0.04)');
-    photoVeil.addColorStop(0.45, 'rgba(248,244,238,0.08)');
-    photoVeil.addColorStop(1, 'rgba(34,32,28,0.18)');
+    photoVeil.addColorStop(0, 'rgba(255,255,255,0.02)');
+    photoVeil.addColorStop(0.55, 'rgba(248,244,238,0.04)');
+    photoVeil.addColorStop(1, 'rgba(34,32,28,0.10)');
     ctx.fillStyle = photoVeil;
     ctx.fillRect(0, 0, width, height);
 
