@@ -82,6 +82,28 @@
 
         /* UI Helpers */
         .cart-open { overflow: hidden; }
+
+        /* Compartilhamento de produto: invisível para clientes; liberado no modo proprietário */
+        .owner-share-btn {
+            display: none !important;
+        }
+        body.owner-mode .owner-share-btn {
+            display: inline-flex !important;
+        }
+        .owner-share-btn {
+            align-items: center;
+            justify-content: center;
+            border: 1px solid rgba(44, 74, 52, 0.14);
+            background: rgba(245, 240, 231, 0.88);
+            color: rgba(44, 74, 52, 0.78);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            box-shadow: 0 2px 10px rgba(34, 32, 28, 0.08);
+        }
+        .owner-share-btn:hover {
+            background: #F5F0E7;
+            color: #2C4A34;
+        }
         
         input[type="number"]::-webkit-inner-spin-button, 
         input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
@@ -742,7 +764,7 @@
     <div id="discovery-overlay">
         <div class="discovery-shell">
             <div class="discovery-brand">
-                <div class="discovery-brand-name">Delícias da Vovó</div>
+                <div class="discovery-brand-name select-none" onclick="handleOwnerModeTap()">Delícias da Vovó</div>
                 <div class="discovery-brand-line"></div>
             </div>
 
@@ -2949,10 +2971,14 @@ flavors: ['Sonho de Valsa', 'Ouro branco', 'Ninho trufado', 'Pessêgo', 'Amendoi
         let toastAutoHideTimer = null;
         let toastCleanupTimer = null;
         let pendingKitSelection = null;
+        const OWNER_MODE_KEY = 'delicias_owner_mode_v1';
+        let ownerModeTapCount = 0;
+        let ownerModeTapTimer = null;
         const CHECKOUT_PREFS_KEY = 'delicias_checkout_preferences_v1';
         const WHATSAPP_RETURN_KEY = 'delicias_return_from_whatsapp';
 
         window.onload = () => {
+            applyOwnerModeState();
             renderCategories();
             renderMenu();
             renderDiscovery();
@@ -3026,6 +3052,37 @@ flavors: ['Sonho de Valsa', 'Ouro branco', 'Ninho trufado', 'Pessêgo', 'Amendoi
         });
 
         window.addEventListener('focus', handleReturnFromWhatsApp);
+
+        function applyOwnerModeState() {
+            let enabled = false;
+            try {
+                enabled = localStorage.getItem(OWNER_MODE_KEY) === '1';
+            } catch (_) {}
+            document.body.classList.toggle('owner-mode', enabled);
+        }
+
+        function handleOwnerModeTap() {
+            ownerModeTapCount += 1;
+            if (ownerModeTapTimer) clearTimeout(ownerModeTapTimer);
+
+            ownerModeTapTimer = setTimeout(() => {
+                ownerModeTapCount = 0;
+            }, 1800);
+
+            if (ownerModeTapCount < 5) return;
+
+            ownerModeTapCount = 0;
+            const enabled = !document.body.classList.contains('owner-mode');
+            document.body.classList.toggle('owner-mode', enabled);
+
+            try {
+                localStorage.setItem(OWNER_MODE_KEY, enabled ? '1' : '0');
+            } catch (_) {}
+
+            showValidationPopup(enabled
+                ? 'Modo proprietário ativado.'
+                : 'Modo proprietário desativado.');
+        }
 
         function renderDiscovery() {
             const container = document.getElementById('discovery-cards');
@@ -3270,7 +3327,10 @@ flavors: ['Sonho de Valsa', 'Ouro branco', 'Ninho trufado', 'Pessêgo', 'Amendoi
             const unitSuffix = item.isKit ? '/pessoa' : (item.units[0] === 'kg' ? '/kg' : '/un');
 
             return `
-                <div class="product-card group flex flex-col h-full overflow-hidden">
+                <div class="product-card group relative flex flex-col h-full overflow-hidden">
+                    <button type="button" onclick="event.stopPropagation(); shareProductImage('${item.id}')" class="owner-share-btn absolute top-3 right-3 z-20 w-8 h-8 rounded-full" aria-label="Compartilhar imagem de ${item.name}">
+                        <i class="fas fa-arrow-up-from-bracket text-[10px]"></i>
+                    </button>
                     <div class="relative h-56 overflow-hidden">
   <img
     id="img-${item.id}"
@@ -4962,6 +5022,247 @@ function initModalSwipe() {
     });
 }
 
+// ===== COMPARTILHAMENTO DE PRODUTO (MODO PROPRIETÁRIO) =====
+
+function shareWrapText(ctx, text, x, y, maxWidth, lineHeight, maxLines = Infinity) {
+    const words = String(text || '').trim().split(/\s+/).filter(Boolean);
+    const lines = [];
+    let current = '';
+
+    words.forEach(word => {
+        const test = current ? current + ' ' + word : word;
+        if (ctx.measureText(test).width <= maxWidth || !current) {
+            current = test;
+        } else {
+            lines.push(current);
+            current = word;
+        }
+    });
+
+    if (current) lines.push(current);
+
+    const visible = lines.slice(0, maxLines);
+    if (lines.length > maxLines && visible.length) {
+        let last = visible[visible.length - 1];
+        while (ctx.measureText(last + '…').width > maxWidth && last.length > 1) {
+            last = last.slice(0, -1);
+        }
+        visible[visible.length - 1] = last.trim() + '…';
+    }
+
+    visible.forEach((line, idx) => ctx.fillText(line, x, y + idx * lineHeight));
+    return y + visible.length * lineHeight;
+}
+
+async function loadShareProductImage(src) {
+    if (!src) return null;
+
+    return new Promise(resolve => {
+        const img = new Image();
+        img.crossOrigin = 'anonymous';
+        img.onload = () => resolve(img);
+        img.onerror = () => resolve(null);
+        img.src = src;
+    });
+}
+
+function drawShareCoverImage(ctx, img, x, y, width, height) {
+    if (!img) {
+        ctx.fillStyle = '#E8E0D2';
+        ctx.fillRect(x, y, width, height);
+        return;
+    }
+
+    const imgRatio = img.width / img.height;
+    const targetRatio = width / height;
+    let sx = 0, sy = 0, sw = img.width, sh = img.height;
+
+    if (imgRatio > targetRatio) {
+        sw = img.height * targetRatio;
+        sx = (img.width - sw) / 2;
+    } else {
+        sh = img.width / targetRatio;
+        sy = (img.height - sh) / 2;
+    }
+
+    ctx.drawImage(img, sx, sy, sw, sh, x, y, width, height);
+}
+
+function getSharePriceLines(item) {
+    const lines = [];
+
+    if (item.isKit) {
+        const kitTotal = getKitComputedTotal(item, 10);
+        lines.push('A partir de R$ ' + (kitTotal / 10).toFixed(2).replace('.', ',') + ' por pessoa');
+        return lines;
+    }
+
+    if (item.sizes && item.sizes.length) {
+        item.sizes.forEach(size => {
+            if (typeof size.price === 'number') {
+                lines.push(size.label + '  ·  R$ ' + size.price.toFixed(2).replace('.', ','));
+            }
+        });
+        return lines;
+    }
+
+    const hasUn = item.units && item.units.includes('un');
+    const hasKg = item.units && item.units.includes('kg');
+
+    if (hasUn && typeof item.price === 'number') {
+        lines.push('Unidade  ·  R$ ' + item.price.toFixed(2).replace('.', ','));
+    }
+
+    if (hasKg && typeof item.priceKg === 'number') {
+        lines.push('Quilo  ·  R$ ' + item.priceKg.toFixed(2).replace('.', ','));
+    }
+
+    if (!lines.length && typeof item.price === 'number') {
+        lines.push('R$ ' + item.price.toFixed(2).replace('.', ','));
+    }
+
+    return lines;
+}
+
+function getShareFlavorLabels(item) {
+    if (!item.flavors || !item.flavors.length) return [];
+    return getFlavorList(item).map(flavor => flavor.label).filter(Boolean);
+}
+
+async function buildProductShareBlob(item) {
+    if (document.fonts && document.fonts.ready) {
+        try { await document.fonts.ready; } catch (_) {}
+    }
+
+    const width = 1080;
+    const height = 1440;
+    const imageHeight = 760;
+    const canvas = document.createElement('canvas');
+    canvas.width = width;
+    canvas.height = height;
+
+    const ctx = canvas.getContext('2d');
+    ctx.fillStyle = '#F5F0E7';
+    ctx.fillRect(0, 0, width, height);
+
+    const imageSrc = (item.images && item.images.length)
+        ? item.images[0]
+        : (item.image || '');
+
+    const img = await loadShareProductImage(imageSrc);
+    drawShareCoverImage(ctx, img, 0, 0, width, imageHeight);
+
+    const left = 68;
+    const contentWidth = width - (left * 2);
+    let y = imageHeight + 62;
+
+    ctx.fillStyle = '#858278';
+    ctx.font = "600 27px 'DM Sans', sans-serif";
+    ctx.fillText(String(item.category || 'CARDÁPIO').toUpperCase(), left, y);
+    y += 68;
+
+    ctx.fillStyle = '#22201C';
+    ctx.font = "400 62px 'Lora', serif";
+    y = shareWrapText(ctx, item.name, left, y, contentWidth, 70, 2);
+    y += 20;
+
+    ctx.fillStyle = '#827F78';
+    ctx.font = "400 30px 'DM Sans', sans-serif";
+    y = shareWrapText(ctx, item.description || '', left, y, contentWidth, 43, 2);
+    y += 28;
+
+    const priceLines = getSharePriceLines(item);
+    if (priceLines.length) {
+        ctx.fillStyle = '#2C4A34';
+        ctx.font = "700 20px 'DM Sans', sans-serif";
+        ctx.fillText('VALORES', left, y);
+        y += 34;
+
+        ctx.fillStyle = '#22201C';
+        ctx.font = "600 28px 'DM Sans', sans-serif";
+        priceLines.slice(0, 4).forEach(line => {
+            ctx.fillText(line, left, y);
+            y += 38;
+        });
+        y += 8;
+    }
+
+    const flavors = getShareFlavorLabels(item);
+    if (flavors.length && y < height - 145) {
+        ctx.fillStyle = '#2C4A34';
+        ctx.font = "700 20px 'DM Sans', sans-serif";
+        ctx.fillText('SABORES / RECHEIOS', left, y);
+        y += 34;
+
+        ctx.fillStyle = '#6E6A62';
+        ctx.font = "400 24px 'DM Sans', sans-serif";
+        shareWrapText(ctx, flavors.join('  •  '), left, y, contentWidth, 34, 4);
+    }
+
+    ctx.fillStyle = 'rgba(44, 74, 52, 0.55)';
+    ctx.font = "600 18px 'DM Sans', sans-serif";
+    ctx.textAlign = 'right';
+    ctx.fillText('DELÍCIAS DA VOVÓ', width - left, height - 38);
+    ctx.textAlign = 'left';
+
+    return new Promise((resolve, reject) => {
+        try {
+            canvas.toBlob(blob => {
+                if (blob) resolve(blob);
+                else reject(new Error('Não foi possível gerar a imagem.'));
+            }, 'image/png', 0.95);
+        } catch (error) {
+            reject(error);
+        }
+    });
+}
+
+async function shareProductImage(itemId) {
+    const item = MENU_ITEMS.find(product => product.id === itemId);
+    if (!item || !document.body.classList.contains('owner-mode')) return;
+
+    showValidationPopup('Preparando imagem do produto…');
+
+    try {
+        const blob = await buildProductShareBlob(item);
+        const safeName = String(item.name || 'produto')
+            .normalize('NFD')
+            .replace(/[\u0300-\u036f]/g, '')
+            .replace(/[^a-zA-Z0-9]+/g, '-')
+            .replace(/^-|-$/g, '')
+            .toLowerCase();
+
+        const file = new File([blob], 'delicias-da-vovo-' + safeName + '.png', {
+            type: 'image/png'
+        });
+
+        if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
+            try {
+                await navigator.share({
+                    files: [file],
+                    title: item.name
+                });
+                return;
+            } catch (error) {
+                if (error && error.name === 'AbortError') return;
+            }
+        }
+
+        const objectUrl = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = objectUrl;
+        a.download = file.name;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        setTimeout(() => URL.revokeObjectURL(objectUrl), 1500);
+        showValidationPopup('Imagem pronta.');
+    } catch (error) {
+        console.error(error);
+        showValidationPopup('Não foi possível gerar a imagem deste produto.');
+    }
+}
+
 // ===== MOBILE: LISTA DE PRODUTOS =====
 
 function createProductListItem(item) {
@@ -4993,7 +5294,10 @@ function createProductListItem(item) {
         : '';
 
     return `
-        <div class="product-list-item flex items-center gap-4 px-4 py-3.5" onclick="openProductModal('${item.id}')">
+        <div class="product-list-item relative flex items-center gap-4 px-4 py-3.5" onclick="openProductModal('${item.id}')">
+            <button type="button" onclick="event.stopPropagation(); shareProductImage('${item.id}')" class="owner-share-btn absolute top-2.5 right-2.5 z-10 w-7 h-7 rounded-full" aria-label="Compartilhar imagem de ${escapeHtml(item.name)}">
+                <i class="fas fa-arrow-up-from-bracket text-[9px]"></i>
+            </button>
             <div class="shrink-0 w-[100px] h-[100px] rounded-2xl overflow-hidden bg-[#ECE9E1]">
                 ${imgSrc
                     ? `<img src="${escapeHtml(imgSrc)}" onerror="handleImgError(this)" class="w-full h-full object-cover" loading="lazy">`
@@ -5069,6 +5373,9 @@ function buildProductModalContent(item) {
 
     return `
         <div class="relative h-[34vh] min-h-[240px] max-h-[340px] overflow-hidden bg-[#ECE9E1]">
+            <button type="button" onclick="event.stopPropagation(); shareProductImage('${item.id}')" class="owner-share-btn absolute top-3 right-3 z-20 w-9 h-9 rounded-full" aria-label="Compartilhar imagem">
+                <i class="fas fa-arrow-up-from-bracket text-[11px]"></i>
+            </button>
             <img id="modal-img" src="${escapeHtml(imgSrc)}" onerror="handleImgError(this)" class="w-full h-full object-cover">
             ${hasMultiImg ? `
                 <button onclick="modalPrevImage()" class="absolute left-3 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white w-9 h-9 rounded-full shadow-md flex items-center justify-center active:scale-90 transition-all">
