@@ -464,6 +464,14 @@
     text-align: center;
     margin-bottom: clamp(20px, 4.2vh, 34px);
 }
+.owner-mode-trigger {
+    touch-action: manipulation;
+    -webkit-user-select: none;
+    user-select: none;
+    -webkit-touch-callout: none;
+    cursor: default;
+}
+
 .discovery-brand-name {
     font-family: 'DM Sans', sans-serif;
     font-size: 10px;
@@ -472,11 +480,6 @@
     letter-spacing: 0.34em;
     text-transform: uppercase;
     color: #2C4A34;
-    touch-action: manipulation;
-    -webkit-user-select: none;
-    user-select: none;
-    -webkit-touch-callout: none;
-    cursor: default;
 }
 .discovery-brand-line {
     width: 36px;
@@ -725,7 +728,7 @@
                     <i class="fas fa-bars text-[15px]"></i>
                 </button>
                 <!-- Marca centralizada -->
-                <p class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-[10px] uppercase font-semibold tracking-[0.3em] text-[#C9A576] pointer-events-none whitespace-nowrap">Delícias da Vovó</p>
+                <p class="owner-mode-trigger absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-[10px] uppercase font-semibold tracking-[0.3em] text-[#C9A576] whitespace-nowrap" onpointerup="handleOwnerModeTap(event)" ondblclick="event.preventDefault()">Delícias da Vovó</p>
                 <!-- Busca e cesta à direita -->
                 <div class="flex items-center gap-0.5">
                     <button id="search-toggle-btn" onclick="toggleSearch()" class="p-1.5 hover:bg-white/10 rounded-full transition-all active:scale-90 text-[#F4F1EA]" title="Buscar" aria-label="Buscar">
@@ -773,7 +776,7 @@
     <div id="discovery-overlay">
         <div class="discovery-shell">
             <div class="discovery-brand">
-                <div class="discovery-brand-name select-none" onpointerup="handleOwnerModeTap(event)" ondblclick="event.preventDefault()">Delícias da Vovó</div>
+                <div class="discovery-brand-name owner-mode-trigger select-none" onpointerup="handleOwnerModeTap(event)" ondblclick="event.preventDefault()">Delícias da Vovó</div>
                 <div class="discovery-brand-line"></div>
             </div>
 
