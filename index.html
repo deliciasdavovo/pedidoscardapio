@@ -5545,50 +5545,14 @@ async function buildProductShareBlob(item) {
     const hasDetailColumn = flavors.length > 0;
     const hasEstimatedPriceNote = hasEstimatedUnitPrice(item);
 
-    // O valor grande não é repetido na lista inferior.
-    const priceDetailLines = [...priceLines];
-    const hasVariantSizePrices = getFlavorList(item).some(flavor => {
-        const variant = item.variants && item.variants[flavor.label]
-            ? item.variants[flavor.label]
-            : {};
-        return (
-            (flavor.sizePrices && Object.keys(flavor.sizePrices).length > 0) ||
-            (variant.sizePrices && Object.keys(variant.sizePrices).length > 0)
-        );
-    });
-    const isVariantStartingPrice = (
-        /^a partir de\s+/i.test(primaryPrice) &&
-        !!item.variants &&
-        (hasVariantSizePrices || !(item.sizes && item.sizes.length))
-    );
-
-    let primaryPriceLabel = /^a partir de\s+/i.test(primaryPrice)
+    // Só existe preço principal quando o produto possui um único valor.
+    // Com dois ou mais preços, todos aparecem no mesmo nível visual.
+    const hasMultiplePrices = priceLines.length > 1;
+    const primaryPriceToDisplay = hasMultiplePrices ? '' : primaryPrice;
+    const priceDetailLines = hasMultiplePrices ? [...priceLines] : [];
+    const primaryPriceLabel = /^a partir de\s+/i.test(primaryPriceToDisplay)
         ? 'A PARTIR DE'
         : '';
-
-    if (item.sizes && item.sizes.length && !hasVariantSizePrices) {
-        const numericPrices = item.sizes
-            .map(size => Number(size.price))
-            .filter(Number.isFinite);
-        const minimum = numericPrices.length ? Math.min(...numericPrices) : null;
-        const primarySize = item.sizes.find(size => Number(size.price) === minimum);
-
-        if (primarySize) primaryPriceLabel = String(primarySize.label).toUpperCase();
-    }
-
-    if (!isVariantStartingPrice && primaryPrice) {
-        const primaryComparable = primaryPrice
-            .replace(/^a partir de\s+/i, '')
-            .replace(/\s+/g, '')
-            .toLowerCase();
-
-        const repeatedIndex = priceDetailLines.findIndex(line => {
-            return String(line).replace(/\s+/g, '').toLowerCase().includes(primaryComparable);
-        });
-
-        if (repeatedIndex >= 0) priceDetailLines.splice(repeatedIndex, 1);
-    }
-
     const showPriceDetails = priceDetailLines.length > 0;
 
     // Estima a altura real do conteúdo para preservar todas as descrições,
@@ -5615,7 +5579,7 @@ async function buildProductShareBlob(item) {
     const headerHeight = 136 + (titleRows * 60) + (descriptionRows * 33);
     const priceBlockHeight =
         42 +
-        (primaryPrice ? (primaryPriceLabel ? 88 : 64) : 0) +
+        (primaryPriceToDisplay ? (primaryPriceLabel ? 88 : 64) : 0) +
         (showPriceDetails ? 34 + (priceVisualLines * 36) + (priceDetailLines.length * 10) : 0) +
         (hasEstimatedPriceNote ? 58 : 0) +
         (weightText ? 62 + (weightVisualLines * 33) : 0);
@@ -5770,8 +5734,8 @@ async function buildProductShareBlob(item) {
 
         // O preço principal continua grande e verde, preservando a hierarquia
         // visual aprovada. As demais opções aparecem logo abaixo.
-        if (primaryPrice) {
-            const primaryValue = primaryPrice.replace(/^a partir de\s+/i, '');
+        if (primaryPriceToDisplay) {
+            const primaryValue = primaryPriceToDisplay.replace(/^a partir de\s+/i, '');
 
             if (primaryPriceLabel) {
                 ctx.fillStyle = '#B27845';
@@ -5813,7 +5777,7 @@ async function buildProductShareBlob(item) {
                 );
                 priceY += isEstimated ? 8 : 10;
             });
-        } else if (!primaryPrice) {
+        } else if (!primaryPriceToDisplay && !showPriceDetails) {
             ctx.fillStyle = '#77736C';
             ctx.font = "400 25px 'DM Sans', sans-serif";
             priceY = shareWrapText(ctx, 'Consulte o valor.', startX, priceY, maxWidth, 34, 2);
