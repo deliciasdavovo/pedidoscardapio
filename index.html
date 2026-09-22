@@ -5124,6 +5124,51 @@ function drawShareCoverImage(ctx, img, x, y, width, height) {
     ctx.drawImage(img, sx, sy, sw, sh, x, y, width, height);
 }
 
+function drawShareProductImage(ctx, img, width) {
+    const fallbackHeight = 560;
+
+    if (!img || !img.width || !img.height) {
+        ctx.fillStyle = '#E8E0D2';
+        ctx.fillRect(0, 0, width, fallbackHeight);
+        return fallbackHeight;
+    }
+
+    const ratio = img.width / img.height;
+
+    // Fotos naturalmente horizontais ocupam a largura inteira sem corte
+    // nem distorção. A altura acompanha a proporção original.
+    if (ratio >= 1.30) {
+        const naturalHeight = width / ratio;
+        const imageHeight = Math.max(500, Math.min(650, naturalHeight));
+
+        ctx.fillStyle = '#E8E0D2';
+        ctx.fillRect(0, 0, width, imageHeight);
+
+        const drawWidth = Math.min(width, imageHeight * ratio);
+        const drawHeight = drawWidth / ratio;
+        const dx = (width - drawWidth) / 2;
+        const dy = (imageHeight - drawHeight) / 2;
+
+        ctx.drawImage(img, dx, dy, drawWidth, drawHeight);
+        return imageHeight;
+    }
+
+    // Fotos quadradas ou verticais não são forçadas a virar paisagem.
+    // Ficam centralizadas, preservando 100% da proporção.
+    const imageHeight = 620;
+    ctx.fillStyle = '#E8E0D2';
+    ctx.fillRect(0, 0, width, imageHeight);
+
+    const scale = Math.min(width / img.width, imageHeight / img.height);
+    const drawWidth = img.width * scale;
+    const drawHeight = img.height * scale;
+    const dx = (width - drawWidth) / 2;
+    const dy = (imageHeight - drawHeight) / 2;
+
+    ctx.drawImage(img, dx, dy, drawWidth, drawHeight);
+    return imageHeight;
+}
+
 function getSharePriceLines(item) {
     const lines = [];
 
@@ -5143,13 +5188,12 @@ function getSharePriceLines(item) {
     }
 
     const hasUn = item.units && item.units.includes('un');
-    const hasKg = item.units && item.units.includes('kg');
 
     if (hasUn && typeof item.price === 'number') {
         lines.push('Unidade  ·  R$ ' + item.price.toFixed(2).replace('.', ','));
     }
 
-    if (hasKg && typeof item.priceKg === 'number') {
+    if (typeof item.priceKg === 'number') {
         lines.push('Quilo  ·  R$ ' + item.priceKg.toFixed(2).replace('.', ','));
     }
 
@@ -5226,7 +5270,6 @@ async function buildProductShareBlob(item) {
 
     const width = 1080;
     const height = 1350;
-    const imageHeight = 540;
     const canvas = document.createElement('canvas');
     canvas.width = width;
     canvas.height = height;
@@ -5240,7 +5283,7 @@ async function buildProductShareBlob(item) {
         : (item.image || '');
 
     const img = await loadShareProductImage(imageSrc);
-    drawShareCoverImage(ctx, img, 0, 0, width, imageHeight);
+    const imageHeight = drawShareProductImage(ctx, img, width);
 
     const left = 72;
     const right = width - 72;
