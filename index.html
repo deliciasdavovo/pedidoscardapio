@@ -5267,40 +5267,128 @@ function getKgPriceText(item) {
 
 function getSharePriceLines(item) {
     const lines = [];
+    const formatMoney = value => 'R$ ' + Number(value).toFixed(2).replace('.', ',');
 
     if (item.isKit) {
         const kitTotal = getKitComputedTotal(item, 10);
-        lines.push('A partir de R$ ' + (kitTotal / 10).toFixed(2).replace('.', ',') + ' / pessoa');
+        lines.push('A partir de ' + formatMoney(kitTotal / 10) + ' / pessoa');
         return lines;
     }
 
-    if (item.sizes && item.sizes.length) {
-        item.sizes.forEach(size => {
-            if (typeof size.price === 'number') {
-                lines.push(size.label + '  ·  R$ ' + size.price.toFixed(2).replace('.', ','));
+    const flavors = getFlavorList(item);
+    const hasSizes = Array.isArray(item.sizes) && item.sizes.length > 0;
+    const hasUn = Array.isArray(item.units) && item.units.includes('un');
+    const hasKg = Array.isArray(item.units) && item.units.includes('kg');
+
+    function getPriceParts(source) {
+        const parts = [];
+
+        if (hasSizes) {
+            item.sizes.forEach(size => {
+                const specificPrice = source && source.sizePrices
+                    ? source.sizePrices[size.label]
+                    : undefined;
+                const value = typeof specificPrice === 'number' ? specificPrice : size.price;
+
+                if (typeof value === 'number') {
+                    parts.push(size.label + ' · ' + formatMoney(value));
+                }
+            });
+            return parts;
+        }
+
+        const unitPrice = source && typeof source.price === 'number'
+            ? source.price
+            : item.price;
+        const kgPrice = source && typeof source.priceKg === 'number'
+            ? source.priceKg
+            : item.priceKg;
+
+        if (hasKg && typeof kgPrice === 'number') {
+            parts.push(formatMoney(kgPrice) + '/kg');
+        }
+
+        if (hasUn && typeof unitPrice === 'number') {
+            parts.push((hasKg ? 'aprox. ' : '') + formatMoney(unitPrice) + '/un');
+        }
+
+        if (!hasUn && !hasKg && typeof unitPrice === 'number') {
+            parts.push(formatMoney(unitPrice));
+        }
+
+        return parts;
+    }
+
+    // Quando cada sabor/tipo possui preço próprio, agrupa somente as opções
+    // que realmente compartilham o mesmo conjunto de valores.
+    if (flavors.length) {
+        const groups = new Map();
+        let hasSpecificFlavorPrice = false;
+
+        flavors.forEach(flavor => {
+            const variant = item.variants && item.variants[flavor.label]
+                ? item.variants[flavor.label]
+                : {};
+            const source = Object.assign({}, flavor, variant);
+            const hasSpecificPrice = (
+                typeof flavor.price === 'number' ||
+                typeof flavor.priceKg === 'number' ||
+                (flavor.sizePrices && Object.keys(flavor.sizePrices).length > 0) ||
+                typeof variant.price === 'number' ||
+                typeof variant.priceKg === 'number' ||
+                (variant.sizePrices && Object.keys(variant.sizePrices).length > 0)
+            );
+
+            hasSpecificFlavorPrice = hasSpecificFlavorPrice || hasSpecificPrice;
+
+            const parts = getPriceParts(source);
+            const signature = parts.join('|');
+
+            if (!groups.has(signature)) {
+                groups.set(signature, { labels: [], parts });
             }
+            groups.get(signature).labels.push(flavor.label);
         });
+
+        if (hasSpecificFlavorPrice && groups.size > 1) {
+            groups.forEach(group => {
+                lines.push(
+                    group.labels.join(' / ') +
+                    '  ·  ' +
+                    group.parts.join('  ·  ')
+                );
+            });
+            return lines;
+        }
+
+        if (hasSpecificFlavorPrice && groups.size === 1) {
+            const onlyGroup = Array.from(groups.values())[0];
+            onlyGroup.parts.forEach(part => lines.push(part));
+            return lines;
+        }
+    }
+
+    if (hasSizes) {
+        getPriceParts({}).forEach(part => lines.push(part));
         return lines;
     }
 
-    if (hasEstimatedUnitPrice(item)) {
-        lines.push('Preço por quilo  ·  R$ ' + item.priceKg.toFixed(2).replace('.', ','));
-        lines.push('Unidade estimada  ·  aprox. R$ ' + item.price.toFixed(2).replace('.', ','));
+    if (hasKg && hasUn && typeof item.priceKg === 'number' && typeof item.price === 'number') {
+        lines.push('Preço por quilo  ·  ' + formatMoney(item.priceKg));
+        lines.push('Unidade estimada  ·  aprox. ' + formatMoney(item.price));
         return lines;
     }
-
-    const hasUn = item.units && item.units.includes('un');
 
     if (hasUn && typeof item.price === 'number') {
-        lines.push('Unidade  ·  R$ ' + item.price.toFixed(2).replace('.', ','));
+        lines.push('Unidade  ·  ' + formatMoney(item.price));
     }
 
-    if (typeof item.priceKg === 'number') {
-        lines.push('Quilo  ·  R$ ' + item.priceKg.toFixed(2).replace('.', ','));
+    if (hasKg && typeof item.priceKg === 'number') {
+        lines.push('Quilo  ·  ' + formatMoney(item.priceKg));
     }
 
     if (!lines.length && typeof item.price === 'number') {
-        lines.push('R$ ' + item.price.toFixed(2).replace('.', ','));
+        lines.push(formatMoney(item.price));
     }
 
     return lines;
@@ -5383,27 +5471,50 @@ async function buildProductShareBlob(item) {
     const priceLines = getSharePriceLines(item);
     const weightText = getShareWeightText(item);
     const shortDescription = getShareShortDescription(item);
+    const hasDetailColumn = flavors.length > 0;
+    const hasEstimatedPriceNote = hasEstimatedUnitPrice(item);
 
-    const flavorText = flavors.length
-        ? 'Sabores / recheios: ' + flavors.join(' · ')
-        : '';
+    // Estima a altura real do conteúdo para preservar todas as descrições,
+    // variações, faixas de preço e opções sem cortar o card.
+    const titleRows = Math.min(2, Math.max(1, Math.ceil(String(item.name || '').length / 27)));
+    const descriptionRows = shortDescription
+        ? Math.min(5, Math.max(1, Math.ceil(shortDescription.length / 62)))
+        : 0;
+    const priceCharsPerLine = hasDetailColumn ? 29 : 58;
+    const flavorCharsPerLine = 31;
 
-    const primaryInfoText = flavorText || shortDescription || '';
-    const primaryPrice = getShareItemStartingPrice(item);
+    const priceVisualLines = priceLines.reduce((total, line) => {
+        return total + Math.max(1, Math.ceil(String(line).length / priceCharsPerLine));
+    }, 0);
 
-    let secondaryPrice = '';
-    if (hasEstimatedUnitPrice(item)) {
-        secondaryPrice = 'aprox. R$ ' + item.price.toFixed(2).replace('.', ',') + '/un · estimativa pelo peso';
-    } else if (item.sizes && item.sizes.length > 1) {
-        secondaryPrice = priceLines.join(' · ');
-    } else if (priceLines.length > 1) {
-        secondaryPrice = priceLines.slice(1).join(' · ');
-    }
+    const flavorVisualLines = flavors.reduce((total, flavor) => {
+        return total + Math.max(1, Math.ceil(String(flavor).length / flavorCharsPerLine));
+    }, 0);
 
-    const infoExtra = primaryInfoText.length > 68 ? 34 : 0;
-    const priceExtra = secondaryPrice.length > 78 ? 30 : 0;
-    const titleExtra = String(item.name || '').length > 28 ? 28 : 0;
-    const panelHeight = Math.min(700, 575 + infoExtra + priceExtra + titleExtra);
+    const weightVisualLines = weightText
+        ? Math.max(1, Math.ceil(String(weightText).length / (hasDetailColumn ? 30 : 60)))
+        : 0;
+
+    const headerHeight = 136 + (titleRows * 60) + (descriptionRows * 33);
+    const priceBlockHeight =
+        42 +
+        (priceVisualLines * 38) +
+        (priceLines.length * 10) +
+        (hasEstimatedPriceNote ? 58 : 0) +
+        (weightText ? 62 + (weightVisualLines * 33) : 0);
+    const flavorBlockHeight =
+        42 +
+        (flavorVisualLines * 32) +
+        (flavors.length * 10);
+
+    const infoHeight = hasDetailColumn
+        ? Math.max(priceBlockHeight, flavorBlockHeight)
+        : priceBlockHeight;
+
+    const panelHeight = Math.max(
+        hasDetailColumn ? 650 : 560,
+        headerHeight + infoHeight + 52
+    );
     const height = Math.max(1350, panelHeight + 670);
 
     const canvas = document.createElement('canvas');
@@ -5424,11 +5535,9 @@ async function buildProductShareBlob(item) {
     if (img && img.width && img.height) {
         drawShareCoverImage(ctx, img, 0, 0, width, height);
 
-        // Camada leitosa para apagar detalhes do fundo sem causar o efeito de tontura.
         ctx.fillStyle = 'rgba(248,244,238,0.42)';
         ctx.fillRect(0, 0, width, height);
 
-        // Segunda camada sutil para deixar o fundo mais uniforme.
         ctx.fillStyle = 'rgba(255,255,255,0.10)';
         ctx.fillRect(0, 0, width, height);
     }
@@ -5441,16 +5550,15 @@ async function buildProductShareBlob(item) {
     ctx.fillStyle = photoVeil;
     ctx.fillRect(0, 0, width, height);
 
-    // Painel de informações: posição inspirada no card de referência.
-    const panelX = 78;
-    const panelY = height - panelHeight - 50;
+    const panelX = 70;
+    const panelY = height - panelHeight - 48;
     const panelWidth = width - (panelX * 2);
 
-    // Moldura da foto.
-    const frameX = 108;
+    // Moldura central com a foto inteira do produto.
+    const frameX = 110;
     const frameY = 70;
     const frameWidth = width - (frameX * 2);
-    const frameBottom = panelY + 105;
+    const frameBottom = panelY + 112;
     const frameHeight = Math.max(520, frameBottom - frameY);
 
     const innerInset = 10;
@@ -5467,7 +5575,6 @@ async function buildProductShareBlob(item) {
     ctx.fillRect(innerX, innerY, innerWidth, innerHeight);
 
     if (img && img.width && img.height) {
-        // Exibe a foto inteira do produto dentro da moldura, sem recortes.
         drawShareContainImage(ctx, img, innerX, innerY, innerWidth, innerHeight);
     }
 
@@ -5479,17 +5586,17 @@ async function buildProductShareBlob(item) {
         frameY,
         frameWidth,
         frameHeight,
-        70,
+        72,
         null,
         'rgba(255,255,255,0.96)',
         14
     );
 
-    // Card branco.
+    // Card branco de informações.
     ctx.save();
-    ctx.shadowColor = 'rgba(34, 32, 28, 0.16)';
-    ctx.shadowBlur = 30;
-    ctx.shadowOffsetY = 12;
+    ctx.shadowColor = 'rgba(34, 32, 28, 0.18)';
+    ctx.shadowBlur = 34;
+    ctx.shadowOffsetY = 14;
     drawShareRoundedRect(
         ctx,
         panelX,
@@ -5501,67 +5608,133 @@ async function buildProductShareBlob(item) {
     );
     ctx.restore();
 
-    const left = panelX + 58;
-    const right = panelX + panelWidth - 58;
+    const left = panelX + 56;
+    const right = panelX + panelWidth - 56;
     const contentWidth = right - left;
-    let y = panelY + 62;
+    let y = panelY + 58;
 
-    // Categoria pequena e caramelo.
+    // Categoria.
     ctx.fillStyle = '#B27845';
     ctx.font = "700 22px 'DM Sans', sans-serif";
     ctx.fillText(String(item.category || 'CARDÁPIO'), left, y);
 
-    // Nome: elemento principal da hierarquia.
-    y += 62;
+    // Nome.
+    y += 58;
     ctx.fillStyle = '#22201C';
-    ctx.font = "400 58px 'Lora', serif";
-    y = shareWrapText(ctx, item.name, left, y, contentWidth, 62, 2);
-    y += 18;
+    ctx.font = "400 59px 'Lora', serif";
+    y = shareWrapText(ctx, item.name, left, y, contentWidth, 60, 2);
+    y -= 26;
 
-    // Informações principais em linha corrida, como na referência.
-    if (primaryInfoText) {
+    // Descrição novamente visível e próxima ao nome.
+    if (shortDescription) {
         ctx.fillStyle = '#6F6B63';
-        ctx.font = "500 25px 'DM Sans', sans-serif";
-        y = shareWrapText(ctx, primaryInfoText, left, y, contentWidth, 34, 3);
+        ctx.font = "400 24px 'DM Sans', sans-serif";
+        y = shareWrapText(ctx, shortDescription, left, y, contentWidth, 33, 5);
+        y += 10;
+    } else {
         y += 8;
     }
 
-    if (weightText) {
-        ctx.fillStyle = '#8A867E';
-        ctx.font = "500 22px 'DM Sans', sans-serif";
-        y = shareWrapText(
-            ctx,
-            'Peso aproximado: ' + weightText,
-            left,
-            y,
-            contentWidth,
-            31,
-            2
-        );
-        y += 18;
-    }
-
-    // Pequena assinatura gráfica caramelo.
-    ctx.strokeStyle = 'rgba(190, 107, 46, 0.72)';
+    // Detalhe caramelo.
+    ctx.strokeStyle = 'rgba(190, 107, 46, 0.55)';
     ctx.lineWidth = 2;
     ctx.beginPath();
-    ctx.moveTo(left, y + 2);
-    ctx.lineTo(left + 96, y + 2);
+    ctx.moveTo(left, y + 4);
+    ctx.lineTo(left + 94, y + 4);
     ctx.stroke();
 
-    // Preço ancorado no rodapé do card.
-    const priceY = panelY + panelHeight - 108;
+    y += 38;
+    const infoTop = y;
 
-    if (primaryPrice) {
-        ctx.fillStyle = '#2C5437';
-        ctx.font = "700 49px 'DM Sans', sans-serif";
-        ctx.fillText(primaryPrice, left, priceY);
+    function drawPrices(startX, startY, maxWidth) {
+        let priceY = startY;
+        drawShareSectionLabel(ctx, 'Valores', startX, priceY);
+        priceY += 42;
+
+        ctx.fillStyle = '#22201C';
+        ctx.font = "600 27px 'DM Sans', sans-serif";
+
+        if (priceLines.length) {
+            priceLines.forEach(line => {
+                priceY = shareWrapText(ctx, line, startX, priceY, maxWidth, 38, Infinity);
+                priceY += 10;
+            });
+        } else {
+            ctx.fillStyle = '#77736C';
+            ctx.font = "400 25px 'DM Sans', sans-serif";
+            priceY = shareWrapText(ctx, 'Consulte o valor.', startX, priceY, maxWidth, 34, 2);
+        }
+
+        if (hasEstimatedPriceNote) {
+            ctx.fillStyle = '#8A857C';
+            ctx.font = "500 20px 'DM Sans', sans-serif";
+            priceY = shareWrapText(
+                ctx,
+                'O preço por quilo é oficial; a unidade é uma estimativa e varia conforme o peso.',
+                startX,
+                priceY + 4,
+                maxWidth,
+                28,
+                3
+            );
+        }
+
+        if (weightText) {
+            priceY += 18;
+            drawShareSectionLabel(ctx, 'Peso aproximado', startX, priceY);
+            priceY += 38;
+
+            ctx.fillStyle = '#6F6B63';
+            ctx.font = "400 24px 'DM Sans', sans-serif";
+            shareWrapText(ctx, weightText, startX, priceY, maxWidth, 33, Infinity);
+        }
     }
 
-    if (secondaryPrice) {
-        ctx.fillStyle = '#817D75';
-        ctx.font = "600 20px 'DM Sans', sans-serif";
-        shareWrapText(ctx, secondaryPrice, left, priceY + 36, contentWidth, 27, 2);
+    if (!hasDetailColumn) {
+        // Sem sabores/recheios: os valores ocupam a largura inteira.
+        drawPrices(left, infoTop, contentWidth);
+    } else {
+        // Com sabores/recheios: preços à esquerda e tópicos à direita.
+        const dividerX = Math.round(width / 2);
+        const leftX = left;
+        const rightX = dividerX + 42;
+        const leftColWidth = dividerX - leftX - 40;
+        const rightColWidth = right - rightX;
+        const dividerBottom = panelY + panelHeight - 42;
+
+        ctx.strokeStyle = 'rgba(44, 74, 52, 0.16)';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(dividerX, infoTop - 10);
+        ctx.lineTo(dividerX, dividerBottom);
+        ctx.stroke();
+
+        drawPrices(leftX, infoTop, leftColWidth);
+
+        let flavorY = infoTop;
+        drawShareSectionLabel(ctx, 'Sabores / Recheios', rightX, flavorY);
+        flavorY += 42;
+
+        ctx.font = "400 23px 'DM Sans', sans-serif";
+
+        flavors.forEach(flavor => {
+            ctx.fillStyle = '#2C4A34';
+            ctx.beginPath();
+            ctx.arc(rightX + 5, flavorY - 7, 4, 0, Math.PI * 2);
+            ctx.fill();
+
+            ctx.fillStyle = '#5F5B55';
+            flavorY = shareWrapText(
+                ctx,
+                flavor,
+                rightX + 20,
+                flavorY,
+                rightColWidth - 20,
+                32,
+                Infinity
+            );
+            flavorY += 10;
+        });
     }
 
     return new Promise((resolve, reject) => {
