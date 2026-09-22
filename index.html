@@ -869,9 +869,18 @@
                                 <option value="Vila Nova">Unidade Vila Nova - Unicenter</option>
                             </select>
                         </div>
-                        <div id="delivery-address-container" class="hidden space-y-2">
-                            <label class="text-[12px] font-semibold text-[#8C8676] ml-2 block">Endereço para Entrega</label>
-                            <input type="text" id="delivery-address" placeholder="Rua, número, bairro e apto/casa" class="w-full bg-[#ECE9E1]/50 border border-[#8C8676]/10 rounded-2xl px-5 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#8C8676]/20 transition-all">
+                        <div id="delivery-address-container" class="hidden space-y-3">
+                            <div class="space-y-2">
+                                <label class="text-[12px] font-semibold text-[#8C8676] ml-2 block">Bairro</label>
+                                <select id="delivery-neighborhood" onchange="updateCartSummary()" class="w-full bg-[#ECE9E1]/50 border border-[#8C8676]/10 rounded-2xl px-5 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#8C8676]/20 appearance-none text-[#22201C]">
+                                    <option value="">Selecione o bairro</option>
+                                </select>
+                                <p class="text-[10px] text-[#8C8676]/70 ml-2">A taxa de entrega é calculada automaticamente conforme o bairro.</p>
+                            </div>
+                            <div class="space-y-2">
+                                <label class="text-[12px] font-semibold text-[#8C8676] ml-2 block">Endereço para Entrega</label>
+                                <input type="text" id="delivery-address" placeholder="Rua, número e complemento" class="w-full bg-[#ECE9E1]/50 border border-[#8C8676]/10 rounded-2xl px-5 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#8C8676]/20 transition-all">
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -880,7 +889,7 @@
                 <div class="px-6 sm:px-8 pt-3 pb-6 border-t border-[#8C8676]/10 space-y-3">
                     <div id="delivery-fee-row" class="hidden flex justify-between items-center px-1 text-sm text-[#8C8676]">
                         <span class="font-medium">Serviço de Entrega</span>
-                        <span class="font-bold">R$ 15,00</span>
+                        <span id="delivery-fee-value" class="font-bold">Selecione o bairro</span>
                     </div>
                     <div class="flex justify-between items-center px-1">
                         <div class="text-left">
@@ -918,7 +927,13 @@
     <script>
         // CONFIGURAÇÕES E DADOS
         const WHATSAPP_NUMBER = '5511988921216';
-        const DELIVERY_FEE = 15.00;
+        const DELIVERY_AREAS = [
+            { fee: 13.00, neighborhoods: ['Bairro Alto', 'Centro', 'Vila Nova', 'Vila Gatti', 'Vila Cleto', 'Jardim Faculdade'] },
+            { fee: 15.00, neighborhoods: ['Vila Santa Terezinha', 'Jardim Santana', 'Jardim Corazza', 'Portela', 'Bairro Liberdade', 'Vila Padre Bento', 'Vila Santo Antônio', 'Jardim do Estádio'] },
+            { fee: 18.00, neighborhoods: ['Nossa Senhora da Candelária', 'Presidente Médici', 'Parque do Varvito', 'Jardim Convenção', 'Jardim Alberto Gomes', 'Vila Esperança', 'Jardim São José', 'Vila São José', 'Jardim dos Ipês', 'Mayard'] },
+            { fee: 21.00, neighborhoods: ['Jardim Aeroporto', 'Jardim São Judas', 'Bairro Rancho Grande', 'Jardim Rancho Grande', 'Itu Novo Centro', 'Jardim Paineiras', 'Jardim Paraíso I', 'Jardim Paraíso II', 'Bairro Brasil', 'São Luiz', 'Parque América'] },
+            { fee: 25.00, neighborhoods: ['Cidade Nova', 'Terras de São José', 'Campos de Santo Antônio', 'Plaza Athénée', 'Jardim Europa', 'Jardim Novo Mundo', 'City Castelo', 'Outro bairro'] }
+        ];
         const ENCOMENDA_TIME_MIN = "07:30";
         const ENCOMENDA_TIME_MAX = "20:00";
         const PRONTA_ENTREGA_MSG = 'Pedidos para hoje (pronta entrega): ligue (11) 4013-5248.';
@@ -2837,6 +2852,7 @@ flavors: ['Sonho de Valsa', 'Ouro branco', 'Ninho trufado', 'Pessêgo', 'Amendoi
             renderCategories();
             renderMenu();
             renderDiscovery();
+            renderDeliveryNeighborhoods();
             setOrderType('Encomenda');
             setFulfillment('Retirada');
             initModalSwipe();
@@ -3988,11 +4004,44 @@ if (!item.sizes && flavor && item.variants && item.variants[flavor]) {
             else { cart.push({ ...item, qty, unit, flavor, size, finalPrice, image: imageOverride || item.image }); }
         }
 
+        function renderDeliveryNeighborhoods() {
+            const select = document.getElementById('delivery-neighborhood');
+            if (!select) return;
+
+            select.innerHTML = '<option value="">Selecione o bairro</option>' + DELIVERY_AREAS.map(area => {
+                const options = area.neighborhoods.map(neighborhood =>
+                    '<option value="' + neighborhood + '" data-fee="' + area.fee.toFixed(2) + '">' +
+                    neighborhood + ' — R$ ' + area.fee.toFixed(2).replace('.', ',') +
+                    '</option>'
+                ).join('');
+                return '<optgroup label="Taxa R$ ' + area.fee.toFixed(2).replace('.', ',') + '">' + options + '</optgroup>';
+            }).join('');
+        }
+
+        function getSelectedDeliveryFee() {
+            const select = document.getElementById('delivery-neighborhood');
+            const option = select?.selectedOptions?.[0];
+            return option?.dataset?.fee ? Number(option.dataset.fee) : 0;
+        }
+
+        function getSelectedDeliveryNeighborhood() {
+            return document.getElementById('delivery-neighborhood')?.value || '';
+        }
+
         function updateCartSummary() {
             let total = cart.reduce((acc, item) => acc + (item.finalPrice * item.qty), 0);
             const count = cart.length;
-            if (activeFulfillment === 'Entrega' && count > 0) { total += DELIVERY_FEE; document.getElementById('delivery-fee-row').classList.remove('hidden'); }
-            else { document.getElementById('delivery-fee-row').classList.add('hidden'); }
+            const feeRow = document.getElementById('delivery-fee-row');
+            const feeValue = document.getElementById('delivery-fee-value');
+
+            if (activeFulfillment === 'Entrega' && count > 0) {
+                const deliveryFee = getSelectedDeliveryFee();
+                total += deliveryFee;
+                feeRow.classList.remove('hidden');
+                feeValue.innerText = deliveryFee > 0 ? 'R$ ' + deliveryFee.toFixed(2).replace('.', ',') : 'Selecione o bairro';
+            } else {
+                feeRow.classList.add('hidden');
+            }
             document.getElementById('cart-badge').innerText = count;
             document.getElementById('cart-badge').classList.toggle('hidden', count === 0);
             document.getElementById('header-total').innerText = 'R$ ' + total.toFixed(2);
@@ -4114,6 +4163,11 @@ if (!item.sizes && flavor && item.variants && item.variants[flavor]) {
                 document.getElementById('order-name').focus();
                 return;
             }
+            if (activeFulfillment === 'Entrega' && !getSelectedDeliveryNeighborhood()) {
+                showValidationPopup('Por favor, selecione o bairro da entrega!');
+                document.getElementById('delivery-neighborhood').focus();
+                return;
+            }
             if (activeFulfillment === 'Entrega' && !document.getElementById('delivery-address').value) {
                 showValidationPopup('Por favor, informe o endereço!');
                 document.getElementById('delivery-address').focus();
@@ -4125,8 +4179,10 @@ if (!item.sizes && flavor && item.variants && item.variants[flavor]) {
             }
             const itemsText = cart.map(formatWhatsAppCartItem).join('\n');
             let total = cart.reduce((acc, item) => acc + (item.finalPrice * item.qty), 0);
-            const deliveryText = activeFulfillment === 'Entrega' ? '\nTaxa de Entrega: R$ ' + DELIVERY_FEE.toFixed(2) : '';
-            if(activeFulfillment === 'Entrega') total += DELIVERY_FEE;
+            const deliveryFee = activeFulfillment === 'Entrega' ? getSelectedDeliveryFee() : 0;
+            const deliveryNeighborhood = activeFulfillment === 'Entrega' ? getSelectedDeliveryNeighborhood() : '';
+            const deliveryText = activeFulfillment === 'Entrega' ? '\nBairro: ' + deliveryNeighborhood + '\nTaxa de Entrega: R$ ' + deliveryFee.toFixed(2) : '';
+            if(activeFulfillment === 'Entrega') total += deliveryFee;
             const fulfillmentInfo = activeFulfillment === 'Entrega' ? 'Entrega: ' + document.getElementById('delivery-address').value : 'Retirada: ' + document.getElementById('pickup-location').value;
             const selectedDate = document.getElementById('order-date').value;
             const selectedTime = document.getElementById('order-time').value;
