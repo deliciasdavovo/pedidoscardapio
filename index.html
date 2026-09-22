@@ -5306,11 +5306,15 @@ function getSharePriceLines(item) {
             : item.priceKg;
 
         if (hasKg && typeof kgPrice === 'number') {
-            parts.push(formatMoney(kgPrice) + '/kg');
+            parts.push('Quilo · ' + formatMoney(kgPrice) + '/kg');
         }
 
         if (hasUn && typeof unitPrice === 'number') {
-            parts.push((hasKg ? 'aprox. ' : '') + formatMoney(unitPrice) + '/un');
+            parts.push(
+                (hasKg ? 'Unidade estimada · aprox. ' : 'Unidade · ') +
+                formatMoney(unitPrice) +
+                '/un'
+            );
         }
 
         if (!hasUn && !hasKg && typeof unitPrice === 'number') {
@@ -5355,11 +5359,13 @@ function getSharePriceLines(item) {
 
         if (hasSpecificFlavorPrice && groups.size > 1) {
             groups.forEach(group => {
-                lines.push(
-                    group.labels.join(' / ') +
-                    ' · ' +
-                    group.parts.join(' · ')
-                );
+                const optionLabel = group.labels.join(' / ');
+
+                // Cada tipo de valor ganha sua própria linha para deixar
+                // unidade, quilo e estimativas visualmente inequívocos.
+                group.parts.forEach(part => {
+                    lines.push(optionLabel + ' · ' + part);
+                });
             });
             return lines;
         }
@@ -5377,11 +5383,15 @@ function getSharePriceLines(item) {
     }
 
     if (hasKg && typeof item.priceKg === 'number') {
-        lines.push(formatMoney(item.priceKg) + '/kg');
+        lines.push('Quilo · ' + formatMoney(item.priceKg) + '/kg');
     }
 
     if (hasUn && typeof item.price === 'number') {
-        lines.push((hasKg ? 'aprox. ' : '') + formatMoney(item.price) + '/un');
+        lines.push(
+            (hasKg ? 'Unidade estimada · aprox. ' : 'Unidade · ') +
+            formatMoney(item.price) +
+            '/un'
+        );
     }
 
     if (!lines.length && typeof item.price === 'number') {
@@ -5606,7 +5616,7 @@ async function buildProductShareBlob(item) {
     const priceBlockHeight =
         42 +
         (primaryPrice ? (primaryPriceLabel ? 88 : 64) : 0) +
-        (showPriceDetails ? 34 + (priceVisualLines * 32) + (priceDetailLines.length * 8) : 0) +
+        (showPriceDetails ? 34 + (priceVisualLines * 36) + (priceDetailLines.length * 10) : 0) +
         (hasEstimatedPriceNote ? 58 : 0) +
         (weightText ? 62 + (weightVisualLines * 33) : 0);
     const flavorBlockHeight =
@@ -5782,12 +5792,26 @@ async function buildProductShareBlob(item) {
             ctx.fillText('OPÇÕES E VARIAÇÕES', startX, priceY);
             priceY += 30;
 
-            ctx.fillStyle = '#3F3B35';
-            ctx.font = "600 22px 'DM Sans', sans-serif";
-
             priceDetailLines.forEach(line => {
-                priceY = shareWrapText(ctx, line, startX, priceY, maxWidth, 32, Infinity);
-                priceY += 8;
+                const isEstimated = /unidade estimada|aprox\./i.test(line);
+
+                // Todos os valores permanecem verdes. A estimativa recebe
+                // hierarquia menor para não competir com os preços oficiais.
+                ctx.fillStyle = '#2C5437';
+                ctx.font = isEstimated
+                    ? "600 19px 'DM Sans', sans-serif"
+                    : "700 25px 'DM Sans', sans-serif";
+
+                priceY = shareWrapText(
+                    ctx,
+                    line,
+                    startX,
+                    priceY,
+                    maxWidth,
+                    isEstimated ? 29 : 36,
+                    Infinity
+                );
+                priceY += isEstimated ? 8 : 10;
             });
         } else if (!primaryPrice) {
             ctx.fillStyle = '#77736C';
