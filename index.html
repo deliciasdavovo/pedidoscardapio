@@ -468,6 +468,11 @@
     letter-spacing: 0.34em;
     text-transform: uppercase;
     color: #2C4A34;
+    touch-action: manipulation;
+    -webkit-user-select: none;
+    user-select: none;
+    -webkit-touch-callout: none;
+    cursor: default;
 }
 .discovery-brand-line {
     width: 36px;
@@ -764,7 +769,7 @@
     <div id="discovery-overlay">
         <div class="discovery-shell">
             <div class="discovery-brand">
-                <div class="discovery-brand-name select-none" onclick="handleOwnerModeTap()">Delícias da Vovó</div>
+                <div class="discovery-brand-name select-none" onpointerup="handleOwnerModeTap(event)" ondblclick="event.preventDefault()">Delícias da Vovó</div>
                 <div class="discovery-brand-line"></div>
             </div>
 
@@ -2974,6 +2979,7 @@ flavors: ['Sonho de Valsa', 'Ouro branco', 'Ninho trufado', 'Pessêgo', 'Amendoi
         const OWNER_MODE_KEY = 'delicias_owner_mode_v1';
         let ownerModeTapCount = 0;
         let ownerModeTapTimer = null;
+        let ownerModeTapStartedAt = 0;
         const CHECKOUT_PREFS_KEY = 'delicias_checkout_preferences_v1';
         const WHATSAPP_RETURN_KEY = 'delicias_return_from_whatsapp';
 
@@ -3061,23 +3067,43 @@ flavors: ['Sonho de Valsa', 'Ouro branco', 'Ninho trufado', 'Pessêgo', 'Amendoi
             document.body.classList.toggle('owner-mode', enabled);
         }
 
-        function handleOwnerModeTap() {
-            ownerModeTapCount += 1;
-            if (ownerModeTapTimer) clearTimeout(ownerModeTapTimer);
+        function handleOwnerModeTap(event) {
+            if (event) {
+                event.preventDefault();
+                event.stopPropagation();
+            }
 
+            const now = Date.now();
+
+            if (!ownerModeTapStartedAt || (now - ownerModeTapStartedAt) > 4000) {
+                ownerModeTapCount = 0;
+                ownerModeTapStartedAt = now;
+            }
+
+            ownerModeTapCount += 1;
+
+            if (ownerModeTapTimer) clearTimeout(ownerModeTapTimer);
             ownerModeTapTimer = setTimeout(() => {
                 ownerModeTapCount = 0;
-            }, 1800);
+                ownerModeTapStartedAt = 0;
+            }, 4000);
 
             if (ownerModeTapCount < 5) return;
 
+            if (ownerModeTapTimer) clearTimeout(ownerModeTapTimer);
             ownerModeTapCount = 0;
+            ownerModeTapStartedAt = 0;
+
             const enabled = !document.body.classList.contains('owner-mode');
             document.body.classList.toggle('owner-mode', enabled);
 
             try {
                 localStorage.setItem(OWNER_MODE_KEY, enabled ? '1' : '0');
             } catch (_) {}
+
+            if (navigator.vibrate) {
+                try { navigator.vibrate(35); } catch (_) {}
+            }
 
             showValidationPopup(enabled
                 ? 'Modo proprietário ativado.'
