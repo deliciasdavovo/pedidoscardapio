@@ -5374,98 +5374,117 @@ async function buildCategoryShareBlob(categoryName) {
     if (!items.length) throw new Error('Categoria sem produtos.');
 
     const width = 1080;
-    const height = 1350;
-    const photoHeight = 520;
+    const side = 74;
+    const topBlock = 330;
+    const footerSpace = 105;
+    const colGap = 72;
+    const colWidth = (width - (side * 2) - colGap) / 2;
+    const rowHeight = 118;
+    const rows = Math.ceil(items.length / 2);
+    const height = Math.max(1350, topBlock + (rows * rowHeight) + footerSpace + 70);
+
     const canvas = document.createElement('canvas');
     canvas.width = width;
     canvas.height = height;
     const ctx = canvas.getContext('2d');
 
+    // Fundo editorial
     ctx.fillStyle = '#F5F0E7';
     ctx.fillRect(0, 0, width, height);
 
-    const photoItems = items
-        .filter(item => (item.images && item.images.length) || item.image)
-        .slice(0, 4);
+    // Pequeno topo de marca
+    ctx.fillStyle = '#2C4A34';
+    ctx.fillRect(0, 0, width, 18);
 
-    const loaded = await Promise.all(photoItems.map(item => {
-        const src = (item.images && item.images.length) ? item.images[0] : item.image;
-        return loadShareProductImage(src);
-    }));
-
-    if (loaded.length >= 4) {
-        const gap = 8;
-        const cellW = (width - gap) / 2;
-        const cellH = (photoHeight - gap) / 2;
-        drawShareCoverImage(ctx, loaded[0], 0, 0, cellW, cellH);
-        drawShareCoverImage(ctx, loaded[1], cellW + gap, 0, cellW, cellH);
-        drawShareCoverImage(ctx, loaded[2], 0, cellH + gap, cellW, cellH);
-        drawShareCoverImage(ctx, loaded[3], cellW + gap, cellH + gap, cellW, cellH);
-    } else if (loaded.length >= 2) {
-        const gap = 8;
-        const cellW = (width - gap) / 2;
-        drawShareCoverImage(ctx, loaded[0], 0, 0, cellW, photoHeight);
-        drawShareCoverImage(ctx, loaded[1], cellW + gap, 0, cellW, photoHeight);
-    } else {
-        drawShareCoverImage(ctx, loaded[0] || null, 0, 0, width, photoHeight);
-    }
-
-    const left = 72;
-    const right = width - 72;
-    const contentWidth = right - left;
-    let y = photoHeight + 58;
+    let y = 86;
 
     ctx.fillStyle = '#817D74';
     ctx.font = "700 22px 'DM Sans', sans-serif";
-    ctx.fillText('DELÍCIAS DA VOVÓ', left, y);
-    y += 58;
+    ctx.fillText('DELÍCIAS DA VOVÓ', side, y);
 
+    y += 64;
     ctx.fillStyle = '#22201C';
-    ctx.font = "400 80px 'Lora', serif";
-    y = shareWrapText(ctx, categoryName, left, y, contentWidth, 86, 2);
-    y += 18;
+    ctx.font = "400 82px 'Lora', serif";
+    y = shareWrapText(ctx, categoryName, side, y, width - (side * 2), 88, 2);
 
+    y += 20;
     ctx.fillStyle = '#77736C';
-    ctx.font = "400 33px 'DM Sans', sans-serif";
-    y = shareWrapText(ctx, 'Uma seleção especial do nosso cardápio, feita com carinho.', left, y, contentWidth, 46, 2);
-    y += 42;
+    ctx.font = "400 31px 'DM Sans', sans-serif";
+    ctx.fillText('Cardápio da categoria', side, y);
 
-    drawShareSectionLabel(ctx, 'Destaques da categoria', left, y);
-    y += 46;
+    y += 44;
+    ctx.strokeStyle = 'rgba(44, 74, 52, 0.18)';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(side, y);
+    ctx.lineTo(width - side, y);
+    ctx.stroke();
 
-    const highlights = items.slice(0, 4);
-    const colGap = 50;
-    const colWidth = (contentWidth - colGap) / 2;
+    const listTop = Math.max(topBlock, y + 54);
+    const leftX = side;
+    const rightX = side + colWidth + colGap;
+    const dividerX = side + colWidth + (colGap / 2);
+    const itemsPerColumn = Math.ceil(items.length / 2);
 
-    highlights.forEach((item, index) => {
-        const col = index % 2;
-        const row = Math.floor(index / 2);
-        const x = left + col * (colWidth + colGap);
-        const itemY = y + row * 145;
+    // Linha vertical central do menu
+    ctx.strokeStyle = 'rgba(44, 74, 52, 0.14)';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(dividerX, listTop - 18);
+    ctx.lineTo(dividerX, height - footerSpace);
+    ctx.stroke();
+
+    function drawMenuItem(item, x, itemY) {
+        const price = getShareItemStartingPrice(item);
+        const weight = getShareWeightText(item);
 
         ctx.fillStyle = '#22201C';
-        ctx.font = "600 32px 'DM Sans', sans-serif";
-        shareWrapText(ctx, item.name, x, itemY, colWidth, 43, 2);
+        ctx.font = "600 31px 'DM Sans', sans-serif";
+        const nameBottom = shareWrapText(ctx, item.name, x, itemY, colWidth - 16, 38, 2);
 
-        const price = getShareItemStartingPrice(item);
         if (price) {
             ctx.fillStyle = '#2C4A34';
             ctx.font = "700 27px 'DM Sans', sans-serif";
-            ctx.fillText(price, x, itemY + 90);
+            ctx.fillText(price, x, nameBottom + 10);
         }
-    });
 
-    const moreCount = Math.max(0, items.length - highlights.length);
-    if (moreCount > 0) {
-        ctx.fillStyle = '#8A857C';
-        ctx.font = "600 26px 'DM Sans', sans-serif";
-        ctx.fillText('+ ' + moreCount + ' outras opções na categoria', left, height - 86);
+        if (weight) {
+            ctx.fillStyle = '#8A857C';
+            ctx.font = "500 21px 'DM Sans', sans-serif";
+            ctx.fillText('aprox. ' + weight.replace(/\s+por unidade$/i, ''), x, nameBottom + 45);
+        }
+
+        ctx.strokeStyle = 'rgba(44, 74, 52, 0.08)';
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(x, itemY + rowHeight - 18);
+        ctx.lineTo(x + colWidth - 12, itemY + rowHeight - 18);
+        ctx.stroke();
     }
 
-    ctx.fillStyle = 'rgba(44, 74, 52, 0.60)';
-    ctx.font = "700 20px 'DM Sans', sans-serif";
+    items.forEach((item, index) => {
+        const inLeft = index < itemsPerColumn;
+        const localIndex = inLeft ? index : index - itemsPerColumn;
+        const x = inLeft ? leftX : rightX;
+        const itemY = listTop + (localIndex * rowHeight);
+        drawMenuItem(item, x, itemY);
+    });
+
+    // Rodapé
+    const footerY = height - 56;
+    ctx.strokeStyle = 'rgba(44, 74, 52, 0.16)';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(side, footerY - 34);
+    ctx.lineTo(width - side, footerY - 34);
+    ctx.stroke();
+
+    ctx.fillStyle = 'rgba(44, 74, 52, 0.62)';
+    ctx.font = "700 19px 'DM Sans', sans-serif";
+    ctx.fillText('FEITO COM CARINHO DESDE 2005', side, footerY);
+
     ctx.textAlign = 'right';
-    ctx.fillText('FEITO COM CARINHO DESDE 2005', right, height - 42);
+    ctx.fillText(items.length + (items.length === 1 ? ' OPÇÃO' : ' OPÇÕES'), width - side, footerY);
     ctx.textAlign = 'left';
 
     return new Promise((resolve, reject) => {
@@ -5498,6 +5517,15 @@ function getOwnerShareIconHtml(sizeClass = 'text-[10px]') {
         : '<i class="fas fa-download ' + sizeClass + '"></i>';
 }
 
+function makeShareFileName(label, fallback = 'imagem') {
+    const clean = String(label || fallback)
+        .replace(/[\\/:*?"<>|]+/g, '-')
+        .replace(/\s+/g, ' ')
+        .trim();
+
+    return (clean || fallback) + '.png';
+}
+
 function downloadGeneratedShareFile(blob, fileName, successMessage = 'Imagem baixada.') {
     const objectUrl = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -5513,23 +5541,17 @@ function downloadGeneratedShareFile(blob, fileName, successMessage = 'Imagem bai
 async function shareCategoryImage(categoryName) {
     if (!document.body.classList.contains('owner-mode')) return;
 
-    showValidationPopup(isMobileShareDevice() ? 'Preparando para compartilhar…' : 'Preparando download…');
+    showValidationPopup(isMobileShareDevice() ? 'Preparando cardápio para compartilhar…' : 'Preparando cardápio para download…');
 
     try {
         const blob = await buildCategoryShareBlob(categoryName);
-        const safeName = String(categoryName || 'categoria')
-            .normalize('NFD')
-            .replace(/[\u0300-\u036f]/g, '')
-            .replace(/[^a-zA-Z0-9]+/g, '-')
-            .replace(/^-|-$/g, '')
-            .toLowerCase();
-
-        const file = new File([blob], 'delicias-da-vovo-' + safeName + '.png', {
+        const fileName = makeShareFileName('Cardápio - ' + categoryName, 'Cardápio');
+        const file = new File([blob], fileName, {
             type: 'image/png'
         });
 
         if (!isMobileShareDevice()) {
-            downloadGeneratedShareFile(blob, file.name, 'Imagem da categoria baixada.');
+            downloadGeneratedShareFile(blob, file.name, 'Cardápio baixado.');
             return;
         }
 
@@ -5545,7 +5567,7 @@ async function shareCategoryImage(categoryName) {
             }
         }
 
-        downloadGeneratedShareFile(blob, file.name, 'Imagem da categoria pronta.');
+        downloadGeneratedShareFile(blob, file.name, 'Cardápio pronto.');
     } catch (error) {
         console.error(error);
         showValidationPopup('Não foi possível gerar a imagem desta categoria.');
@@ -5560,14 +5582,8 @@ async function shareProductImage(itemId) {
 
     try {
         const blob = await buildProductShareBlob(item);
-        const safeName = String(item.name || 'produto')
-            .normalize('NFD')
-            .replace(/[\u0300-\u036f]/g, '')
-            .replace(/[^a-zA-Z0-9]+/g, '-')
-            .replace(/^-|-$/g, '')
-            .toLowerCase();
-
-        const file = new File([blob], 'delicias-da-vovo-' + safeName + '.png', {
+        const fileName = makeShareFileName(item.name, 'Produto');
+        const file = new File([blob], fileName, {
             type: 'image/png'
         });
 
