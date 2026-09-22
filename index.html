@@ -3301,8 +3301,11 @@ flavors: ['Sonho de Valsa', 'Ouro branco', 'Ninho trufado', 'Pessêgo', 'Amendoi
                     desktopGrid += `</div>`;
 
                     let html = `
-                        <div class="mb-6 sm:mb-10 text-center">
-                            <h2 class="text-[11px] sm:text-xs tracking-[0.14em] uppercase caslon-font text-[#8C8676]/80">${cat}</h2>
+                        <div class="mb-6 sm:mb-10 flex items-center justify-center gap-2.5 text-center">
+                            <h2 class="text-[11px] sm:text-xs tracking-[0.14em] uppercase text-[#8C8676]/80" style="font-family:'DM Sans',sans-serif;">${cat}</h2>
+                            <button type="button" onclick="event.stopPropagation(); shareCategoryImage('${String(cat).replace(/'/g, "\\'")}')" class="owner-share-btn w-7 h-7 rounded-full" aria-label="Compartilhar categoria ${cat}">
+                                <i class="fas fa-arrow-up-from-bracket text-[9px]"></i>
+                            </button>
                         </div>
                         ${mobileList}
                         ${desktopGrid}
@@ -5126,7 +5129,7 @@ function getSharePriceLines(item) {
 
     if (item.isKit) {
         const kitTotal = getKitComputedTotal(item, 10);
-        lines.push('A partir de R$ ' + (kitTotal / 10).toFixed(2).replace('.', ',') + ' por pessoa');
+        lines.push('A partir de R$ ' + (kitTotal / 10).toFixed(2).replace('.', ',') + ' / pessoa');
         return lines;
     }
 
@@ -5162,14 +5165,68 @@ function getShareFlavorLabels(item) {
     return getFlavorList(item).map(flavor => flavor.label).filter(Boolean);
 }
 
+function getShareWeightText(item) {
+    if (item.weightText) return item.weightText;
+
+    const description = String(item.description || '');
+    const match = description.match(/aprox\.?\s*([0-9.,]+)\s*(kg|g)\b/i);
+    if (!match) return '';
+
+    return match[1].replace('.', ',') + ' ' + match[2].toLowerCase() + ' por unidade';
+}
+
+function getShareShortDescription(item) {
+    let description = String(item.description || '').trim();
+    description = description
+        .replace(/\s*[·•-]?\s*aprox\.?\s*[0-9.,]+\s*(kg|g)\s*por unidade\.?/ig, '')
+        .replace(/\s{2,}/g, ' ')
+        .replace(/\s*[·•-]\s*$/g, '')
+        .trim();
+    return description;
+}
+
+function getShareItemStartingPrice(item) {
+    if (item.isKit) {
+        const kitTotal = getKitComputedTotal(item, 10);
+        return 'R$ ' + (kitTotal / 10).toFixed(2).replace('.', ',') + '/pessoa';
+    }
+
+    if (item.sizes && item.sizes.length) {
+        const prices = item.sizes
+            .map(size => Number(size.price))
+            .filter(Number.isFinite);
+        if (prices.length) return 'a partir de R$ ' + Math.min(...prices).toFixed(2).replace('.', ',');
+    }
+
+    if (item.units && item.units[0] === 'kg' && typeof item.priceKg === 'number') {
+        return 'R$ ' + item.priceKg.toFixed(2).replace('.', ',') + '/kg';
+    }
+
+    if (typeof item.price === 'number') {
+        return 'R$ ' + item.price.toFixed(2).replace('.', ',');
+    }
+
+    if (typeof item.priceKg === 'number') {
+        return 'R$ ' + item.priceKg.toFixed(2).replace('.', ',') + '/kg';
+    }
+
+    return '';
+}
+
+function drawShareSectionLabel(ctx, text, x, y) {
+    ctx.fillStyle = '#2C4A34';
+    ctx.font = "700 19px 'DM Sans', sans-serif";
+    ctx.fillText(String(text || '').toUpperCase(), x, y);
+}
+
 async function buildProductShareBlob(item) {
     if (document.fonts && document.fonts.ready) {
         try { await document.fonts.ready; } catch (_) {}
     }
 
     const width = 1080;
-    const height = 1440;
-    const imageHeight = 760;
+    const height = 1350;
+    const imageHeight = 615;
     const canvas = document.createElement('canvas');
     canvas.width = width;
     canvas.height = height;
@@ -5185,57 +5242,115 @@ async function buildProductShareBlob(item) {
     const img = await loadShareProductImage(imageSrc);
     drawShareCoverImage(ctx, img, 0, 0, width, imageHeight);
 
-    const left = 68;
-    const contentWidth = width - (left * 2);
-    let y = imageHeight + 62;
+    const left = 72;
+    const right = width - 72;
+    const contentWidth = right - left;
+    let y = imageHeight + 58;
 
-    ctx.fillStyle = '#858278';
-    ctx.font = "600 27px 'DM Sans', sans-serif";
+    ctx.fillStyle = '#817D74';
+    ctx.font = "700 19px 'DM Sans', sans-serif";
     ctx.fillText(String(item.category || 'CARDÁPIO').toUpperCase(), left, y);
-    y += 68;
+    y += 60;
 
     ctx.fillStyle = '#22201C';
-    ctx.font = "400 62px 'Lora', serif";
-    y = shareWrapText(ctx, item.name, left, y, contentWidth, 70, 2);
-    y += 20;
+    ctx.font = "400 68px 'Lora', serif";
+    y = shareWrapText(ctx, item.name, left, y, contentWidth, 74, 2);
+    y += 18;
 
-    ctx.fillStyle = '#827F78';
-    ctx.font = "400 30px 'DM Sans', sans-serif";
-    y = shareWrapText(ctx, item.description || '', left, y, contentWidth, 43, 2);
-    y += 28;
+    const shortDescription = getShareShortDescription(item);
+    if (shortDescription) {
+        ctx.fillStyle = '#77736C';
+        ctx.font = "400 27px 'DM Sans', sans-serif";
+        y = shareWrapText(ctx, shortDescription, left, y, contentWidth, 39, 2);
+        y += 34;
+    } else {
+        y += 10;
+    }
+
+    const infoTop = y;
+    const footerTop = height - 76;
+    const dividerX = 535;
+    const dividerBottom = footerTop - 32;
+    const leftX = left;
+    const rightX = dividerX + 46;
+    const leftColWidth = dividerX - leftX - 42;
+    const rightColWidth = right - rightX;
+
+    ctx.strokeStyle = 'rgba(44, 74, 52, 0.20)';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(dividerX, infoTop - 4);
+    ctx.lineTo(dividerX, dividerBottom);
+    ctx.stroke();
+
+    // Coluna esquerda: valores + peso
+    let leftY = infoTop;
+    drawShareSectionLabel(ctx, 'Valores', leftX, leftY);
+    leftY += 42;
 
     const priceLines = getSharePriceLines(item);
-    if (priceLines.length) {
-        ctx.fillStyle = '#2C4A34';
-        ctx.font = "700 20px 'DM Sans', sans-serif";
-        ctx.fillText('VALORES', left, y);
-        y += 34;
+    ctx.fillStyle = '#22201C';
+    ctx.font = "600 28px 'DM Sans', sans-serif";
+    priceLines.slice(0, 5).forEach(line => {
+        leftY = shareWrapText(ctx, line, leftX, leftY, leftColWidth, 37, 2);
+        leftY += 10;
+    });
 
-        ctx.fillStyle = '#22201C';
-        ctx.font = "600 28px 'DM Sans', sans-serif";
-        priceLines.slice(0, 4).forEach(line => {
-            ctx.fillText(line, left, y);
-            y += 38;
-        });
-        y += 8;
+    const weightText = getShareWeightText(item);
+    if (weightText && leftY < dividerBottom - 74) {
+        leftY += 22;
+        drawShareSectionLabel(ctx, 'Peso aproximado', leftX, leftY);
+        leftY += 40;
+        ctx.fillStyle = '#6F6B63';
+        ctx.font = "400 27px 'DM Sans', sans-serif";
+        shareWrapText(ctx, weightText, leftX, leftY, leftColWidth, 38, 2);
     }
 
+    // Coluna direita: sabores/recheios
+    let rightY = infoTop;
     const flavors = getShareFlavorLabels(item);
-    if (flavors.length && y < height - 145) {
-        ctx.fillStyle = '#2C4A34';
-        ctx.font = "700 20px 'DM Sans', sans-serif";
-        ctx.fillText('SABORES / RECHEIOS', left, y);
-        y += 34;
+    drawShareSectionLabel(ctx, flavors.length ? 'Sabores / Recheios' : 'Detalhes', rightX, rightY);
+    rightY += 43;
 
-        ctx.fillStyle = '#6E6A62';
-        ctx.font = "400 24px 'DM Sans', sans-serif";
-        shareWrapText(ctx, flavors.join('  •  '), left, y, contentWidth, 34, 4);
+    ctx.fillStyle = '#5F5B55';
+    ctx.font = "400 26px 'DM Sans', sans-serif";
+
+    if (flavors.length) {
+        flavors.slice(0, 7).forEach((flavor, index) => {
+            if (rightY > dividerBottom - 30) return;
+            ctx.fillStyle = '#2C4A34';
+            ctx.beginPath();
+            ctx.arc(rightX + 5, rightY - 8, 4, 0, Math.PI * 2);
+            ctx.fill();
+
+            ctx.fillStyle = '#5F5B55';
+            rightY = shareWrapText(ctx, flavor, rightX + 22, rightY, rightColWidth - 22, 34, 2);
+            rightY += 12;
+        });
+
+        if (flavors.length > 7 && rightY < dividerBottom - 20) {
+            ctx.fillStyle = '#8A857C';
+            ctx.font = "500 23px 'DM Sans', sans-serif";
+            ctx.fillText('+ ' + (flavors.length - 7) + ' outras opções', rightX, rightY);
+        }
+    } else {
+        ctx.fillStyle = '#77736C';
+        ctx.font = "400 25px 'DM Sans', sans-serif";
+        shareWrapText(ctx, 'Consulte as opções disponíveis.', rightX, rightY, rightColWidth, 36, 2);
     }
 
-    ctx.fillStyle = 'rgba(44, 74, 52, 0.55)';
-    ctx.font = "600 18px 'DM Sans', sans-serif";
+    // Rodapé
+    ctx.strokeStyle = 'rgba(44, 74, 52, 0.13)';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(left, footerTop - 20);
+    ctx.lineTo(right, footerTop - 20);
+    ctx.stroke();
+
+    ctx.fillStyle = 'rgba(44, 74, 52, 0.60)';
+    ctx.font = "700 17px 'DM Sans', sans-serif";
     ctx.textAlign = 'right';
-    ctx.fillText('DELÍCIAS DA VOVÓ', width - left, height - 38);
+    ctx.fillText('DELÍCIAS DA VOVÓ', right, footerTop + 20);
     ctx.textAlign = 'left';
 
     return new Promise((resolve, reject) => {
@@ -5248,6 +5363,166 @@ async function buildProductShareBlob(item) {
             reject(error);
         }
     });
+}
+
+async function buildCategoryShareBlob(categoryName) {
+    if (document.fonts && document.fonts.ready) {
+        try { await document.fonts.ready; } catch (_) {}
+    }
+
+    const items = MENU_ITEMS.filter(item => item.category === categoryName);
+    if (!items.length) throw new Error('Categoria sem produtos.');
+
+    const width = 1080;
+    const height = 1350;
+    const photoHeight = 590;
+    const canvas = document.createElement('canvas');
+    canvas.width = width;
+    canvas.height = height;
+    const ctx = canvas.getContext('2d');
+
+    ctx.fillStyle = '#F5F0E7';
+    ctx.fillRect(0, 0, width, height);
+
+    const photoItems = items
+        .filter(item => (item.images && item.images.length) || item.image)
+        .slice(0, 4);
+
+    const loaded = await Promise.all(photoItems.map(item => {
+        const src = (item.images && item.images.length) ? item.images[0] : item.image;
+        return loadShareProductImage(src);
+    }));
+
+    if (loaded.length >= 4) {
+        const gap = 8;
+        const cellW = (width - gap) / 2;
+        const cellH = (photoHeight - gap) / 2;
+        drawShareCoverImage(ctx, loaded[0], 0, 0, cellW, cellH);
+        drawShareCoverImage(ctx, loaded[1], cellW + gap, 0, cellW, cellH);
+        drawShareCoverImage(ctx, loaded[2], 0, cellH + gap, cellW, cellH);
+        drawShareCoverImage(ctx, loaded[3], cellW + gap, cellH + gap, cellW, cellH);
+    } else if (loaded.length >= 2) {
+        const gap = 8;
+        const cellW = (width - gap) / 2;
+        drawShareCoverImage(ctx, loaded[0], 0, 0, cellW, photoHeight);
+        drawShareCoverImage(ctx, loaded[1], cellW + gap, 0, cellW, photoHeight);
+    } else {
+        drawShareCoverImage(ctx, loaded[0] || null, 0, 0, width, photoHeight);
+    }
+
+    const left = 72;
+    const right = width - 72;
+    const contentWidth = right - left;
+    let y = photoHeight + 58;
+
+    ctx.fillStyle = '#817D74';
+    ctx.font = "700 19px 'DM Sans', sans-serif";
+    ctx.fillText('DELÍCIAS DA VOVÓ', left, y);
+    y += 58;
+
+    ctx.fillStyle = '#22201C';
+    ctx.font = "400 66px 'Lora', serif";
+    y = shareWrapText(ctx, categoryName, left, y, contentWidth, 72, 2);
+    y += 18;
+
+    ctx.fillStyle = '#77736C';
+    ctx.font = "400 27px 'DM Sans', sans-serif";
+    y = shareWrapText(ctx, 'Uma seleção especial do nosso cardápio, feita com carinho.', left, y, contentWidth, 39, 2);
+    y += 42;
+
+    drawShareSectionLabel(ctx, 'Destaques da categoria', left, y);
+    y += 46;
+
+    const highlights = items.slice(0, 4);
+    const colGap = 50;
+    const colWidth = (contentWidth - colGap) / 2;
+
+    highlights.forEach((item, index) => {
+        const col = index % 2;
+        const row = Math.floor(index / 2);
+        const x = left + col * (colWidth + colGap);
+        const itemY = y + row * 125;
+
+        ctx.fillStyle = '#22201C';
+        ctx.font = "600 27px 'DM Sans', sans-serif";
+        shareWrapText(ctx, item.name, x, itemY, colWidth, 34, 2);
+
+        const price = getShareItemStartingPrice(item);
+        if (price) {
+            ctx.fillStyle = '#2C4A34';
+            ctx.font = "600 23px 'DM Sans', sans-serif";
+            ctx.fillText(price, x, itemY + 76);
+        }
+    });
+
+    const moreCount = Math.max(0, items.length - highlights.length);
+    if (moreCount > 0) {
+        ctx.fillStyle = '#8A857C';
+        ctx.font = "500 22px 'DM Sans', sans-serif";
+        ctx.fillText('+ ' + moreCount + ' outras opções na categoria', left, height - 86);
+    }
+
+    ctx.fillStyle = 'rgba(44, 74, 52, 0.60)';
+    ctx.font = "700 17px 'DM Sans', sans-serif";
+    ctx.textAlign = 'right';
+    ctx.fillText('FEITO COM CARINHO DESDE 2005', right, height - 42);
+    ctx.textAlign = 'left';
+
+    return new Promise((resolve, reject) => {
+        try {
+            canvas.toBlob(blob => {
+                if (blob) resolve(blob);
+                else reject(new Error('Não foi possível gerar a imagem.'));
+            }, 'image/png', 0.95);
+        } catch (error) {
+            reject(error);
+        }
+    });
+}
+
+async function shareCategoryImage(categoryName) {
+    if (!document.body.classList.contains('owner-mode')) return;
+
+    showValidationPopup('Preparando imagem da categoria…');
+
+    try {
+        const blob = await buildCategoryShareBlob(categoryName);
+        const safeName = String(categoryName || 'categoria')
+            .normalize('NFD')
+            .replace(/[\u0300-\u036f]/g, '')
+            .replace(/[^a-zA-Z0-9]+/g, '-')
+            .replace(/^-|-$/g, '')
+            .toLowerCase();
+
+        const file = new File([blob], 'delicias-da-vovo-' + safeName + '.png', {
+            type: 'image/png'
+        });
+
+        if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
+            try {
+                await navigator.share({
+                    files: [file],
+                    title: categoryName
+                });
+                return;
+            } catch (error) {
+                if (error && error.name === 'AbortError') return;
+            }
+        }
+
+        const objectUrl = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = objectUrl;
+        a.download = file.name;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        setTimeout(() => URL.revokeObjectURL(objectUrl), 1500);
+        showValidationPopup('Imagem da categoria pronta.');
+    } catch (error) {
+        console.error(error);
+        showValidationPopup('Não foi possível gerar a imagem desta categoria.');
+    }
 }
 
 async function shareProductImage(itemId) {
