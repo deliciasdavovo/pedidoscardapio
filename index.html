@@ -5420,32 +5420,92 @@ function getShareShortDescription(item) {
 }
 
 function getShareItemStartingPrice(item) {
+    const formatMoney = value => 'R$ ' + Number(value).toFixed(2).replace('.', ',');
+
     if (item.isKit) {
         const kitTotal = getKitComputedTotal(item, 10);
-        return 'R$ ' + (kitTotal / 10).toFixed(2).replace('.', ',') + '/pessoa';
+        return formatMoney(kitTotal / 10) + '/pessoa';
     }
 
-    if (item.sizes && item.sizes.length) {
-        const prices = item.sizes
-            .map(size => Number(size.price))
-            .filter(Number.isFinite);
-        if (prices.length) return 'a partir de R$ ' + Math.min(...prices).toFixed(2).replace('.', ',');
+    const flavors = getFlavorList(item);
+    const hasSizes = Array.isArray(item.sizes) && item.sizes.length > 0;
+    const hasKg = Array.isArray(item.units) && item.units.includes('kg');
+
+    if (hasSizes) {
+        const prices = [];
+
+        item.sizes.forEach(size => {
+            if (typeof size.price === 'number') prices.push(size.price);
+        });
+
+        flavors.forEach(flavor => {
+            const variant = item.variants && item.variants[flavor.label]
+                ? item.variants[flavor.label]
+                : {};
+            const sizePrices = variant.sizePrices || flavor.sizePrices || {};
+
+            Object.values(sizePrices).forEach(value => {
+                if (typeof value === 'number') prices.push(value);
+            });
+        });
+
+        if (prices.length) {
+            const uniquePrices = [...new Set(prices.map(Number))];
+            const prefix = uniquePrices.length > 1 ? 'a partir de ' : '';
+            return prefix + formatMoney(Math.min(...uniquePrices));
+        }
     }
 
-    if (hasEstimatedUnitPrice(item)) {
-        return getKgPriceText(item);
+    if (hasKg) {
+        const kgPrices = [];
+
+        if (flavors.length) {
+            flavors.forEach(flavor => {
+                const variant = item.variants && item.variants[flavor.label]
+                    ? item.variants[flavor.label]
+                    : {};
+                const value = typeof variant.priceKg === 'number'
+                    ? variant.priceKg
+                    : (typeof flavor.priceKg === 'number' ? flavor.priceKg : item.priceKg);
+
+                if (typeof value === 'number') kgPrices.push(value);
+            });
+        } else if (typeof item.priceKg === 'number') {
+            kgPrices.push(item.priceKg);
+        }
+
+        if (kgPrices.length) {
+            const uniquePrices = [...new Set(kgPrices.map(Number))];
+            const prefix = uniquePrices.length > 1 ? 'a partir de ' : '';
+            return prefix + formatMoney(Math.min(...uniquePrices)) + '/kg';
+        }
     }
 
-    if (item.units && item.units[0] === 'kg' && typeof item.priceKg === 'number') {
-        return 'R$ ' + item.priceKg.toFixed(2).replace('.', ',') + '/kg';
+    const unitPrices = [];
+
+    if (flavors.length) {
+        flavors.forEach(flavor => {
+            const variant = item.variants && item.variants[flavor.label]
+                ? item.variants[flavor.label]
+                : {};
+            const value = typeof variant.price === 'number'
+                ? variant.price
+                : (typeof flavor.price === 'number' ? flavor.price : item.price);
+
+            if (typeof value === 'number') unitPrices.push(value);
+        });
+    } else if (typeof item.price === 'number') {
+        unitPrices.push(item.price);
     }
 
-    if (typeof item.price === 'number') {
-        return 'R$ ' + item.price.toFixed(2).replace('.', ',');
+    if (unitPrices.length) {
+        const uniquePrices = [...new Set(unitPrices.map(Number))];
+        const prefix = uniquePrices.length > 1 ? 'a partir de ' : '';
+        return prefix + formatMoney(Math.min(...uniquePrices));
     }
 
     if (typeof item.priceKg === 'number') {
-        return 'R$ ' + item.priceKg.toFixed(2).replace('.', ',') + '/kg';
+        return formatMoney(item.priceKg) + '/kg';
     }
 
     return '';
@@ -5469,6 +5529,8 @@ async function buildProductShareBlob(item) {
     const width = 1080;
     const flavors = getShareFlavorLabels(item);
     const priceLines = getSharePriceLines(item);
+    const primaryPrice = getShareItemStartingPrice(item);
+    const showPriceDetails = priceLines.length > 1;
     const weightText = getShareWeightText(item);
     const shortDescription = getShareShortDescription(item);
     const hasDetailColumn = flavors.length > 0;
@@ -5498,8 +5560,8 @@ async function buildProductShareBlob(item) {
     const headerHeight = 136 + (titleRows * 60) + (descriptionRows * 33);
     const priceBlockHeight =
         42 +
-        (priceVisualLines * 38) +
-        (priceLines.length * 10) +
+        (primaryPrice ? 72 : 0) +
+        (showPriceDetails ? 34 + (priceVisualLines * 32) + (priceLines.length * 8) : 0) +
         (hasEstimatedPriceNote ? 58 : 0) +
         (weightText ? 62 + (weightVisualLines * 33) : 0);
     const flavorBlockHeight =
@@ -5651,15 +5713,29 @@ async function buildProductShareBlob(item) {
         drawShareSectionLabel(ctx, 'Valores', startX, priceY);
         priceY += 42;
 
-        ctx.fillStyle = '#22201C';
-        ctx.font = "600 27px 'DM Sans', sans-serif";
+        // O preço principal continua grande e verde, preservando a hierarquia
+        // visual aprovada. As demais opções aparecem logo abaixo.
+        if (primaryPrice) {
+            ctx.fillStyle = '#2C5437';
+            ctx.font = "700 47px 'DM Sans', sans-serif";
+            priceY = shareWrapText(ctx, primaryPrice, startX, priceY, maxWidth, 52, 2);
+            priceY += 6;
+        }
 
-        if (priceLines.length) {
+        if (showPriceDetails) {
+            ctx.fillStyle = '#B27845';
+            ctx.font = "700 18px 'DM Sans', sans-serif";
+            ctx.fillText('OPÇÕES E VARIAÇÕES', startX, priceY);
+            priceY += 30;
+
+            ctx.fillStyle = '#3F3B35';
+            ctx.font = "600 22px 'DM Sans', sans-serif";
+
             priceLines.forEach(line => {
-                priceY = shareWrapText(ctx, line, startX, priceY, maxWidth, 38, Infinity);
-                priceY += 10;
+                priceY = shareWrapText(ctx, line, startX, priceY, maxWidth, 32, Infinity);
+                priceY += 8;
             });
-        } else {
+        } else if (!primaryPrice) {
             ctx.fillStyle = '#77736C';
             ctx.font = "400 25px 'DM Sans', sans-serif";
             priceY = shareWrapText(ctx, 'Consulte o valor.', startX, priceY, maxWidth, 34, 2);
