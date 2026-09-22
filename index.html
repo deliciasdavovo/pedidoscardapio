@@ -815,93 +815,122 @@
                 <!-- Itens do carrinho aqui -->
             </div>
 
-            <!-- PAINEL DE CHECKOUT SEMI-FIXO E RETRÁTIL (não ocupa a tela toda) -->
-            <div id="cart-checkout" class="hidden shrink-0 bg-white border-t border-[#8C8676]/10">
-                <!-- Alça retrátil -->
-                <button type="button" id="checkout-toggle" onclick="toggleCheckout()" class="w-full flex flex-col items-center gap-1.5 px-6 sm:px-8 pt-2.5 pb-2 active:opacity-70 transition-opacity">
-                    <span class="w-10 h-1 rounded-full bg-[#8C8676]/25"></span>
-                    <span class="w-full flex items-center justify-between">
-                        <span class="text-[13px] font-semibold text-[#8C8676]">Seus dados e entrega</span>
-                        <i id="checkout-chevron" class="fas fa-chevron-down text-[#8C8676] text-sm transition-transform"></i>
-                    </span>
+            <!-- RODAPÉ DA CESTA: revisão simples -->
+            <div id="cart-checkout" class="hidden shrink-0 bg-white border-t border-[#8C8676]/10 px-6 sm:px-8 pt-4 pb-6 space-y-4">
+                <div class="flex justify-between items-end gap-4">
+                    <div>
+                        <span class="text-[#8C8676] text-[12px] font-semibold block mb-1">Total estimado</span>
+                        <span class="text-[11px] text-gray-400">Revise sua cesta antes de continuar</span>
+                    </div>
+                    <span class="text-3xl font-bold text-[#22201C] tracking-tight" id="cart-review-total">R$ 0,00</span>
+                </div>
+                <button onclick="openCheckout()" class="w-full bg-[#22201C] hover:bg-[#2f2c27] text-white py-4 sm:py-[18px] rounded-2xl font-semibold tracking-[-0.01em] text-[16px] transition-all shadow-sm flex items-center justify-center gap-3 active:scale-95">
+                    Finalizar pedido
+                    <i class="fas fa-arrow-right text-sm"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Finalização do Pedido -->
+    <div id="checkout-modal" class="fixed inset-0 z-[65] invisible">
+        <div id="checkout-overlay" class="absolute inset-0 bg-[#22201C]/70 backdrop-blur-md opacity-0 transition-opacity duration-300" onclick="closeCheckout()"></div>
+
+        <div id="checkout-panel" class="absolute inset-y-0 right-0 w-full max-w-lg bg-[#F4F1EA] shadow-2xl translate-x-full transition-transform duration-500 flex flex-col h-full">
+            <div class="px-6 sm:px-8 py-5 sm:py-6 border-b border-[#8C8676]/10 bg-white flex items-center justify-between shrink-0">
+                <div>
+                    <p class="text-[11px] uppercase tracking-[0.12em] font-semibold text-[#8C8676] mb-1">Última etapa</p>
+                    <h2 class="serif-font text-2xl sm:text-[28px] text-[#22201C]">Finalização</h2>
+                </div>
+                <button onclick="closeCheckout()" class="text-[#8C8676] w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center rounded-full hover:bg-[#ECE9E1] transition-all">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+
+            <div class="flex-grow min-h-0 overflow-y-auto px-6 sm:px-8 py-6 space-y-6 custom-scrollbar">
+                <button type="button" onclick="backToCart()" class="inline-flex items-center gap-2 text-[13px] font-semibold text-[#8C8676] hover:text-[#22201C] transition-colors">
+                    <i class="fas fa-arrow-left text-xs"></i>
+                    Voltar à cesta
                 </button>
 
-                <!-- Corpo retrátil: formulário -->
-                <div id="checkout-body" class="overflow-y-auto max-h-[42vh] px-6 sm:px-8 pb-4 space-y-4 sm:space-y-5 custom-scrollbar">
+                <div class="bg-white rounded-[1.6rem] border border-[#8C8676]/10 p-5 space-y-5 shadow-sm">
                     <div class="space-y-2">
-                        <label class="text-[13px] font-semibold text-[#8C8676] ml-2">Identificação </label>
-                        <input type="text" id="order-name" placeholder="Como podemos te chamar?" class="w-full bg-[#ECE9E1]/50 border border-[#8C8676]/10 rounded-2xl px-5 py-3 text-sm focus:outline-none focus:ring-4 focus:ring-[#8C8676]/5 transition-all">
+                        <label class="text-[12px] font-semibold text-[#8C8676] ml-1">Seu nome</label>
+                        <input type="text" id="order-name" placeholder="Como podemos te chamar?" class="w-full bg-[#ECE9E1]/50 border border-[#8C8676]/10 rounded-2xl px-5 py-3.5 text-sm focus:outline-none focus:ring-4 focus:ring-[#8C8676]/5 transition-all">
                     </div>
 
-                    <div class="space-y-2">
-                        <div class="flex items-center gap-2 ml-2">
-                            <label class="text-[13px] font-semibold text-[#8C8676]">Data e horário da encomenda</label>
+                    <div class="space-y-3">
+                        <div class="flex items-center gap-2 ml-1">
+                            <label class="text-[12px] font-semibold text-[#8C8676]">Quando você deseja?</label>
                             <button type="button" onclick="showProntaEntregaInfo()" aria-label="Informação sobre pronta entrega" class="w-5 h-5 shrink-0 rounded-full bg-[#8C8676]/15 text-[#8C8676] text-[10px] flex items-center justify-center hover:bg-[#8C8676]/25 active:scale-90 transition-all">
                                 <i class="fas fa-info"></i>
                             </button>
                         </div>
-                        <div id="sched-fields" class="space-y-3">
+                        <div id="sched-fields" class="grid grid-cols-2 gap-3">
                             <div class="space-y-1">
-                                <label class="text-[12px] font-semibold text-[#8C8676] ml-2 block">Data</label>
-                                <input type="date" id="order-date" class="w-full bg-[#ECE9E1]/50 rounded-xl px-4 py-3 text-sm border border-[#8C8676]/10 outline-none">
+                                <label class="text-[11px] font-semibold text-[#8C8676] ml-1 block">Data</label>
+                                <input type="date" id="order-date" class="w-full bg-[#ECE9E1]/50 rounded-xl px-3 py-3 text-sm border border-[#8C8676]/10 outline-none">
                             </div>
                             <div class="space-y-1">
-                                <label class="text-[12px] font-semibold text-[#8C8676] ml-2 block">Horário</label>
-                                <input type="time" id="order-time" class="w-full bg-[#ECE9E1]/50 rounded-xl px-4 py-3 text-sm border border-[#8C8676]/10 outline-none">
+                                <label class="text-[11px] font-semibold text-[#8C8676] ml-1 block">Horário</label>
+                                <input type="time" id="order-time" class="w-full bg-[#ECE9E1]/50 rounded-xl px-3 py-3 text-sm border border-[#8C8676]/10 outline-none">
                             </div>
                         </div>
-                        <p class="text-[11px] text-[#8C8676]/75 ml-2 leading-relaxed">Encomendas a partir de amanhã. Para <strong>pronta entrega</strong> (hoje), ligue <a href="tel:+551140135248" class="font-semibold underline text-[#22201C]">(11) 4013-5248</a>.</p>
+                        <p class="text-[10px] text-[#8C8676]/70 leading-relaxed">Encomendas a partir de amanhã. Para pronta entrega hoje, ligue <a href="tel:+551140135248" class="font-semibold underline text-[#22201C]">(11) 4013-5248</a>.</p>
                     </div>
+                </div>
 
+                <div class="bg-white rounded-[1.6rem] border border-[#8C8676]/10 p-5 space-y-5 shadow-sm">
                     <div class="space-y-2">
-                        <label class="text-[13px] font-semibold text-[#8C8676] ml-2">Como receber?</label>
+                        <label class="text-[12px] font-semibold text-[#8C8676] ml-1">Como prefere receber?</label>
                         <div class="toggle-container">
-                            <button onclick="setFulfillment('Retirada')" id="btn-pickup" class="toggle-btn active">Retirada</button>
-                            <button onclick="setFulfillment('Entrega')" id="btn-delivery" class="toggle-btn">Entrega</button>
+                            <button type="button" onclick="setFulfillment('Retirada')" id="btn-pickup" class="toggle-btn active">Retirada</button>
+                            <button type="button" onclick="setFulfillment('Entrega')" id="btn-delivery" class="toggle-btn">Entrega</button>
                         </div>
                     </div>
 
                     <div id="fulfillment-details" class="animate-fade">
                         <div id="pickup-location-container" class="space-y-2">
-                            <label class="text-[12px] font-semibold text-[#8C8676] ml-2 block">Unidade Escolhida</label>
-                            <select id="pickup-location" class="w-full bg-[#ECE9E1]/50 border border-[#8C8676]/10 rounded-2xl px-5 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#8C8676]/20 appearance-none text-[#22201C]">
+                            <label class="text-[11px] font-semibold text-[#8C8676] ml-1 block">Unidade para retirada</label>
+                            <select id="pickup-location" class="w-full bg-[#ECE9E1]/50 border border-[#8C8676]/10 rounded-2xl px-5 py-3.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#8C8676]/20 appearance-none text-[#22201C]">
                                 <option value="Matriz">Unidade Matriz - Centro</option>
                                 <option value="Vila Nova">Unidade Vila Nova - Unicenter</option>
                             </select>
                         </div>
-                        <div id="delivery-address-container" class="hidden space-y-3">
+
+                        <div id="delivery-address-container" class="hidden space-y-4">
                             <div class="space-y-2">
-                                <label class="text-[12px] font-semibold text-[#8C8676] ml-2 block">Bairro</label>
-                                <select id="delivery-neighborhood" onchange="updateCartSummary()" class="w-full bg-[#ECE9E1]/50 border border-[#8C8676]/10 rounded-2xl px-5 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#8C8676]/20 appearance-none text-[#22201C]">
+                                <label class="text-[11px] font-semibold text-[#8C8676] ml-1 block">Bairro</label>
+                                <select id="delivery-neighborhood" onchange="updateCartSummary()" class="w-full bg-[#ECE9E1]/50 border border-[#8C8676]/10 rounded-2xl px-5 py-3.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#8C8676]/20 appearance-none text-[#22201C]">
                                     <option value="">Selecione o bairro</option>
                                 </select>
-                                <p id="delivery-fee-hint" class="text-[11px] text-[#8C8676]/75 ml-2">Selecione o bairro para ver a taxa de entrega.</p>
+                                <p id="delivery-fee-hint" class="text-[10px] text-[#8C8676]/70 ml-1">Selecione o bairro para ver a taxa de entrega.</p>
                             </div>
                             <div class="space-y-2">
-                                <label class="text-[12px] font-semibold text-[#8C8676] ml-2 block">Endereço para Entrega</label>
-                                <input type="text" id="delivery-address" placeholder="Rua, número e complemento" class="w-full bg-[#ECE9E1]/50 border border-[#8C8676]/10 rounded-2xl px-5 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#8C8676]/20 transition-all">
+                                <label class="text-[11px] font-semibold text-[#8C8676] ml-1 block">Endereço</label>
+                                <input type="text" id="delivery-address" placeholder="Rua, número e complemento" class="w-full bg-[#ECE9E1]/50 border border-[#8C8676]/10 rounded-2xl px-5 py-3.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#8C8676]/20 transition-all">
                             </div>
                         </div>
                     </div>
                 </div>
+            </div>
 
-                <!-- Barra fixa: total + finalizar (sempre visível) -->
-                <div class="px-6 sm:px-8 pt-3 pb-6 border-t border-[#8C8676]/10 space-y-3">
-                    <div id="delivery-fee-row" class="hidden flex justify-between items-center px-1 text-sm text-[#8C8676]">
-                        <span class="font-medium">Taxa de entrega</span>
-                        <span id="delivery-fee-value" class="font-bold">Selecione o bairro</span>
-                    </div>
-                    <div class="flex justify-between items-center px-1">
-                        <div class="text-left">
-                            <span class="text-[#8C8676] text-[13px] font-semibold block mb-0.5">Total estimado</span>
-                            <span class="text-[11px] text-gray-400 italic">Pesagem final na entrega</span>
-                        </div>
-                        <span class="text-3xl sm:text-4xl font-bold text-[#22201C] tracking-tight" id="cart-final-total">R$ 0,00</span>
-                    </div>
-                    <button onclick="sendWhatsAppOrder()" class="w-full bg-[#1F8F7A] hover:bg-[#176E60] text-white py-4 sm:py-[18px] rounded-2xl font-semibold tracking-[-0.01em] text-[16px] transition-all shadow-[0_8px_24px_rgba(31,143,122,0.28),0_2px_6px_rgba(31,143,122,0.20)] flex items-center justify-center gap-3 active:scale-95 group">
-                        <i class="fab fa-whatsapp text-xl sm:text-2xl group-hover:rotate-12 transition-transform"></i> Finalizar no WhatsApp
-                    </button>
+            <div class="shrink-0 bg-white border-t border-[#8C8676]/10 px-6 sm:px-8 pt-4 pb-6 space-y-3">
+                <div id="delivery-fee-row" class="hidden flex justify-between items-center text-[13px] text-[#8C8676]">
+                    <span class="font-medium">Taxa de entrega</span>
+                    <span id="delivery-fee-value" class="font-bold">Selecione o bairro</span>
                 </div>
+                <div class="flex justify-between items-end">
+                    <div>
+                        <span class="text-[#8C8676] text-[12px] font-semibold block">Total estimado</span>
+                        <span class="text-[10px] text-gray-400">Pesagem final quando aplicável</span>
+                    </div>
+                    <span class="text-3xl font-bold text-[#22201C] tracking-tight" id="cart-final-total">R$ 0,00</span>
+                </div>
+                <button onclick="sendWhatsAppOrder()" class="w-full bg-[#1F8F7A] hover:bg-[#176E60] text-white py-4 sm:py-[18px] rounded-2xl font-semibold tracking-[-0.01em] text-[16px] transition-all shadow-[0_8px_24px_rgba(31,143,122,0.24)] flex items-center justify-center gap-3 active:scale-95 group">
+                    <i class="fab fa-whatsapp text-xl"></i>
+                    Enviar pedido
+                </button>
             </div>
         </div>
     </div>
@@ -2864,11 +2893,13 @@ flavors: ['Sonho de Valsa', 'Ouro branco', 'Ninho trufado', 'Pessêgo', 'Amendoi
                 const bar = document.getElementById('search-bar');
                 const kitModal = document.getElementById('kit-flavor-modal');
                 const cartModal = document.getElementById('cart-modal');
+                const checkoutModal = document.getElementById('checkout-modal');
                 const productModal = document.getElementById('product-detail-modal');
                 const sideMenu = document.getElementById('side-menu');
                 if (!sideMenu.classList.contains('invisible')) { closeSideMenu(); return; }
                 if (!bar.classList.contains('opacity-0')) { toggleSearch(); return; }
                 if (!kitModal.classList.contains('invisible')) { closeKitFlavorModal(); return; }
+                if (!checkoutModal.classList.contains('invisible')) { closeCheckout(); return; }
                 if (!cartModal.classList.contains('invisible')) { closeCart(); return; }
                 if (!productModal.classList.contains('invisible')) { closeProductModal(); return; }
             });
@@ -2881,6 +2912,8 @@ flavors: ['Sonho de Valsa', 'Ouro branco', 'Ninho trufado', 'Pessêgo', 'Amendoi
         window.addEventListener('pageshow', (e) => {
             if (e.persisted) {
                 document.body.classList.remove('cart-open');
+                const checkoutModal = document.getElementById('checkout-modal');
+                if (checkoutModal) checkoutModal.classList.add('invisible');
             }
         });
 
@@ -3552,6 +3585,43 @@ if (!item.sizes && selectedFlavor && item.variants && item.variants[selectedFlav
             setTimeout(() => { document.getElementById('cart-modal').classList.add('invisible'); document.body.classList.remove('cart-open'); }, 500);
         }
 
+        function openCheckout() {
+            if (cart.length === 0) return;
+
+            const cartModal = document.getElementById('cart-modal');
+            document.getElementById('cart-overlay').classList.remove('opacity-100');
+            document.getElementById('cart-panel').classList.add('translate-x-full');
+            cartModal.classList.add('invisible');
+
+            const checkoutModal = document.getElementById('checkout-modal');
+            checkoutModal.classList.remove('invisible');
+            requestAnimationFrame(() => {
+                document.getElementById('checkout-overlay').classList.add('opacity-100');
+                document.getElementById('checkout-panel').classList.remove('translate-x-full');
+            });
+
+            document.body.classList.add('cart-open');
+            configurarRestricoesEncomenda();
+            updateCartSummary();
+        }
+
+        function closeCheckout() {
+            const modal = document.getElementById('checkout-modal');
+            document.getElementById('checkout-overlay').classList.remove('opacity-100');
+            document.getElementById('checkout-panel').classList.add('translate-x-full');
+            setTimeout(() => {
+                modal.classList.add('invisible');
+                document.body.classList.remove('cart-open');
+            }, 500);
+        }
+
+        function backToCart() {
+            document.getElementById('checkout-overlay').classList.remove('opacity-100');
+            document.getElementById('checkout-panel').classList.add('translate-x-full');
+            document.getElementById('checkout-modal').classList.add('invisible');
+            openCart();
+        }
+
         function getUnitPriceForSelection(item, unit = 'un', flavor = null, size = null) {
             let price = unit === 'kg' ? item.priceKg : item.price;
 
@@ -4070,7 +4140,10 @@ if (!item.sizes && flavor && item.variants && item.variants[flavor]) {
             document.getElementById('cart-badge').classList.toggle('hidden', count === 0);
             document.getElementById('header-total').innerText = 'R$ ' + total.toFixed(2);
             document.getElementById('sticky-total').innerText = 'R$ ' + total.toFixed(2);
-            document.getElementById('cart-final-total').innerText = 'R$ ' + total.toFixed(2);
+            const reviewTotal = document.getElementById('cart-review-total');
+            if (reviewTotal) reviewTotal.innerText = 'R$ ' + total.toFixed(2);
+            const finalTotal = document.getElementById('cart-final-total');
+            if (finalTotal) finalTotal.innerText = 'R$ ' + total.toFixed(2);
             document.getElementById('sticky-cart-count').innerText = count;
             const bar = document.getElementById('sticky-cart-bar');
             if (count > 0) bar.classList.remove('translate-y-40'); else bar.classList.add('translate-y-40');
@@ -4218,7 +4291,7 @@ if (!item.sizes && flavor && item.variants && item.variants[flavor]) {
             // Fecha a cesta e destrava a página. Sem isso, ao voltar do
             // WhatsApp o site podia ficar preso/em branco com o modal aberto
             // e o body travado (overflow hidden).
-            closeCart();
+            closeCheckout();
         }
 
         function formatDateLocalISO(date) {
@@ -4243,15 +4316,6 @@ if (!item.sizes && flavor && item.variants && item.variants[flavor]) {
 
         function showProntaEntregaInfo() {
           showValidationPopup(PRONTA_ENTREGA_MSG);
-        }
-
-        // Painel de checkout retrátil: recolhe/expande o formulário sem ocupar a tela toda
-        function toggleCheckout() {
-          const body = document.getElementById('checkout-body');
-          const chevron = document.getElementById('checkout-chevron');
-          if (!body) return;
-          const collapsed = body.classList.toggle('hidden');
-          if (chevron) chevron.classList.toggle('rotate-180', collapsed);
         }
 
         function showValidationPopup(message) {
