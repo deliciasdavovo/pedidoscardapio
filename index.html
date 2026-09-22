@@ -433,12 +433,15 @@
   }
 }
 
-/* Discovery Overlay — abertura compacta */
+
+/* Discovery Overlay — abertura alinhada ao cardápio */
 #discovery-overlay {
     position: fixed;
     inset: 0;
     z-index: 60;
-    background: #F5F0E7;
+    background:
+        radial-gradient(circle at top, rgba(201, 165, 118, 0.16), transparent 36%),
+        #F4F1EA;
     overflow: hidden;
     color: #22201C;
     transition: opacity 0.38s ease, transform 0.38s ease;
@@ -449,11 +452,11 @@
     pointer-events: none;
 }
 .discovery-shell {
-    width: min(100%, 560px);
+    width: min(100%, 620px);
     height: 100vh;
     height: 100dvh;
     margin: 0 auto;
-    padding: max(24px, env(safe-area-inset-top)) 22px max(22px, env(safe-area-inset-bottom));
+    padding: max(26px, env(safe-area-inset-top)) 22px max(24px, env(safe-area-inset-bottom));
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -462,7 +465,7 @@
 .discovery-brand {
     width: 100%;
     text-align: center;
-    margin-bottom: clamp(20px, 4.2vh, 34px);
+    margin-bottom: clamp(18px, 4vh, 30px);
 }
 .owner-mode-trigger {
     touch-action: manipulation;
@@ -482,15 +485,16 @@
     color: #2C4A34;
 }
 .discovery-brand-line {
-    width: 36px;
-    height: 1px;
-    margin: 11px auto 0;
-    background: rgba(44, 74, 52, 0.52);
+    width: 42px;
+    height: 2px;
+    margin: 12px auto 0;
+    border-radius: 999px;
+    background: #C9A576;
 }
 .discovery-hero {
     width: 100%;
-    max-width: 460px;
-    margin: 0 auto clamp(18px, 3.8vh, 30px);
+    max-width: 500px;
+    margin: 0 auto clamp(20px, 4vh, 28px);
     text-align: center;
     display: flex;
     flex-direction: column;
@@ -500,8 +504,8 @@
     width: 100%;
     margin: 0 auto;
     font-family: 'Lora', serif;
-    font-size: clamp(34px, 9.6vw, 48px);
-    line-height: 1.05;
+    font-size: clamp(34px, 8.6vw, 50px);
+    line-height: 1.04;
     font-weight: 400;
     letter-spacing: -0.035em;
     color: #22201C;
@@ -517,104 +521,121 @@
 }
 .discovery-subtitle {
     margin: 12px auto 0;
-    max-width: 330px;
+    max-width: 360px;
     font-family: 'DM Sans', sans-serif;
-    font-size: 12px;
-    line-height: 1.45;
-    color: rgba(34, 32, 28, 0.52);
+    font-size: 13px;
+    line-height: 1.5;
+    color: rgba(34, 32, 28, 0.56);
 }
 .discovery-section-label {
     width: 100%;
-    margin: 0 0 10px;
+    margin: 0 0 12px;
     font-family: 'DM Sans', sans-serif;
-    font-size: 9px;
+    font-size: 10px;
     font-weight: 700;
-    letter-spacing: 0.20em;
+    letter-spacing: 0.18em;
     text-transform: uppercase;
-    color: rgba(44, 74, 52, 0.62);
+    color: rgba(44, 74, 52, 0.58);
     text-align: center;
 }
 #discovery-cards {
     width: 100%;
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 10px;
+    gap: 12px;
 }
 .discovery-card {
-    min-height: clamp(92px, 12.5vh, 112px);
-    padding: 15px 12px 13px;
-    border: 1px solid rgba(44, 74, 52, 0.12);
-    border-radius: 18px;
-    background: #EEE5D4;
+    min-height: clamp(102px, 13vh, 122px);
+    padding: 16px 14px 14px;
+    border: 1px solid rgba(158, 118, 78, 0.12);
+    border-radius: 24px;
+    background: #FFFFFF;
     color: #22201C;
     cursor: pointer;
     display: flex;
     flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 9px;
-    text-align: center;
-    box-shadow: none;
-    transition: background 0.18s ease, transform 0.18s ease, border-color 0.18s ease;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 10px;
+    text-align: left;
+    box-shadow: 0 1px 2px rgba(20, 34, 22, 0.05), 0 8px 24px rgba(20, 34, 22, 0.06);
+    transition: background 0.18s ease, transform 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
 }
 .discovery-card::before { display: none; }
 .discovery-card:hover {
     transform: translateY(-2px);
-    background: #E9DEC9;
-    border-color: rgba(44, 74, 52, 0.20);
-    box-shadow: none;
+    background: #FFFCF7;
+    border-color: rgba(158, 118, 78, 0.20);
+    box-shadow: 0 2px 6px rgba(20, 34, 22, 0.06), 0 10px 28px rgba(20, 34, 22, 0.10);
 }
 .discovery-card:active { transform: scale(0.985); }
 .discovery-card-wide { grid-column: 1 / -1; }
 .discovery-card-icon {
-    width: 30px;
-    height: 30px;
-    border: 1px solid rgba(44, 74, 52, 0.16);
+    width: 34px;
+    height: 34px;
+    border: 1px solid rgba(44, 74, 52, 0.10);
     border-radius: 999px;
     display: inline-flex;
     align-items: center;
     justify-content: center;
     color: #2C4A34;
-    background: rgba(245, 240, 231, 0.56);
-    font-size: 11px;
+    background: #F5F0E7;
+    font-size: 12px;
 }
 .discovery-card-title {
-    max-width: 150px;
+    max-width: 170px;
     font-family: 'Lora', serif;
-    font-size: clamp(14px, 4vw, 17px);
-    line-height: 1.16;
+    font-size: clamp(15px, 4vw, 18px);
+    line-height: 1.14;
     font-weight: 400;
     letter-spacing: -0.02em;
-    text-align: center;
+    text-align: left;
+    color: #22201C;
 }
 .discovery-card-wide .discovery-card-title {
     max-width: none;
 }
 .discovery-arrow {
-    display: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    border-radius: 999px;
+    background: rgba(201, 165, 118, 0.16);
+    color: #2C4A34;
+    align-self: flex-end;
+    font-size: 10px;
 }
 .discovery-cta {
     width: 100%;
-    min-height: clamp(50px, 7.5vh, 58px);
-    margin-top: 11px;
-    padding: 0 20px;
-    border: 1px solid #2C4A34;
-    border-radius: 16px;
-    background: #2C4A34;
-    color: #F5F0E7;
+    min-height: clamp(52px, 7.8vh, 60px);
+    margin-top: 14px;
+    padding: 0 22px;
+    border: none;
+    border-radius: 18px;
+    background: #BE6B2E;
+    color: #FFFFFF;
     font-family: 'DM Sans', sans-serif;
-    font-size: 13px;
-    font-weight: 650;
+    font-size: 14px;
+    font-weight: 700;
     letter-spacing: -0.01em;
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
     gap: 10px;
-    box-shadow: none;
-    transition: background 0.18s ease, transform 0.18s ease;
+    box-shadow:
+        0 1px 2px rgba(122, 66, 25, 0.18),
+        0 8px 20px rgba(190, 107, 46, 0.18);
+    transition: background 0.18s ease, transform 0.18s ease, box-shadow 0.18s ease;
 }
-.discovery-cta:hover { background: #20361F; }
+.discovery-cta:hover {
+    background: #9E551F;
+    box-shadow:
+        0 2px 4px rgba(122, 66, 25, 0.18),
+        0 10px 24px rgba(190, 107, 46, 0.22);
+}
 .discovery-cta:active { transform: scale(0.985); }
 .discovery-cta i { font-size: 10px; }
 .discovery-footnote {
@@ -623,19 +644,25 @@
     font-family: 'Libre Caslon Text', serif;
     font-size: 12px;
     font-style: italic;
-    color: rgba(44, 74, 52, 0.58);
+    color: rgba(44, 74, 52, 0.56);
 }
 @media (max-height: 700px) {
     .discovery-shell { padding-top: 18px; padding-bottom: 18px; }
-    .discovery-brand { margin-bottom: 16px; }
+    .discovery-brand { margin-bottom: 14px; }
     .discovery-hero { margin-bottom: 14px; }
     .discovery-title { font-size: 32px; }
     .discovery-subtitle { margin-top: 8px; font-size: 11px; }
     .discovery-section-label { margin-bottom: 8px; }
-    #discovery-cards { gap: 7px; }
-    .discovery-card { min-height: 76px; padding: 10px 9px; gap: 6px; border-radius: 14px; }
-    .discovery-card-icon { width: 25px; height: 25px; font-size: 9px; }
+    #discovery-cards { gap: 8px; }
+    .discovery-card {
+        min-height: 84px;
+        padding: 12px 11px;
+        gap: 6px;
+        border-radius: 18px;
+    }
+    .discovery-card-icon { width: 28px; height: 28px; font-size: 10px; }
     .discovery-card-title { font-size: 13px; }
+    .discovery-arrow { width: 24px; height: 24px; font-size: 9px; }
     .discovery-cta { min-height: 48px; margin-top: 8px; border-radius: 14px; }
     .discovery-footnote { margin-top: 9px; font-size: 11px; }
 }
@@ -773,7 +800,8 @@
         </div>
     </div>
     <!-- Tela de Descoberta -->
-    <div id="discovery-overlay">
+    
+<div id="discovery-overlay">
         <div class="discovery-shell">
             <div class="discovery-brand">
                 <div class="discovery-brand-name owner-mode-trigger select-none" onpointerup="handleOwnerModeTap(event)" ondblclick="event.preventDefault()">Delícias da Vovó</div>
@@ -781,11 +809,11 @@
             </div>
 
             <section class="discovery-hero">
-                <h1 class="discovery-title">O que você está procurando hoje?</h1>
-                <p class="discovery-subtitle">Escolha uma categoria abaixo.</p>
+                <h1 class="discovery-title">O que você está procurando <em>hoje?</em></h1>
+                <p class="discovery-subtitle">Escolha uma categoria para começar ou entre direto no cardápio completo.</p>
             </section>
 
-            <p class="discovery-section-label">Cardápio</p>
+            <p class="discovery-section-label">Explore o cardápio</p>
             <div id="discovery-cards"></div>
 
             <button onclick="enterMenu()" class="discovery-cta" aria-label="Ver o cardápio completo">
@@ -796,17 +824,20 @@
             <p class="discovery-footnote">feito com carinho desde 2005</p>
         </div>
     </div>
-    <!-- Transição verde de tela cheia -->
+
+<!-- Transição verde de tela cheia -->
     <div id="discovery-sweep"></div>
 
-    <!-- Faixa de boas-vindas (verde-pinho) -->
-    <div id="welcome-banner" class="bg-[#2C4A34] text-[#F4F1EA] px-6 pt-1 pb-14 sm:pb-20 -mt-px">
-        <div class="max-w-7xl mx-auto">
-            <h2 class="serif-font text-xl sm:text-3xl leading-snug text-center">Conheça nosso cardápio<br class="sm:hidden"> e faça sua encomenda</h2>
+    
+<!-- Faixa de boas-vindas (verde-pinho) -->
+    <div id="welcome-banner" class="bg-[#2C4A34] text-[#F4F1EA] px-6 pt-2 pb-14 sm:pb-20 -mt-px">
+        <div class="max-w-7xl mx-auto text-center">
+            <p class="text-[10px] sm:text-[11px] uppercase tracking-[0.18em] text-[#C9A576] font-semibold mb-2">Delícias da Vovó</p>
+            <h2 class="serif-font text-[22px] sm:text-3xl leading-snug">Conheça nosso cardápio<br class="sm:hidden"> e faça sua encomenda</h2>
         </div>
     </div>
 
-    <!-- Conteúdo Principal (folha arredondada encaixando no cabeçalho) -->
+<!-- Conteúdo Principal (folha arredondada encaixando no cabeçalho) -->
     <div class="relative z-10 -mt-10 sm:-mt-14 bg-[#F4F1EA] rounded-t-[2rem] sm:rounded-t-[2.75rem] shadow-[0_-16px_44px_rgba(20,34,22,0.14)] min-h-screen">
         <div class="w-11 h-1.5 bg-[#8C8676]/30 rounded-full mx-auto mt-3.5 sm:mt-4"></div>
         <main id="menu-container" class="max-w-7xl mx-auto px-4 sm:px-6 pt-7 sm:pt-10 space-y-12 sm:space-y-24 pb-32 sm:pb-48">
@@ -3128,6 +3159,7 @@ flavors: ['Sonho de Valsa', 'Ouro branco', 'Ninho trufado', 'Pessêgo', 'Amendoi
                     <button type="button" class="discovery-card ${isLastOdd ? 'discovery-card-wide' : ''}" onclick="hideDiscovery('${groupNameAttr}')">
                         <span class="discovery-card-icon" aria-hidden="true"><i class="fas ${group.icon || 'fa-circle'}"></i></span>
                         <span class="discovery-card-title">${group.short || group.name}</span>
+                        <span class="discovery-arrow" aria-hidden="true"><i class="fas fa-arrow-right"></i></span>
                     </button>`;
             }).join('');
         }
