@@ -5271,7 +5271,7 @@ function getSharePriceLines(item) {
 
     if (item.isKit) {
         const kitTotal = getKitComputedTotal(item, 10);
-        lines.push('A partir de ' + formatMoney(kitTotal / 10) + ' / pessoa');
+        lines.push(formatMoney(kitTotal / 10) + '/pessoa');
         return lines;
     }
 
@@ -5279,6 +5279,7 @@ function getSharePriceLines(item) {
     const hasSizes = Array.isArray(item.sizes) && item.sizes.length > 0;
     const hasUn = Array.isArray(item.units) && item.units.includes('un');
     const hasKg = Array.isArray(item.units) && item.units.includes('kg');
+    const sizeSuffix = hasKg && !hasUn ? '/kg' : '/un';
 
     function getPriceParts(source) {
         const parts = [];
@@ -5291,7 +5292,7 @@ function getSharePriceLines(item) {
                 const value = typeof specificPrice === 'number' ? specificPrice : size.price;
 
                 if (typeof value === 'number') {
-                    parts.push(size.label + ' · ' + formatMoney(value));
+                    parts.push(size.label + ' · ' + formatMoney(value) + sizeSuffix);
                 }
             });
             return parts;
@@ -5313,14 +5314,16 @@ function getSharePriceLines(item) {
         }
 
         if (!hasUn && !hasKg && typeof unitPrice === 'number') {
-            parts.push(formatMoney(unitPrice));
+            const suffix = Array.isArray(item.units) && item.units.includes('pessoas')
+                ? '/pessoa'
+                : '';
+            parts.push(formatMoney(unitPrice) + suffix);
         }
 
         return parts;
     }
 
-    // Quando cada sabor/tipo possui preço próprio, agrupa somente as opções
-    // que realmente compartilham o mesmo conjunto de valores.
+    // Agrupa sabores/tipos que possuem exatamente o mesmo padrão de preço.
     if (flavors.length) {
         const groups = new Map();
         let hasSpecificFlavorPrice = false;
@@ -5354,8 +5357,8 @@ function getSharePriceLines(item) {
             groups.forEach(group => {
                 lines.push(
                     group.labels.join(' / ') +
-                    '  ·  ' +
-                    group.parts.join('  ·  ')
+                    ' · ' +
+                    group.parts.join(' · ')
                 );
             });
             return lines;
@@ -5373,18 +5376,12 @@ function getSharePriceLines(item) {
         return lines;
     }
 
-    if (hasKg && hasUn && typeof item.priceKg === 'number' && typeof item.price === 'number') {
-        lines.push('Preço por quilo  ·  ' + formatMoney(item.priceKg));
-        lines.push('Unidade estimada  ·  aprox. ' + formatMoney(item.price));
-        return lines;
+    if (hasKg && typeof item.priceKg === 'number') {
+        lines.push(formatMoney(item.priceKg) + '/kg');
     }
 
     if (hasUn && typeof item.price === 'number') {
-        lines.push('Unidade  ·  ' + formatMoney(item.price));
-    }
-
-    if (hasKg && typeof item.priceKg === 'number') {
-        lines.push('Quilo  ·  ' + formatMoney(item.priceKg));
+        lines.push((hasKg ? 'aprox. ' : '') + formatMoney(item.price) + '/un');
     }
 
     if (!lines.length && typeof item.price === 'number') {
@@ -5429,6 +5426,7 @@ function getShareItemStartingPrice(item) {
 
     const flavors = getFlavorList(item);
     const hasSizes = Array.isArray(item.sizes) && item.sizes.length > 0;
+    const hasUn = Array.isArray(item.units) && item.units.includes('un');
     const hasKg = Array.isArray(item.units) && item.units.includes('kg');
 
     if (hasSizes) {
@@ -5452,7 +5450,8 @@ function getShareItemStartingPrice(item) {
         if (prices.length) {
             const uniquePrices = [...new Set(prices.map(Number))];
             const prefix = uniquePrices.length > 1 ? 'a partir de ' : '';
-            return prefix + formatMoney(Math.min(...uniquePrices));
+            const suffix = hasKg && !hasUn ? '/kg' : '/un';
+            return prefix + formatMoney(Math.min(...uniquePrices)) + suffix;
         }
     }
 
@@ -5501,7 +5500,8 @@ function getShareItemStartingPrice(item) {
     if (unitPrices.length) {
         const uniquePrices = [...new Set(unitPrices.map(Number))];
         const prefix = uniquePrices.length > 1 ? 'a partir de ' : '';
-        return prefix + formatMoney(Math.min(...uniquePrices));
+        const suffix = hasUn ? '/un' : '';
+        return prefix + formatMoney(Math.min(...uniquePrices)) + suffix;
     }
 
     if (typeof item.priceKg === 'number') {
@@ -5530,11 +5530,56 @@ async function buildProductShareBlob(item) {
     const flavors = getShareFlavorLabels(item);
     const priceLines = getSharePriceLines(item);
     const primaryPrice = getShareItemStartingPrice(item);
-    const showPriceDetails = priceLines.length > 1;
     const weightText = getShareWeightText(item);
     const shortDescription = getShareShortDescription(item);
     const hasDetailColumn = flavors.length > 0;
     const hasEstimatedPriceNote = hasEstimatedUnitPrice(item);
+
+    // O valor grande não é repetido na lista inferior.
+    const priceDetailLines = [...priceLines];
+    const hasVariantSizePrices = getFlavorList(item).some(flavor => {
+        const variant = item.variants && item.variants[flavor.label]
+            ? item.variants[flavor.label]
+            : {};
+        return (
+            (flavor.sizePrices && Object.keys(flavor.sizePrices).length > 0) ||
+            (variant.sizePrices && Object.keys(variant.sizePrices).length > 0)
+        );
+    });
+    const isVariantStartingPrice = (
+        /^a partir de\s+/i.test(primaryPrice) &&
+        !!item.variants &&
+        (hasVariantSizePrices || !(item.sizes && item.sizes.length))
+    );
+
+    let primaryPriceLabel = /^a partir de\s+/i.test(primaryPrice)
+        ? 'A PARTIR DE'
+        : '';
+
+    if (item.sizes && item.sizes.length && !hasVariantSizePrices) {
+        const numericPrices = item.sizes
+            .map(size => Number(size.price))
+            .filter(Number.isFinite);
+        const minimum = numericPrices.length ? Math.min(...numericPrices) : null;
+        const primarySize = item.sizes.find(size => Number(size.price) === minimum);
+
+        if (primarySize) primaryPriceLabel = String(primarySize.label).toUpperCase();
+    }
+
+    if (!isVariantStartingPrice && primaryPrice) {
+        const primaryComparable = primaryPrice
+            .replace(/^a partir de\s+/i, '')
+            .replace(/\s+/g, '')
+            .toLowerCase();
+
+        const repeatedIndex = priceDetailLines.findIndex(line => {
+            return String(line).replace(/\s+/g, '').toLowerCase().includes(primaryComparable);
+        });
+
+        if (repeatedIndex >= 0) priceDetailLines.splice(repeatedIndex, 1);
+    }
+
+    const showPriceDetails = priceDetailLines.length > 0;
 
     // Estima a altura real do conteúdo para preservar todas as descrições,
     // variações, faixas de preço e opções sem cortar o card.
@@ -5545,7 +5590,7 @@ async function buildProductShareBlob(item) {
     const priceCharsPerLine = hasDetailColumn ? 29 : 58;
     const flavorCharsPerLine = 31;
 
-    const priceVisualLines = priceLines.reduce((total, line) => {
+    const priceVisualLines = priceDetailLines.reduce((total, line) => {
         return total + Math.max(1, Math.ceil(String(line).length / priceCharsPerLine));
     }, 0);
 
@@ -5560,8 +5605,8 @@ async function buildProductShareBlob(item) {
     const headerHeight = 136 + (titleRows * 60) + (descriptionRows * 33);
     const priceBlockHeight =
         42 +
-        (primaryPrice ? (/^a partir de\s+/i.test(primaryPrice) ? 88 : 64) : 0) +
-        (showPriceDetails ? 34 + (priceVisualLines * 32) + (priceLines.length * 8) : 0) +
+        (primaryPrice ? (primaryPriceLabel ? 88 : 64) : 0) +
+        (showPriceDetails ? 34 + (priceVisualLines * 32) + (priceDetailLines.length * 8) : 0) +
         (hasEstimatedPriceNote ? 58 : 0) +
         (weightText ? 62 + (weightVisualLines * 33) : 0);
     const flavorBlockHeight =
@@ -5590,25 +5635,25 @@ async function buildProductShareBlob(item) {
 
     const img = await loadShareProductImage(imageSrc);
 
-    // Fundo externo: suave e "desfocado visualmente", sem usar blur.
+    // Fundo externo com desfoque real; a ampliação evita bordas transparentes.
     ctx.fillStyle = '#DDD5C8';
     ctx.fillRect(0, 0, width, height);
 
     if (img && img.width && img.height) {
-        drawShareCoverImage(ctx, img, 0, 0, width, height);
+        ctx.save();
+        ctx.filter = 'blur(20px)';
+        drawShareCoverImage(ctx, img, -32, -32, width + 64, height + 64);
+        ctx.restore();
 
-        ctx.fillStyle = 'rgba(248,244,238,0.42)';
-        ctx.fillRect(0, 0, width, height);
-
-        ctx.fillStyle = 'rgba(255,255,255,0.10)';
+        // Véu leve: preserva as cores da foto sem deixá-la branca.
+        ctx.fillStyle = 'rgba(248,244,238,0.16)';
         ctx.fillRect(0, 0, width, height);
     }
 
     const photoVeil = ctx.createLinearGradient(0, 0, 0, height);
-    photoVeil.addColorStop(0, 'rgba(255,255,255,0.10)');
-    photoVeil.addColorStop(0.35, 'rgba(248,244,238,0.16)');
-    photoVeil.addColorStop(0.72, 'rgba(248,244,238,0.26)');
-    photoVeil.addColorStop(1, 'rgba(34,32,28,0.16)');
+    photoVeil.addColorStop(0, 'rgba(255,255,255,0.04)');
+    photoVeil.addColorStop(0.45, 'rgba(248,244,238,0.08)');
+    photoVeil.addColorStop(1, 'rgba(34,32,28,0.18)');
     ctx.fillStyle = photoVeil;
     ctx.fillRect(0, 0, width, height);
 
@@ -5616,7 +5661,7 @@ async function buildProductShareBlob(item) {
     const panelY = height - panelHeight - 48;
     const panelWidth = width - (panelX * 2);
 
-    // Moldura central com a foto inteira do produto.
+    // Moldura central preenchida por completo, mantendo a proporção da foto.
     const frameX = 110;
     const frameY = 70;
     const frameWidth = width - (frameX * 2);
@@ -5637,7 +5682,7 @@ async function buildProductShareBlob(item) {
     ctx.fillRect(innerX, innerY, innerWidth, innerHeight);
 
     if (img && img.width && img.height) {
-        drawShareContainImage(ctx, img, innerX, innerY, innerWidth, innerHeight);
+        drawShareCoverImage(ctx, img, innerX, innerY, innerWidth, innerHeight);
     }
 
     ctx.restore();
@@ -5716,13 +5761,12 @@ async function buildProductShareBlob(item) {
         // O preço principal continua grande e verde, preservando a hierarquia
         // visual aprovada. As demais opções aparecem logo abaixo.
         if (primaryPrice) {
-            const isStartingPrice = /^a partir de\s+/i.test(primaryPrice);
             const primaryValue = primaryPrice.replace(/^a partir de\s+/i, '');
 
-            if (isStartingPrice) {
+            if (primaryPriceLabel) {
                 ctx.fillStyle = '#B27845';
                 ctx.font = "700 17px 'DM Sans', sans-serif";
-                ctx.fillText('A PARTIR DE', startX, priceY);
+                ctx.fillText(primaryPriceLabel, startX, priceY);
                 priceY += 26;
             }
 
@@ -5741,7 +5785,7 @@ async function buildProductShareBlob(item) {
             ctx.fillStyle = '#3F3B35';
             ctx.font = "600 22px 'DM Sans', sans-serif";
 
-            priceLines.forEach(line => {
+            priceDetailLines.forEach(line => {
                 priceY = shareWrapText(ctx, line, startX, priceY, maxWidth, 32, Infinity);
                 priceY += 8;
             });
