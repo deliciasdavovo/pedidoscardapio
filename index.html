@@ -5560,7 +5560,7 @@ async function buildProductShareBlob(item) {
     const headerHeight = 136 + (titleRows * 60) + (descriptionRows * 33);
     const priceBlockHeight =
         42 +
-        (primaryPrice ? 72 : 0) +
+        (primaryPrice ? (/^a partir de\s+/i.test(primaryPrice) ? 88 : 64) : 0) +
         (showPriceDetails ? 34 + (priceVisualLines * 32) + (priceLines.length * 8) : 0) +
         (hasEstimatedPriceNote ? 58 : 0) +
         (weightText ? 62 + (weightVisualLines * 33) : 0);
@@ -5716,9 +5716,19 @@ async function buildProductShareBlob(item) {
         // O preço principal continua grande e verde, preservando a hierarquia
         // visual aprovada. As demais opções aparecem logo abaixo.
         if (primaryPrice) {
+            const isStartingPrice = /^a partir de\s+/i.test(primaryPrice);
+            const primaryValue = primaryPrice.replace(/^a partir de\s+/i, '');
+
+            if (isStartingPrice) {
+                ctx.fillStyle = '#B27845';
+                ctx.font = "700 17px 'DM Sans', sans-serif";
+                ctx.fillText('A PARTIR DE', startX, priceY);
+                priceY += 26;
+            }
+
             ctx.fillStyle = '#2C5437';
             ctx.font = "700 47px 'DM Sans', sans-serif";
-            priceY = shareWrapText(ctx, primaryPrice, startX, priceY, maxWidth, 52, 2);
+            priceY = shareWrapText(ctx, primaryValue, startX, priceY, maxWidth, 52, 2);
             priceY += 6;
         }
 
