@@ -5248,7 +5248,7 @@ async function buildProductShareBlob(item) {
     let y = imageHeight + 58;
 
     ctx.fillStyle = '#817D74';
-    ctx.font = "700 19px 'DM Sans', sans-serif";
+    ctx.font = "700 24px 'DM Sans', sans-serif";
     ctx.fillText(String(item.category || 'CARDÁPIO').toUpperCase(), left, y);
     y += 60;
 
@@ -5416,7 +5416,7 @@ async function buildCategoryShareBlob(categoryName) {
     let y = photoHeight + 58;
 
     ctx.fillStyle = '#817D74';
-    ctx.font = "700 19px 'DM Sans', sans-serif";
+    ctx.font = "700 22px 'DM Sans', sans-serif";
     ctx.fillText('DELÍCIAS DA VOVÓ', left, y);
     y += 58;
 
@@ -5427,7 +5427,7 @@ async function buildCategoryShareBlob(categoryName) {
 
     ctx.fillStyle = '#77736C';
     ctx.font = "400 33px 'DM Sans', sans-serif";
-    y = shareWrapText(ctx, 'Uma seleção especial do nosso cardápio, feita com carinho.', left, y, contentWidth, 39, 2);
+    y = shareWrapText(ctx, 'Uma seleção especial do nosso cardápio, feita com carinho.', left, y, contentWidth, 46, 2);
     y += 42;
 
     drawShareSectionLabel(ctx, 'Destaques da categoria', left, y);
@@ -5444,8 +5444,8 @@ async function buildCategoryShareBlob(categoryName) {
         const itemY = y + row * 145;
 
         ctx.fillStyle = '#22201C';
-        ctx.font = "600 27px 'DM Sans', sans-serif";
-        shareWrapText(ctx, item.name, x, itemY, colWidth, 40, 2);
+        ctx.font = "600 32px 'DM Sans', sans-serif";
+        shareWrapText(ctx, item.name, x, itemY, colWidth, 43, 2);
 
         const price = getShareItemStartingPrice(item);
         if (price) {
@@ -5463,7 +5463,7 @@ async function buildCategoryShareBlob(categoryName) {
     }
 
     ctx.fillStyle = 'rgba(44, 74, 52, 0.60)';
-    ctx.font = "700 17px 'DM Sans', sans-serif";
+    ctx.font = "700 20px 'DM Sans', sans-serif";
     ctx.textAlign = 'right';
     ctx.fillText('FEITO COM CARINHO DESDE 2005', right, height - 42);
     ctx.textAlign = 'left';
