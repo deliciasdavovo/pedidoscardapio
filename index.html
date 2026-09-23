@@ -6450,7 +6450,7 @@ async function buildProductShareBlob(item) {
     });
 }
 
-async function buildCategoryShareBlob(categoryName) {
+async function buildCategoryShareBlobs(categoryName) {
     if (document.fonts && document.fonts.ready) {
         try { await document.fonts.ready; } catch (_) {}
     }
@@ -6534,17 +6534,12 @@ async function buildCategoryShareBlob(categoryName) {
         panels.push({ entries, height });
     }
 
-    const height = Math.max(
-        1350,
-        topSpace +
-        panels.reduce((total, panel) => total + panel.height, 0) +
-        (Math.max(0, panels.length - 1) * panelGap) +
-        bottomSpace
-    );
-
+    // Cada parte vira uma imagem independente quando a categoria for longa.
+    // Assim o compartilhamento envia 2 páginas, em vez de uma imagem gigante.
+    const pagePanels = panels;
     const canvas = document.createElement('canvas');
     canvas.width = width;
-    canvas.height = height;
+    canvas.height = Math.max(1350, ...pagePanels.map(panel => panel.height));
     const ctx = canvas.getContext('2d');
 
     const availableBackgroundSources = [];
@@ -6576,9 +6571,6 @@ async function buildCategoryShareBlob(categoryName) {
         throw new Error('Não foi possível carregar uma foto para esta categoria.');
     }
 
-    // O fundo do cardápio é sempre uma fotografia real da categoria.
-    drawShareCoverImage(ctx, backgroundImage, 0, 0, width, height);
-
     // Textura granulada muito leve, semelhante a papel fotográfico.
     const grainCanvas = document.createElement('canvas');
     const grainSize = 144;
@@ -6596,12 +6588,6 @@ async function buildCategoryShareBlob(categoryName) {
     }
 
     grainCtx.putImageData(grainImage, 0, 0);
-    ctx.save();
-    ctx.globalAlpha = 0.28;
-    ctx.globalCompositeOperation = 'soft-light';
-    ctx.fillStyle = ctx.createPattern(grainCanvas, 'repeat');
-    ctx.fillRect(0, 0, width, height);
-    ctx.restore();
 
     function fitMenuNameFont(text, maxWidth, preferredSize = 34, minSize = 25) {
         const original = String(text || '');
@@ -6712,37 +6698,49 @@ async function buildCategoryShareBlob(categoryName) {
         ctx.textAlign = 'left';
     }
 
-    // Faixa branca única, reta e contínua, de cima a baixo.
-    ctx.fillStyle = '#FBF8F2';
-    ctx.fillRect(panelX, 0, panelWidth, height);
+    const blobs = [];
 
-    let panelY = 0;
-    panels.forEach((panel, panelIndex) => {
-        drawPanelHeading(
-            categoryName,
-            panelY,
-            panelIndex
-        );
+    for (let pageIndex = 0; pageIndex < pagePanels.length; pageIndex += 1) {
+        const panel = pagePanels[pageIndex];
+        const pageHeight = Math.max(1350, panel.height);
+        canvas.height = pageHeight;
 
-        let itemY = panelY + 150;
+        drawShareCoverImage(ctx, backgroundImage, 0, 0, width, pageHeight);
+
+        ctx.save();
+        ctx.globalAlpha = 0.28;
+        ctx.globalCompositeOperation = 'soft-light';
+        ctx.fillStyle = ctx.createPattern(grainCanvas, 'repeat');
+        ctx.fillRect(0, 0, width, pageHeight);
+        ctx.restore();
+
+        // Faixa branca única, reta e contínua, de cima a baixo.
+        ctx.fillStyle = '#FBF8F2';
+        ctx.fillRect(panelX, 0, panelWidth, pageHeight);
+
+        drawPanelHeading(categoryName, 0, pageIndex);
+
+        let itemY = 150;
         panel.entries.forEach(entry => {
             drawCategoryMenuItem(entry, itemY);
             itemY += entry.height;
         });
 
-        panelY += panel.height;
-    });
+        const blob = await new Promise((resolve, reject) => {
+            try {
+                canvas.toBlob(result => {
+                    if (result) resolve(result);
+                    else reject(new Error('Não foi possível gerar a imagem.'));
+                }, 'image/png', 0.95);
+            } catch (error) {
+                reject(error);
+            }
+        });
 
-    return new Promise((resolve, reject) => {
-        try {
-            canvas.toBlob(blob => {
-                if (blob) resolve(blob);
-                else reject(new Error('Não foi possível gerar a imagem.'));
-            }, 'image/png', 0.95);
-        } catch (error) {
-            reject(error);
-        }
-    });
+        blobs.push(blob);
+    }
+
+    return blobs;
 }
 
 function isMobileShareDevice() {
@@ -6790,21 +6788,35 @@ async function shareCategoryImage(categoryName) {
     showValidationPopup(isMobileShareDevice() ? 'Preparando cardápio para compartilhar…' : 'Preparando cardápio para download…');
 
     try {
-        const blob = await buildCategoryShareBlob(categoryName);
-        const fileName = makeShareFileName('Cardápio - ' + categoryName, 'Cardápio');
-        const file = new File([blob], fileName, {
-            type: 'image/png'
-        });
+        const blobs = await buildCategoryShareBlobs(categoryName);
+        const files = blobs.map((blob, index) => new File(
+            [blob],
+            makeShareFileName(
+                'Cardápio - ' + categoryName + (blobs.length > 1 ? ' - ' + (index + 1) : ''),
+                'Cardápio'
+            ),
+            { type: 'image/png' }
+        ));
 
         if (!isMobileShareDevice()) {
-            downloadGeneratedShareFile(blob, file.name, 'Cardápio baixado.');
+            blobs.forEach((blob, index) => {
+                setTimeout(() => {
+                    downloadGeneratedShareFile(
+                        blob,
+                        files[index].name,
+                        blobs.length > 1
+                            ? 'Parte ' + (index + 1) + ' do cardápio baixada.'
+                            : 'Cardápio baixado.'
+                    );
+                }, index * 250);
+            });
             return;
         }
 
-        if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
+        if (navigator.share && navigator.canShare && navigator.canShare({ files })) {
             try {
                 await navigator.share({
-                    files: [file],
+                    files,
                     title: categoryName
                 });
                 return;
@@ -6813,7 +6825,9 @@ async function shareCategoryImage(categoryName) {
             }
         }
 
-        downloadGeneratedShareFile(blob, file.name, 'Cardápio pronto.');
+        blobs.forEach((blob, index) => {
+            downloadGeneratedShareFile(blob, files[index].name, 'Cardápio pronto.');
+        });
     } catch (error) {
         console.error(error);
         showValidationPopup('Não foi possível gerar a imagem desta categoria.');
