@@ -6213,8 +6213,8 @@ async function buildProductShareBlob(item) {
     // Descrição novamente visível e próxima ao nome.
     if (shortDescription) {
         ctx.fillStyle = '#6F6B63';
-        ctx.font = "400 29px 'DM Sans', sans-serif";
-        y = shareWrapText(ctx, shortDescription, left, y, contentWidth, 39, 5);
+        ctx.font = "400 32px 'DM Sans', sans-serif";
+        y = shareWrapText(ctx, shortDescription, left, y, contentWidth, 43, 5);
         y += 12;
     } else {
         y += 10;
@@ -6297,8 +6297,8 @@ async function buildProductShareBlob(item) {
 
                     if (parts.description) {
                         ctx.fillStyle = '#766F65';
-                        ctx.font = "400 18px 'DM Sans', sans-serif";
-                        colY = shareWrapText(ctx, parts.description, colX, colY + 5, colWidth, 25, 3);
+                        ctx.font = "400 21px 'DM Sans', sans-serif";
+                        colY = shareWrapText(ctx, parts.description, colX, colY + 5, colWidth, 29, 3);
                     }
 
                     maxBottom = Math.max(maxBottom, colY);
@@ -6338,7 +6338,7 @@ async function buildProductShareBlob(item) {
 
                     if (parts.description) {
                         ctx.fillStyle = '#766F65';
-                        ctx.font = "400 22px 'DM Sans', sans-serif";
+                        ctx.font = "400 25px 'DM Sans', sans-serif";
                         priceY = shareWrapText(
                             ctx,
                             parts.description,
@@ -6366,8 +6366,8 @@ async function buildProductShareBlob(item) {
             priceY += 46;
 
             ctx.fillStyle = '#6F6B63';
-            ctx.font = "400 28px 'DM Sans', sans-serif";
-            shareWrapText(ctx, displayWeightText, startX, priceY, maxWidth, 38, Infinity);
+            ctx.font = "400 31px 'DM Sans', sans-serif";
+            shareWrapText(ctx, displayWeightText, startX, priceY, maxWidth, 42, Infinity);
         }
     }
 
@@ -6396,7 +6396,7 @@ async function buildProductShareBlob(item) {
         drawShareSectionLabel(ctx, 'Sabores / Recheios', rightX, flavorY);
         flavorY += 50;
 
-        ctx.font = "400 28px 'DM Sans', sans-serif";
+        ctx.font = "400 31px 'DM Sans', sans-serif";
 
         flavors.forEach(flavor => {
             ctx.fillStyle = '#2C4A34';
@@ -6411,7 +6411,7 @@ async function buildProductShareBlob(item) {
                 rightX + 24,
                 flavorY,
                 rightColWidth - 24,
-                38,
+                42,
                 Infinity
             );
             flavorY += 12;
