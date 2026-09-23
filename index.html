@@ -6443,9 +6443,9 @@ async function buildCategoryShareBlob(categoryName) {
     const panelWidth = width - (panelX * 2);
     const panelPadding = 50;
     const contentWidth = panelWidth - (panelPadding * 2);
-    const panelGap = 34;
-    const topSpace = 54;
-    const bottomSpace = 54;
+    const panelGap = 0;
+    const topSpace = 0;
+    const bottomSpace = 0;
 
     function getCategoryMenuEntry(item) {
         let price = getShareItemStartingPrice(item);
@@ -6474,7 +6474,7 @@ async function buildCategoryShareBlob(categoryName) {
         }
 
         const detailRows = detail
-            ? Math.min(3, Math.max(1, Math.ceil(detail.length / 42)))
+            ? Math.min(4, Math.max(1, Math.ceil(detail.length / 36)))
             : 0;
         const estimatedRows = estimated
             ? Math.min(2, Math.max(1, Math.ceil(estimated.length / 44)))
@@ -6482,7 +6482,7 @@ async function buildCategoryShareBlob(categoryName) {
         const height =
             56 +
             (estimatedRows * 30) +
-            (detailRows * 29) +
+            (detailRows * 34) +
             (detailRows ? 7 : 0) +
             18;
 
@@ -6579,15 +6579,15 @@ async function buildCategoryShareBlob(categoryName) {
     ctx.fillRect(0, 0, width, height);
     ctx.restore();
 
-    function fitMenuText(text, maxWidth) {
+    function fitMenuNameFont(text, maxWidth, preferredSize = 34, minSize = 25) {
         const original = String(text || '');
-        if (ctx.measureText(original).width <= maxWidth) return original;
-
-        let fitted = original;
-        while (fitted.length > 1 && ctx.measureText(fitted + '…').width > maxWidth) {
-            fitted = fitted.slice(0, -1);
-        }
-        return fitted.trimEnd() + '…';
+        let size = preferredSize;
+        do {
+            ctx.font = "600 " + size + "px 'DM Sans', sans-serif";
+            if (ctx.measureText(original).width <= maxWidth || size <= minSize) break;
+            size -= 1;
+        } while (size > minSize);
+        return size;
     }
 
     function drawPanelHeading(title, panelY, panelIndex) {
@@ -6596,7 +6596,7 @@ async function buildCategoryShareBlob(categoryName) {
 
         ctx.textAlign = 'center';
         do {
-            ctx.font = "400 " + fontSize + "px 'Lora', serif";
+            ctx.font = "700 " + fontSize + "px 'Lora', serif";
             if (ctx.measureText(title).width <= contentWidth - 82 || fontSize <= 44) break;
             fontSize -= 2;
         } while (fontSize > 44);
@@ -6606,9 +6606,9 @@ async function buildCategoryShareBlob(categoryName) {
         const lineEnd = Math.max(panelX + 68, centerX - (titleWidth / 2) - 24);
 
         ctx.strokeStyle = color;
-        ctx.lineWidth = 4;
+        ctx.lineWidth = 7;
         ctx.beginPath();
-        ctx.moveTo(panelX + 28, panelY + 86);
+        ctx.moveTo(panelX - 62, panelY + 86);
         ctx.lineTo(lineEnd, panelY + 86);
         ctx.stroke();
 
@@ -6624,14 +6624,14 @@ async function buildCategoryShareBlob(categoryName) {
 
         ctx.font = "500 32px 'DM Sans', sans-serif";
         const priceWidth = ctx.measureText(entry.price).width;
-        ctx.font = "400 34px 'DM Sans', sans-serif";
         const nameMaxWidth = Math.max(190, contentWidth - priceWidth - 58);
-        const fittedName = fitMenuText(entry.name, nameMaxWidth);
-        const nameWidth = ctx.measureText(fittedName).width;
+        const nameFontSize = fitMenuNameFont(entry.name, nameMaxWidth, 34, 25);
+        ctx.font = "600 " + nameFontSize + "px 'DM Sans', sans-serif";
+        const nameWidth = ctx.measureText(entry.name).width;
 
         ctx.fillStyle = '#2B2925';
         ctx.textAlign = 'left';
-        ctx.fillText(fittedName, left, baseline);
+        ctx.fillText(entry.name, left, baseline);
 
         ctx.fillStyle = '#2B2925';
         ctx.textAlign = 'right';
@@ -6659,53 +6659,41 @@ async function buildCategoryShareBlob(categoryName) {
 
         if (entry.estimated) {
             ctx.fillStyle = '#8A857C';
-            ctx.font = "400 23px 'DM Sans', sans-serif";
+            ctx.font = "400 26px 'DM Sans', sans-serif";
             detailY = shareWrapText(
                 ctx,
                 entry.estimated,
                 width / 2,
                 detailY,
                 contentWidth,
-                30,
+                34,
                 2
             );
         }
 
         if (entry.detail) {
             ctx.fillStyle = '#A46E3F';
-            ctx.font = "400 22px 'DM Sans', sans-serif";
+            ctx.font = "500 27px 'DM Sans', sans-serif";
             detailY = shareWrapText(
                 ctx,
                 entry.detail,
                 width / 2,
                 detailY + 1,
                 contentWidth,
-                29,
-                3
+                34,
+                4
             );
         }
 
         ctx.textAlign = 'left';
     }
 
-    let panelY = topSpace;
+    // Faixa branca única, reta e contínua, de cima a baixo.
+    ctx.fillStyle = '#FBF8F2';
+    ctx.fillRect(panelX, 0, panelWidth, height);
 
+    let panelY = 0;
     panels.forEach((panel, panelIndex) => {
-        ctx.save();
-        ctx.shadowColor = 'rgba(30,26,22,0.28)';
-        ctx.shadowBlur = 28;
-        ctx.shadowOffsetY = 12;
-        drawShareRoundedRect(
-            ctx,
-            panelX,
-            panelY,
-            panelWidth,
-            panel.height,
-            0,
-            '#FBF8F2'
-        );
-        ctx.restore();
-
         drawPanelHeading(
             panelIndex === 0 ? categoryName : 'Mais opções',
             panelY,
@@ -6718,7 +6706,7 @@ async function buildCategoryShareBlob(categoryName) {
             itemY += entry.height;
         });
 
-        panelY += panel.height + panelGap;
+        panelY += panel.height;
     });
 
     return new Promise((resolve, reject) => {
