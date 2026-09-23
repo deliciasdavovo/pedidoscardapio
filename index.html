@@ -1106,17 +1106,18 @@
         const PRONTA_ENTREGA_MSG = 'Pedidos para hoje (pronta entrega): ligue (11) 4013-5248.';
         
         const MACRO_GROUPS = [
-            { name: 'Coffees Sugeridos & Cestas', short: 'Coffees & Cestas', icon: 'fa-mug-hot', subtitle: 'Kits prontos para grupos e cestas especiais', categories: ['Coffee Breaks', 'Cestas de café da manhã', 'Bebidas'] },
             { name: 'Salgados & Lanches', short: 'Salgados & Lanches', icon: 'fa-bread-slice', subtitle: 'Petiscos, lanches e salgadinhos', categories: ['Pão de bolinha', 'Mini salgados', 'Salgados assados', 'Lanches frios', 'Tortas & Quiches'] },
             { name: 'Bolos & Doces', short: 'Bolos & Doces', icon: 'fa-cake-candles', subtitle: 'Bolos, doces e quitutes', categories: ['Bolos caseiros', 'Doces panificação', 'Bolachas & biscoitos', 'Bolos gelados', 'Docinhos festa'] },
             { name: 'Sobremesas', short: 'Sobremesas', icon: 'fa-spoon', subtitle: 'Para se mimar com algo especial', categories: ['Mini sobremesas', 'Sobremesas unitárias', 'Tortas doces', 'Sobremesas clássicas'] },
             { name: 'Especiais', short: 'Especiais', icon: 'fa-star', subtitle: 'Edições limitadas e sazonais', categories: ['Especiais de Natal'] },
+            { name: 'Coffees Sugeridos & Cestas', short: 'Coffees & Cestas', icon: 'fa-mug-hot', subtitle: 'Kits prontos para grupos e cestas especiais', categories: ['Coffee Breaks', 'Cestas de café da manhã', 'Bebidas'] },
         ];
 
         const CATEGORIES = [
-            'Pão de bolinha', 'Coffee Breaks', 'Bolos caseiros', 'Lanches frios', 'Mini salgados', 'Tortas & Quiches', 'Doces panificação',
-            
-            'Bebidas',  'Bolachas & biscoitos','Mini sobremesas','Sobremesas unitárias',  'Bolos gelados','Tortas doces','Sobremesas', 'Sobremesas clássicas', 'Docinhos festa', 'Salgados assados','Cestas de café da manhã','Especiais de Natal'
+            'Pão de bolinha', 'Bolos caseiros', 'Lanches frios', 'Mini salgados', 'Tortas & Quiches', 'Doces panificação',
+            'Bolachas & biscoitos', 'Mini sobremesas', 'Sobremesas unitárias', 'Bolos gelados', 'Tortas doces',
+            'Sobremesas', 'Sobremesas clássicas', 'Docinhos festa', 'Salgados assados', 'Especiais de Natal',
+            'Coffee Breaks', 'Cestas de café da manhã', 'Bebidas'
         ];
         
         const MENU_ITEMS = [
@@ -6156,124 +6157,280 @@ async function buildCategoryShareBlob(categoryName) {
     if (!items.length) throw new Error('Categoria sem produtos.');
 
     const width = 1080;
-    const side = 72;
-    const topBlock = 340;
-    const footerSpace = 110;
-    const colGap = 76;
-    const colWidth = (width - (side * 2) - colGap) / 2;
+    const panelX = 82;
+    const panelWidth = width - (panelX * 2);
+    const panelPadding = 64;
+    const contentWidth = panelWidth - (panelPadding * 2);
+    const panelGap = 34;
+    const topSpace = 142;
+    const bottomSpace = 78;
 
-    // Mais altura por item evita que nome, preço e peso se encostem.
-    const rowHeight = 154;
-    const rows = Math.ceil(items.length / 2);
-    const height = Math.max(1350, topBlock + (rows * rowHeight) + footerSpace + 72);
+    function getCategoryMenuEntry(item) {
+        let price = getShareItemStartingPrice(item);
+        let estimated = '';
+
+        if (hasEstimatedUnitPrice(item)) {
+            price = getKgPriceText(item);
+            const estimatedWeight = getShareEstimatedUnitWeightText(item);
+            estimated =
+                'aprox. R$ ' +
+                item.price.toFixed(2).replace('.', ',') +
+                '/un' +
+                (estimatedWeight ? ' · ' + estimatedWeight : '');
+        }
+
+        const flavorLabels = getShareFlavorLabels(item);
+        let detail = flavorLabels.length
+            ? flavorLabels.join(' · ')
+            : getShareShortDescription(item);
+
+        if (
+            String(detail || '').trim().toLowerCase() ===
+            String(item.name || '').trim().toLowerCase()
+        ) {
+            detail = '';
+        }
+
+        const detailRows = detail
+            ? Math.min(3, Math.max(1, Math.ceil(detail.length / 58)))
+            : 0;
+        const estimatedRows = estimated
+            ? Math.min(2, Math.max(1, Math.ceil(estimated.length / 58)))
+            : 0;
+        const height =
+            44 +
+            (estimatedRows * 27) +
+            (detailRows * 28) +
+            (detailRows ? 6 : 0) +
+            16;
+
+        return {
+            item,
+            name: String(item.name || ''),
+            price: String(price || 'Consulte'),
+            estimated,
+            detail,
+            detailRows,
+            estimatedRows,
+            height
+        };
+    }
+
+    const menuEntries = items.map(getCategoryMenuEntry);
+    const maxItemsPerPanel = 7;
+    const panelCount = Math.ceil(menuEntries.length / maxItemsPerPanel);
+    const balancedPanelSize = Math.ceil(menuEntries.length / panelCount);
+    const panels = [];
+
+    for (let index = 0; index < menuEntries.length; index += balancedPanelSize) {
+        const entries = menuEntries.slice(index, index + balancedPanelSize);
+        const height = 132 + entries.reduce((total, entry) => total + entry.height, 0) + 38;
+        panels.push({ entries, height });
+    }
+
+    const height = Math.max(
+        1350,
+        topSpace +
+        panels.reduce((total, panel) => total + panel.height, 0) +
+        (Math.max(0, panels.length - 1) * panelGap) +
+        bottomSpace
+    );
 
     const canvas = document.createElement('canvas');
     canvas.width = width;
     canvas.height = height;
     const ctx = canvas.getContext('2d');
 
-    ctx.fillStyle = '#F5F0E7';
+    ctx.fillStyle = '#B9AA94';
     ctx.fillRect(0, 0, width, height);
 
-    // Assinatura discreta no topo
-    ctx.fillStyle = '#2C4A34';
-    ctx.fillRect(0, 0, width, 16);
+    const backgroundItem =
+        items.find(item => {
+            const source = (item.images && item.images.length)
+                ? item.images[0]
+                : item.image;
+            return source && !/^https?:/i.test(source);
+        }) ||
+        items.find(item => (item.images && item.images.length) || item.image);
+    const backgroundSource = backgroundItem
+        ? ((backgroundItem.images && backgroundItem.images.length)
+            ? backgroundItem.images[0]
+            : backgroundItem.image)
+        : '';
+    const backgroundImage = await loadShareProductImage(backgroundSource);
 
-    let y = 84;
+    if (backgroundImage && backgroundImage.width && backgroundImage.height) {
+        const dominantColor = drawShareBlurredBackground(ctx, backgroundImage, width, height);
 
-    ctx.fillStyle = '#817D74';
-    ctx.font = "700 21px 'DM Sans', sans-serif";
-    ctx.fillText('DELÍCIAS DA VOVÓ', side, y);
+        if (dominantColor) {
+            ctx.fillStyle =
+                'rgba(' +
+                dominantColor.red + ',' +
+                dominantColor.green + ',' +
+                dominantColor.blue + ',0.52)';
+            ctx.fillRect(0, 0, width, height);
+        }
+    }
 
-    y += 68;
-    ctx.fillStyle = '#22201C';
-    ctx.font = "400 80px 'Lora', serif";
-    y = shareWrapText(ctx, categoryName, side, y, width - (side * 2), 86, 2);
+    const backgroundVeil = ctx.createLinearGradient(0, 0, 0, height);
+    backgroundVeil.addColorStop(0, 'rgba(25,24,22,0.24)');
+    backgroundVeil.addColorStop(0.22, 'rgba(248,244,238,0.04)');
+    backgroundVeil.addColorStop(1, 'rgba(25,24,22,0.18)');
+    ctx.fillStyle = backgroundVeil;
+    ctx.fillRect(0, 0, width, height);
 
-    y += 24;
-    ctx.fillStyle = '#77736C';
-    ctx.font = "500 27px 'DM Sans', sans-serif";
-    ctx.fillText('CARDÁPIO · ESCOLHA SEU FAVORITO', side, y);
+    ctx.save();
+    ctx.textAlign = 'center';
+    ctx.shadowColor = 'rgba(20,18,15,0.38)';
+    ctx.shadowBlur = 16;
+    ctx.shadowOffsetY = 3;
+    ctx.fillStyle = 'rgba(255,255,255,0.96)';
+    ctx.font = "500 25px 'DM Sans', sans-serif";
+    ctx.fillText('DELÍCIAS DA VOVÓ', width / 2, 66);
+    ctx.font = "400 18px 'DM Sans', sans-serif";
+    ctx.fillText('CARDÁPIO PARA ENCOMENDAS', width / 2, 98);
+    ctx.restore();
 
-    const listTop = Math.max(topBlock, y + 62);
-    const leftX = side + 28;
-    const rightX = side + colWidth + colGap + 28;
-    const dividerX = side + colWidth + (colGap / 2);
-    const itemsPerColumn = Math.ceil(items.length / 2);
+    function fitMenuText(text, maxWidth) {
+        const original = String(text || '');
+        if (ctx.measureText(original).width <= maxWidth) return original;
 
-    // Folha de menu arredondada — mantém o compartilhamento de categoria
-    // claramente com cara de cardápio, não de card de produto.
-    const menuX = 42;
-    const menuTop = listTop - 34;
-    const menuBottom = height - 30;
-    drawShareRoundedRect(
-        ctx,
-        menuX,
-        menuTop,
-        width - (menuX * 2),
-        menuBottom - menuTop,
-        34,
-        '#FBF8F2',
-        'rgba(44, 74, 52, 0.10)'
-    );
+        let fitted = original;
+        while (fitted.length > 1 && ctx.measureText(fitted + '…').width > maxWidth) {
+            fitted = fitted.slice(0, -1);
+        }
+        return fitted.trimEnd() + '…';
+    }
 
-    ctx.strokeStyle = 'rgba(44, 74, 52, 0.12)';
-    ctx.lineWidth = 2;
-    ctx.beginPath();
-    ctx.moveTo(dividerX, listTop - 8);
-    ctx.lineTo(dividerX, height - 70);
-    ctx.stroke();
+    function drawPanelHeading(title, panelY, panelIndex) {
+        const color = panelIndex % 2 === 0 ? '#2C4A34' : '#B27845';
+        let fontSize = 54;
 
-    function drawMenuItem(item, x, itemY) {
-        const price = getShareItemStartingPrice(item);
-        const weight = getShareWeightText(item);
+        ctx.textAlign = 'center';
+        do {
+            ctx.font = "italic 400 " + fontSize + "px 'Lora', serif";
+            if (ctx.measureText(title).width <= contentWidth - 220 || fontSize <= 38) break;
+            fontSize -= 2;
+        } while (fontSize > 38);
 
-        ctx.fillStyle = '#22201C';
-        ctx.font = "400 31px 'Lora', serif";
-        const nameBottom = shareWrapText(ctx, item.name, x, itemY, colWidth - 68, 38, 2);
+        const centerX = width / 2;
+        const titleWidth = ctx.measureText(title).width;
+        const lineEnd = Math.max(panelX + 112, centerX - (titleWidth / 2) - 34);
 
-        if (price) {
-            ctx.fillStyle = '#2C4A34';
-            ctx.font = "700 25px 'DM Sans', sans-serif";
-            ctx.fillText(price, x, nameBottom + 10);
+        ctx.strokeStyle = color;
+        ctx.lineWidth = 4;
+        ctx.beginPath();
+        ctx.moveTo(panelX + 46, panelY + 77);
+        ctx.lineTo(lineEnd, panelY + 77);
+        ctx.stroke();
+
+        ctx.fillStyle = color;
+        ctx.fillText(title, centerX + 44, panelY + 91);
+        ctx.textAlign = 'left';
+    }
+
+    function drawCategoryMenuItem(entry, itemY) {
+        const left = panelX + panelPadding;
+        const right = panelX + panelWidth - panelPadding;
+        const baseline = itemY + 27;
+
+        ctx.font = "400 28px 'DM Sans', sans-serif";
+        const priceWidth = ctx.measureText(entry.price).width;
+        const nameMaxWidth = Math.max(220, contentWidth - priceWidth - 78);
+        const fittedName = fitMenuText(entry.name, nameMaxWidth);
+        const nameWidth = ctx.measureText(fittedName).width;
+
+        ctx.fillStyle = '#2B2925';
+        ctx.textAlign = 'left';
+        ctx.fillText(fittedName, left, baseline);
+
+        ctx.fillStyle = '#2B2925';
+        ctx.textAlign = 'right';
+        ctx.font = "500 26px 'DM Sans', sans-serif";
+        ctx.fillText(entry.price, right, baseline);
+
+        const priceStart = right - ctx.measureText(entry.price).width;
+        const leaderStart = left + nameWidth + 16;
+        const leaderEnd = priceStart - 16;
+
+        if (leaderEnd > leaderStart) {
+            ctx.save();
+            ctx.strokeStyle = 'rgba(95,91,85,0.66)';
+            ctx.lineWidth = 2;
+            ctx.setLineDash([3, 7]);
+            ctx.beginPath();
+            ctx.moveTo(leaderStart, baseline - 7);
+            ctx.lineTo(leaderEnd, baseline - 7);
+            ctx.stroke();
+            ctx.restore();
         }
 
-        if (weight) {
+        let detailY = baseline + 29;
+        ctx.textAlign = 'center';
+
+        if (entry.estimated) {
             ctx.fillStyle = '#8A857C';
-            ctx.font = "500 19px 'DM Sans', sans-serif";
-            shareWrapText(
+            ctx.font = "400 21px 'DM Sans', sans-serif";
+            detailY = shareWrapText(
                 ctx,
-                'aprox. ' + weight.replace(/\s+por unidade$/i, ''),
-                x,
-                nameBottom + 43,
-                colWidth - 68,
+                entry.estimated,
+                width / 2,
+                detailY,
+                contentWidth,
                 27,
                 2
             );
         }
 
-        ctx.strokeStyle = 'rgba(44, 74, 52, 0.07)';
-        ctx.lineWidth = 1;
-        ctx.beginPath();
-        ctx.moveTo(x, itemY + rowHeight - 22);
-        ctx.lineTo(x + colWidth - 70, itemY + rowHeight - 22);
-        ctx.stroke();
+        if (entry.detail) {
+            ctx.fillStyle = '#A46E3F';
+            ctx.font = "500 21px 'DM Sans', sans-serif";
+            detailY = shareWrapText(
+                ctx,
+                entry.detail,
+                width / 2,
+                detailY + 1,
+                contentWidth,
+                28,
+                3
+            );
+        }
+
+        ctx.textAlign = 'left';
     }
 
-    items.forEach((item, index) => {
-        const inLeft = index < itemsPerColumn;
-        const localIndex = inLeft ? index : index - itemsPerColumn;
-        const x = inLeft ? leftX : rightX;
-        const itemY = listTop + (localIndex * rowHeight);
-        drawMenuItem(item, x, itemY);
-    });
+    let panelY = topSpace;
 
-    // Contagem discreta, sem assinatura/linha de rodapé.
-    ctx.fillStyle = 'rgba(44, 74, 52, 0.50)';
-    ctx.font = "700 17px 'DM Sans', sans-serif";
-    ctx.textAlign = 'right';
-    ctx.fillText(items.length + (items.length === 1 ? ' OPÇÃO' : ' OPÇÕES'), width - side, height - 44);
-    ctx.textAlign = 'left';
+    panels.forEach((panel, panelIndex) => {
+        ctx.save();
+        ctx.shadowColor = 'rgba(30,26,22,0.28)';
+        ctx.shadowBlur = 28;
+        ctx.shadowOffsetY = 12;
+        drawShareRoundedRect(
+            ctx,
+            panelX,
+            panelY,
+            panelWidth,
+            panel.height,
+            22,
+            'rgba(251,248,242,0.95)'
+        );
+        ctx.restore();
+
+        drawPanelHeading(
+            panelIndex === 0 ? categoryName : 'Mais opções',
+            panelY,
+            panelIndex
+        );
+
+        let itemY = panelY + 126;
+        panel.entries.forEach(entry => {
+            drawCategoryMenuItem(entry, itemY);
+            itemY += entry.height;
+        });
+
+        panelY += panel.height + panelGap;
+    });
 
     return new Promise((resolve, reject) => {
         try {
