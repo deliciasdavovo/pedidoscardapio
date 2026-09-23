@@ -5868,43 +5868,23 @@ async function buildProductShareBlob(item) {
 
     const img = await loadShareProductImage(imageSrc);
 
-    // Fundo externo: a própria foto ampliada e realmente desfocada.
+    // Fundo externo: somente a própria foto ampliada e desfocada.
     ctx.fillStyle = '#DDD5C8';
     ctx.fillRect(0, 0, width, height);
 
     if (img && img.width && img.height) {
-        const dominantColor = drawShareBlurredBackground(ctx, img, width, height);
-
-        // Mantém a paleta da foto e evita que o fundo dispute com o conteúdo.
-        if (dominantColor) {
-            ctx.fillStyle =
-                'rgba(' +
-                dominantColor.red + ',' +
-                dominantColor.green + ',' +
-                dominantColor.blue + ',0.70)';
-            ctx.fillRect(0, 0, width, height);
-        }
-
-        ctx.fillStyle = 'rgba(248,244,238,0.06)';
-        ctx.fillRect(0, 0, width, height);
+        drawShareBlurredBackground(ctx, img, width, height);
     }
-
-    const photoVeil = ctx.createLinearGradient(0, 0, 0, height);
-    photoVeil.addColorStop(0, 'rgba(255,255,255,0.02)');
-    photoVeil.addColorStop(0.55, 'rgba(248,244,238,0.04)');
-    photoVeil.addColorStop(1, 'rgba(34,32,28,0.10)');
-    ctx.fillStyle = photoVeil;
-    ctx.fillRect(0, 0, width, height);
 
     const panelX = 70;
     const panelY = height - panelHeight - 48;
     const panelWidth = width - (panelX * 2);
 
-    // Foto maior, com margens menores e mais presença vertical.
-    const frameX = 44;
+    // Moldura e card compartilham o mesmo alinhamento e formam uma peça única.
+    const frameX = panelX;
     const frameY = 34;
-    const frameWidth = width - (frameX * 2);
-    const frameBottom = panelY + 128;
+    const frameWidth = panelWidth;
+    const frameBottom = panelY + 112;
     const frameHeight = Math.max(650, frameBottom - frameY);
 
     const innerInset = 16;
