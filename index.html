@@ -6524,7 +6524,17 @@ async function buildCategoryShareBlobs(categoryName) {
     const totalContentHeight =
         154 + menuEntries.reduce((total, entry) => total + entry.height, 0) + 42;
     const maxSharePageHeight = 1900;
-    const pageCount = totalContentHeight > maxSharePageHeight ? 2 : 1;
+    // Categorias com muitos itens devem virar duas imagens reais, mesmo quando
+    // o cálculo de altura ainda caberia tecnicamente em uma única imagem.
+    const maxItemsPerShareImage = 7;
+    const pageCount = Math.min(
+        2,
+        Math.max(
+            1,
+            Math.ceil(menuEntries.length / maxItemsPerShareImage),
+            totalContentHeight > maxSharePageHeight ? 2 : 1
+        )
+    );
     const balancedPanelSize = Math.ceil(menuEntries.length / pageCount);
     const panels = [];
 
