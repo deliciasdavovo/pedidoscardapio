@@ -378,19 +378,19 @@
             width: 100%;
             max-width: 100%;
             box-sizing: border-box;
-            font-size: 13px;
+            font-size: 16px;
             padding-left: 12px;
             padding-right: 10px;
         }
-        @media (max-width: 420px) {
+        @media (max-width: 520px) {
             #sched-fields {
-                grid-template-columns: minmax(0, 1fr) minmax(0, .72fr) !important;
+                grid-template-columns: 1fr !important;
                 gap: 8px;
             }
             #order-date,
             #order-time {
-                font-size: 12px;
-                min-height: 46px;
+                font-size: 16px !important;
+                min-height: 48px;
             }
         }
         
@@ -1264,7 +1264,7 @@
                                     <label class="text-[11px] font-medium text-[#8E8E93]">Data e horário</label>
                                     <button type="button" onclick="showProntaEntregaInfo()" class="text-[11px] font-medium text-[#2C4A34]">Pronta entrega?</button>
                                 </div>
-                                <div id="sched-fields" class="grid grid-cols-[minmax(0,1fr)_minmax(0,.72fr)] gap-2">
+                                <div id="sched-fields" class="grid grid-cols-[minmax(0,1.35fr)_minmax(0,.8fr)] gap-2">
                                     <input type="date" id="order-date" aria-label="Data do pedido" class="checkout-field w-full min-w-0 px-3 text-[14px]">
                                     <input type="time" id="order-time" aria-label="Horário do pedido" class="checkout-field w-full min-w-0 px-3 text-[14px]">
                                 </div>
