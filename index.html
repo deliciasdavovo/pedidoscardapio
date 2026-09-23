@@ -4929,7 +4929,7 @@ if (!item.sizes && flavor && item.variants && item.variants[flavor]) {
             return 'R$ ' + Number(value || 0).toFixed(2).replace('.', ',');
         }
 
-        function formatWhatsAppCartItem(item, index) {
+        function formatWhatsAppCartItem(item) {
             const isKg = item.unit === 'kg';
             const qtyText = item.qty.toFixed(isKg ? 1 : 0).replace('.', ',') + (isKg ? ' kg' : ' un');
             const unitLabel = isKg ? 'kg' : 'un';
@@ -4937,7 +4937,7 @@ if (!item.sizes && flavor && item.variants && item.variants[flavor]) {
             const subtotal = item.finalPrice * item.qty;
 
             const lines = [
-                (index + 1) + '. *' + item.name + '*',
+                '*' + item.name + '*',
                 '   Quantidade: ' + qtyText
             ];
 
@@ -4949,11 +4949,11 @@ if (!item.sizes && flavor && item.variants && item.variants[flavor]) {
                 lines.push('   Sabor: ' + item.flavor);
             }
 
-            lines.push('   Valor ' + unitLabel + ': ' + (estimatedUnit ? 'aprox. ' : '') + formatWhatsAppMoney(item.finalPrice));
-
-            if (estimatedUnit) {
-                lines.push('   _Valor por unidade estimado pelo peso; preço oficial calculado por quilo._');
-            }
+            lines.push(
+                '   Valor ' + unitLabel + ': ' +
+                formatWhatsAppMoney(item.finalPrice) +
+                (estimatedUnit ? ' >> _aproximado*_ <<' : '')
+            );
 
             lines.push('   *Subtotal' + (estimatedUnit ? ' estimado' : '') + ': ' + formatWhatsAppMoney(subtotal) + '*');
 
@@ -5014,7 +5014,7 @@ function formatWhatsAppOrderDate(value) {
                 if (!validarDataEncomenda(true, true) || !validarHorarioEncomenda(true, true)) return;
             }
 
-            const itemsText = cart.map((item, index) => formatWhatsAppCartItem(item, index)).join('\n\n');
+            const itemsText = cart.map(item => formatWhatsAppCartItem(item)).join('\n\n');
             let total = cart.reduce((acc, item) => acc + (item.finalPrice * item.qty), 0);
             const deliveryFee = activeFulfillment === 'Entrega' ? getSelectedDeliveryFee() : 0;
 
@@ -5025,9 +5025,7 @@ function formatWhatsAppOrderDate(value) {
             let deliveryText = '';
             if (activeFulfillment === 'Entrega') {
                 const cepText = cep.length === 8 ? formatCepValue(cep) : 'não informado';
-                const distanceText = calculatedDeliveryDistanceKm != null
-                    ? '\nDistância aproximada: ' + calculatedDeliveryDistanceKm.toFixed(1).replace('.', ',') + ' km'
-                    : '';
+                const distanceText = '';
                 const reason = specialDelivery
                     ? 'pedido com bolo/sobremesa — confirmar transporte'
                     : deliveryQuoteReason;
@@ -5068,6 +5066,9 @@ function formatWhatsAppOrderDate(value) {
                 itemsText + '\n\n' +
                 '__________________________\n' +
                 totalLabel + formatWhatsAppMoney(total) +
+                (cart.some(item => item.unit !== 'kg' && hasEstimatedUnitPrice(item))
+                    ? '\n_O valor aproximado pode mudar conforme os itens que serão pesados._'
+                    : '') +
                 (activeFulfillment === 'Entrega' && !deliveryFee
                     ? '\n_Taxa de entrega será confirmada pela equipe._'
                     : '') +
