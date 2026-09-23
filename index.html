@@ -6020,7 +6020,13 @@ async function buildProductShareBlob(item) {
         : 0;
     const flavorCharsPerLine = 26;
 
-    const priceDetailsHeight = priceDetailLines.reduce((total, line) => {
+    const parsedPriceDetailsForLayout = priceDetailLines.map(getPriceLineParts);
+    const usesThreeAroColumns =
+        !hasDetailColumn &&
+        parsedPriceDetailsForLayout.length === 3 &&
+        parsedPriceDetailsForLayout.every(parts => /^aro\s+/i.test(parts.label || ''));
+
+    const priceDetailsHeight = usesThreeAroColumns ? 155 : priceDetailLines.reduce((total, line) => {
         const parts = getPriceLineParts(line);
         const labelChars = hasDetailColumn ? 23 : 48;
         const valueChars = hasDetailColumn ? 17 : 36;
@@ -6212,56 +6218,100 @@ async function buildProductShareBlob(item) {
                 priceY += 38;
             }
 
-            priceDetailLines.forEach(line => {
-                const parts = getPriceLineParts(line);
+            const parsedPriceDetails = priceDetailLines.map(getPriceLineParts);
+            const isThreeAroLayout =
+                !hasDetailColumn &&
+                parsedPriceDetails.length === 3 &&
+                parsedPriceDetails.every(parts => /^aro\s+/i.test(parts.label || ''));
 
-                if (parts.label) {
+            if (isThreeAroLayout) {
+                const colGap = 28;
+                const colWidth = (maxWidth - (colGap * 2)) / 3;
+                const topY = priceY;
+                let maxBottom = topY;
+
+                parsedPriceDetails.forEach((parts, index) => {
+                    const colX = startX + index * (colWidth + colGap);
+                    let colY = topY;
+
+                    if (index > 0) {
+                        const dividerX = colX - (colGap / 2);
+                        ctx.strokeStyle = 'rgba(44, 74, 52, 0.14)';
+                        ctx.lineWidth = 2;
+                        ctx.beginPath();
+                        ctx.moveTo(dividerX, topY - 4);
+                        ctx.lineTo(dividerX, topY + 142);
+                        ctx.stroke();
+                    }
+
                     ctx.fillStyle = '#766F65';
-                    ctx.font = "700 22px 'DM Sans', sans-serif";
+                    ctx.font = "700 20px 'DM Sans', sans-serif";
+                    colY = shareWrapText(ctx, parts.label.toUpperCase(), colX, colY, colWidth, 27, 2);
+                    colY += 4;
+
+                    ctx.fillStyle = '#2C5437';
+                    ctx.font = "700 29px 'DM Sans', sans-serif";
+                    colY = shareWrapText(ctx, parts.value, colX, colY, colWidth, 37, 2);
+
+                    if (parts.description) {
+                        ctx.fillStyle = '#766F65';
+                        ctx.font = "400 18px 'DM Sans', sans-serif";
+                        colY = shareWrapText(ctx, parts.description, colX, colY + 5, colWidth, 25, 3);
+                    }
+
+                    maxBottom = Math.max(maxBottom, colY);
+                });
+
+                priceY = maxBottom + 12;
+            } else {
+                parsedPriceDetails.forEach(parts => {
+                    if (parts.label) {
+                        ctx.fillStyle = '#766F65';
+                        ctx.font = "700 22px 'DM Sans', sans-serif";
+                        priceY = shareWrapText(
+                            ctx,
+                            parts.label.toUpperCase(),
+                            startX,
+                            priceY,
+                            maxWidth,
+                            30,
+                            Infinity
+                        );
+                        priceY += 4;
+                    }
+
+                    ctx.fillStyle = '#2C5437';
+                    ctx.font = parts.estimated
+                        ? "600 24px 'DM Sans', sans-serif"
+                        : "700 32px 'DM Sans', sans-serif";
                     priceY = shareWrapText(
                         ctx,
-                        parts.label.toUpperCase(),
+                        parts.value,
                         startX,
                         priceY,
                         maxWidth,
-                        30,
+                        parts.estimated ? 34 : 42,
                         Infinity
                     );
-                    priceY += 4;
-                }
 
-                // Todo preço fica verde; a unidade estimada é menor.
-                ctx.fillStyle = '#2C5437';
-                ctx.font = parts.estimated
-                    ? "600 24px 'DM Sans', sans-serif"
-                    : "700 32px 'DM Sans', sans-serif";
-                priceY = shareWrapText(
-                    ctx,
-                    parts.value,
-                    startX,
-                    priceY,
-                    maxWidth,
-                    parts.estimated ? 34 : 42,
-                    Infinity
-                );
-
-                if (parts.description) {
-                    ctx.fillStyle = '#766F65';
-                    ctx.font = "400 22px 'DM Sans', sans-serif";
-                    priceY = shareWrapText(
-                        ctx,
-                        parts.description,
-                        startX,
-                        priceY + 2,
-                        maxWidth,
-                        30,
-                        Infinity
-                    );
-                    priceY += 12;
-                } else {
-                    priceY += 14;
-                }
-            });
+                    if (parts.description) {
+                        ctx.fillStyle = '#766F65';
+                        ctx.font = "400 22px 'DM Sans', sans-serif";
+                        priceY = shareWrapText(
+                            ctx,
+                            parts.description,
+                            startX,
+                            priceY + 2,
+                            maxWidth,
+                            30,
+                            Infinity
+                        );
+                        priceY += 12;
+                    } else {
+                        priceY += 14;
+                    }
+                });
+            }
         } else if (!primaryPriceToDisplay) {
             ctx.fillStyle = '#77736C';
             ctx.font = "400 29px 'DM Sans', sans-serif";
