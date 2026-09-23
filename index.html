@@ -358,18 +358,40 @@
             }
         }
         .checkout-field {
-            background: #F2F2F7;
-            border: 1px solid rgba(60,60,67,0.08);
-            border-radius: 14px;
+            background: #F6F1E8;
+            border: 1px solid rgba(140,134,118,0.18);
+            border-radius: 12px;
             min-height: 48px;
-            color: #1C1C1E;
+            color: #22201C;
+            font-family: 'DM Sans', sans-serif;
             transition: background 0.16s ease, border-color 0.16s ease, box-shadow 0.16s ease;
         }
         .checkout-field:focus {
             outline: none;
-            background: #FFFFFF;
-            border-color: rgba(44,74,52,0.28);
-            box-shadow: 0 0 0 3px rgba(44,74,52,0.08);
+            background: #FFFDF9;
+            border-color: rgba(44,74,52,0.38);
+            box-shadow: 0 0 0 3px rgba(44,74,52,0.07);
+        }
+        #order-date,
+        #order-time {
+            min-width: 0;
+            width: 100%;
+            max-width: 100%;
+            box-sizing: border-box;
+            font-size: 13px;
+            padding-left: 12px;
+            padding-right: 10px;
+        }
+        @media (max-width: 420px) {
+            #sched-fields {
+                grid-template-columns: minmax(0, 1fr) minmax(0, .72fr) !important;
+                gap: 8px;
+            }
+            #order-date,
+            #order-time {
+                font-size: 12px;
+                min-height: 46px;
+            }
         }
         
         #cart-items-list {
@@ -1211,18 +1233,18 @@
     <div id="checkout-modal" class="fixed inset-0 z-[65] invisible" role="dialog" aria-modal="true" aria-labelledby="checkout-title">
         <div id="checkout-overlay" class="absolute inset-0 bg-black/35 opacity-0 transition-opacity duration-200" onclick="closeCheckout()"></div>
 
-        <div id="checkout-panel" class="absolute inset-x-0 bottom-0 h-[94dvh] sm:inset-y-0 sm:right-0 sm:left-auto sm:h-full w-full sm:max-w-lg bg-[#F7F7F8] shadow-[0_-12px_40px_rgba(0,0,0,0.16)] sm:shadow-2xl rounded-t-[30px] sm:rounded-none flex flex-col overflow-hidden">
-            <div class="sm:hidden shrink-0 flex justify-center pt-2.5 pb-1 bg-[#F7F7F8]">
+        <div id="checkout-panel" class="absolute inset-x-0 bottom-0 h-[94dvh] sm:inset-y-0 sm:right-0 sm:left-auto sm:h-full w-full sm:max-w-lg bg-[#F4F1EA] shadow-[0_-12px_40px_rgba(0,0,0,0.16)] sm:shadow-2xl rounded-t-[30px] sm:rounded-none flex flex-col overflow-hidden">
+            <div class="sm:hidden shrink-0 flex justify-center pt-2.5 pb-1 bg-[#F4F1EA]">
                 <div class="w-9 h-1 rounded-full bg-[#C7C7CC]"></div>
             </div>
 
-            <div class="shrink-0 grid grid-cols-[1fr_auto_1fr] items-center px-4 sm:px-5 h-[54px] bg-[#F7F7F8]/95 border-b border-black/[0.06]">
+            <div class="shrink-0 grid grid-cols-[1fr_auto_1fr] items-center px-4 sm:px-5 h-[54px] bg-[#F4F1EA]/95 border-b border-black/[0.06]">
                 <button type="button" onclick="backToCart()" class="justify-self-start inline-flex items-center gap-1 text-[15px] font-medium text-[#2C4A34] active:opacity-50 transition-opacity">
                     <i class="fas fa-chevron-left text-[11px]"></i>
                     Cesta
                 </button>
-                <h2 id="checkout-title" class="text-[16px] font-semibold tracking-[-0.01em] text-[#1C1C1E]">Finalizar pedido</h2>
-                <button type="button" onclick="closeCheckout()" aria-label="Fechar" class="justify-self-end w-8 h-8 rounded-full bg-[#E9E9EB] text-[#636366] flex items-center justify-center active:scale-95 transition-transform">
+                <h2 id="checkout-title" class="text-[16px] font-semibold tracking-[-0.01em] text-[#2C4A34] serif-font">Finalizar pedido</h2>
+                <button type="button" onclick="closeCheckout()" aria-label="Fechar" class="justify-self-end w-8 h-8 rounded-full bg-[#E9E2D7] text-[#6F6A5E] flex items-center justify-center active:scale-95 transition-transform">
                     <i class="fas fa-times text-[13px]"></i>
                 </button>
             </div>
@@ -1242,7 +1264,7 @@
                                     <label class="text-[11px] font-medium text-[#8E8E93]">Data e horário</label>
                                     <button type="button" onclick="showProntaEntregaInfo()" class="text-[11px] font-medium text-[#2C4A34]">Pronta entrega?</button>
                                 </div>
-                                <div id="sched-fields" class="grid grid-cols-[minmax(0,1.35fr)_minmax(0,.85fr)] gap-2">
+                                <div id="sched-fields" class="grid grid-cols-[minmax(0,1fr)_minmax(0,.72fr)] gap-2">
                                     <input type="date" id="order-date" aria-label="Data do pedido" class="checkout-field w-full min-w-0 px-3 text-[14px]">
                                     <input type="time" id="order-time" aria-label="Horário do pedido" class="checkout-field w-full min-w-0 px-3 text-[14px]">
                                 </div>
