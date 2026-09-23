@@ -5670,12 +5670,53 @@ async function buildProductShareBlob(item) {
     const showPriceDetailsHeading = showPriceDetails && !isSimpleKgAndUnit;
     const displayWeightText = isSimpleKgAndUnit ? '' : weightText;
 
+    function normalizeShareOptionLabel(value) {
+        return String(value || '')
+            .normalize('NFD')
+            .replace(/[\u0300-\u036f]/g, '')
+            .toLowerCase()
+            .replace(/\s+/g, ' ')
+            .trim();
+    }
+
+    function getPriceLineDescription(label) {
+        const normalizedLabel = normalizeShareOptionLabel(label);
+        if (!normalizedLabel) return '';
+
+        const sizeOption = Array.isArray(item.sizes)
+            ? item.sizes.find(size => {
+                const sizeLabel = normalizeShareOptionLabel(size.label);
+                return sizeLabel && normalizedLabel.includes(sizeLabel);
+            })
+            : null;
+
+        if (sizeOption && sizeOption.description) {
+            return String(sizeOption.description).trim();
+        }
+
+        const flavorOption = flavorOptions.find(flavor => {
+            const flavorLabel = normalizeShareOptionLabel(flavor.label);
+            return flavorLabel && normalizedLabel.includes(flavorLabel);
+        });
+
+        if (flavorOption && flavorOption.description) {
+            return String(flavorOption.description).trim();
+        }
+
+        return '';
+    }
+
     function getPriceLineParts(line) {
         const text = String(line || '').trim();
         const moneyIndex = text.indexOf('R$');
 
         if (moneyIndex < 0) {
-            return { label: '', value: text, estimated: /aprox\.|estimad/i.test(text) };
+            return {
+                label: '',
+                value: text,
+                estimated: /aprox\.|estimad/i.test(text),
+                description: ''
+            };
         }
 
         const beforeMoney = text.slice(0, moneyIndex);
@@ -5683,11 +5724,13 @@ async function buildProductShareBlob(item) {
         const valueStart = approximateMatch
             ? moneyIndex - approximateMatch[0].length
             : moneyIndex;
+        const label = text.slice(0, valueStart).replace(/[·\s]+$/g, '').trim();
 
         return {
-            label: text.slice(0, valueStart).replace(/[·\s]+$/g, '').trim(),
+            label,
             value: text.slice(valueStart).trim(),
-            estimated: /unidade estimada|aprox\./i.test(text)
+            estimated: /unidade estimada|aprox\./i.test(text),
+            description: getPriceLineDescription(label)
         };
     }
 
@@ -5706,10 +5749,16 @@ async function buildProductShareBlob(item) {
             ? Math.max(1, Math.ceil(parts.label.length / labelChars))
             : 0;
         const valueRows = Math.max(1, Math.ceil(parts.value.length / valueChars));
+        const descriptionChars = hasDetailColumn ? 25 : 52;
+        const optionDescriptionRows = parts.description
+            ? Math.max(1, Math.ceil(parts.description.length / descriptionChars))
+            : 0;
 
         return total +
             (labelRows * 30) +
             (valueRows * (parts.estimated ? 34 : 42)) +
+            (optionDescriptionRows * 30) +
+            (parts.description ? 8 : 0) +
             14;
     }, 0);
 
@@ -5840,8 +5889,8 @@ async function buildProductShareBlob(item) {
 
     // Categoria.
     ctx.fillStyle = '#B27845';
-    ctx.font = "700 28px 'DM Sans', sans-serif";
-    ctx.fillText(String(item.category || 'CARDÁPIO'), left, y);
+    ctx.font = "400 28px 'DM Sans', sans-serif";
+    ctx.fillText(String(item.category || 'CARDÁPIO').toUpperCase(), left, y);
 
     // Nome.
     y += 72;
@@ -5932,7 +5981,23 @@ async function buildProductShareBlob(item) {
                     parts.estimated ? 34 : 42,
                     Infinity
                 );
-                priceY += 14;
+
+                if (parts.description) {
+                    ctx.fillStyle = '#766F65';
+                    ctx.font = "400 22px 'DM Sans', sans-serif";
+                    priceY = shareWrapText(
+                        ctx,
+                        parts.description,
+                        startX,
+                        priceY + 2,
+                        maxWidth,
+                        30,
+                        Infinity
+                    );
+                    priceY += 12;
+                } else {
+                    priceY += 14;
+                }
             });
         } else if (!primaryPriceToDisplay) {
             ctx.fillStyle = '#77736C';
