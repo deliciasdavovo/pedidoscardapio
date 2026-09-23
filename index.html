@@ -5440,6 +5440,61 @@ function getShareWeightText(item) {
     return match[1].replace('.', ',') + ' ' + match[2].toLowerCase() + ' por unidade';
 }
 
+function getShareEstimatedUnitWeightText(item) {
+    const description = String(item.description || '').trim();
+    const sources = [];
+
+    if (item.weightText) {
+        sources.push({
+            text: String(item.weightText),
+            patterns: [/([0-9.,]+)\s*(kg|g)\b/i]
+        });
+    }
+
+    sources.push({
+        text: description,
+        patterns: [
+            /aprox\.?\s*([0-9.,]+)\s*(kg|g)\s*por unidade/i,
+            /aprox\.?\s*([0-9.,]+)\s*(kg|g)\s*cada unidade/i,
+            /\(\s*aprox\.?\s*([0-9.,]+)\s*(kg|g)\s*\)/i,
+            /^aprox\.?\s*([0-9.,]+)\s*(kg|g)\b/i
+        ]
+    });
+
+    for (const source of sources) {
+        for (const pattern of source.patterns) {
+            const match = source.text.match(pattern);
+            if (!match) continue;
+
+            const value = Number(String(match[1]).replace(',', '.'));
+            if (!Number.isFinite(value)) continue;
+
+            const grams = match[2].toLowerCase() === 'kg' ? value * 1000 : value;
+            if (grams >= 1000 && grams % 1000 === 0) {
+                return String(grams / 1000).replace('.', ',') + ' kg';
+            }
+            return Math.round(grams) + ' g';
+        }
+    }
+
+    if (
+        typeof item.price === 'number' &&
+        typeof item.priceKg === 'number' &&
+        item.priceKg > 0
+    ) {
+        const rawGrams = (item.price / item.priceKg) * 1000;
+        const step = rawGrams >= 500 ? 50 : (rawGrams >= 200 ? 10 : 5);
+        const roundedGrams = Math.max(step, Math.round(rawGrams / step) * step);
+
+        if (roundedGrams >= 1000 && roundedGrams % 1000 === 0) {
+            return (roundedGrams / 1000) + ' kg';
+        }
+        return roundedGrams + ' g';
+    }
+
+    return '';
+}
+
 function getShareShortDescription(item) {
     let description = String(item.description || '').trim();
     description = description
@@ -5547,7 +5602,7 @@ function getShareItemStartingPrice(item) {
 
 function drawShareSectionLabel(ctx, text, x, y) {
     ctx.fillStyle = '#2C4A34';
-    ctx.font = "700 24px 'DM Sans', sans-serif";
+    ctx.font = "700 29px 'DM Sans', sans-serif";
     ctx.fillText(String(text || '').toUpperCase(), x, y);
 }
 
@@ -5562,55 +5617,122 @@ async function buildProductShareBlob(item) {
 
     const width = 1080;
     const flavors = getShareFlavorLabels(item);
+    const flavorOptions = getFlavorList(item);
     const priceLines = getSharePriceLines(item);
     const primaryPrice = getShareItemStartingPrice(item);
     const weightText = getShareWeightText(item);
     const shortDescription = getShareShortDescription(item);
     const hasDetailColumn = flavors.length > 0;
-    const hasEstimatedPriceNote = hasEstimatedUnitPrice(item);
 
-    // Só existe preço principal quando o produto possui um único valor.
-    // Com dois ou mais preços, todos aparecem no mesmo nível visual.
-    const hasMultiplePrices = priceLines.length > 1;
-    const primaryPriceToDisplay = hasMultiplePrices ? '' : primaryPrice;
-    const priceDetailLines = hasMultiplePrices ? [...priceLines] : [];
+    const hasExplicitPriceVariations = flavorOptions.some(flavor => {
+        const variant = item.variants && item.variants[flavor.label]
+            ? item.variants[flavor.label]
+            : {};
+
+        return (
+            typeof flavor.price === 'number' ||
+            typeof flavor.priceKg === 'number' ||
+            (flavor.sizePrices && Object.keys(flavor.sizePrices).length > 0) ||
+            typeof variant.price === 'number' ||
+            typeof variant.priceKg === 'number' ||
+            (variant.sizePrices && Object.keys(variant.sizePrices).length > 0)
+        );
+    });
+    const hasMultipleSizes = Array.isArray(item.sizes) && item.sizes.length > 1;
+    const isSimpleKgAndUnit = (
+        hasEstimatedUnitPrice(item) &&
+        !hasExplicitPriceVariations &&
+        !hasMultipleSizes
+    );
+
+    let primaryPriceToDisplay = '';
+    let priceDetailLines = [];
+
+    if (isSimpleKgAndUnit) {
+        const estimatedWeight = getShareEstimatedUnitWeightText(item);
+        primaryPriceToDisplay = getKgPriceText(item);
+        priceDetailLines = [
+            'Unidade estimada · aprox. R$ ' +
+            item.price.toFixed(2).replace('.', ',') +
+            '/un' +
+            (estimatedWeight ? ' · unidade de ' + estimatedWeight : '')
+        ];
+    } else if (priceLines.length > 1) {
+        // Variações reais: nenhum preço é tratado como principal.
+        priceDetailLines = [...priceLines];
+    } else {
+        primaryPriceToDisplay = primaryPrice;
+    }
+
     const primaryPriceLabel = /^a partir de\s+/i.test(primaryPriceToDisplay)
         ? 'A PARTIR DE'
         : '';
     const showPriceDetails = priceDetailLines.length > 0;
+    const showPriceDetailsHeading = showPriceDetails && !isSimpleKgAndUnit;
+    const displayWeightText = isSimpleKgAndUnit ? '' : weightText;
 
-    // Estima a altura real do conteúdo para preservar todas as descrições,
-    // variações, faixas de preço e opções sem cortar o card.
-    const titleRows = Math.min(2, Math.max(1, Math.ceil(String(item.name || '').length / 27)));
+    function getPriceLineParts(line) {
+        const text = String(line || '').trim();
+        const moneyIndex = text.indexOf('R$');
+
+        if (moneyIndex < 0) {
+            return { label: '', value: text, estimated: /aprox\.|estimad/i.test(text) };
+        }
+
+        const beforeMoney = text.slice(0, moneyIndex);
+        const approximateMatch = beforeMoney.match(/aprox\.?\s*$/i);
+        const valueStart = approximateMatch
+            ? moneyIndex - approximateMatch[0].length
+            : moneyIndex;
+
+        return {
+            label: text.slice(0, valueStart).replace(/[·\s]+$/g, '').trim(),
+            value: text.slice(valueStart).trim(),
+            estimated: /unidade estimada|aprox\./i.test(text)
+        };
+    }
+
+    // Estima a altura já considerando a tipografia maior.
+    const titleRows = Math.min(2, Math.max(1, Math.ceil(String(item.name || '').length / 24)));
     const descriptionRows = shortDescription
-        ? Math.min(5, Math.max(1, Math.ceil(shortDescription.length / 62)))
+        ? Math.min(5, Math.max(1, Math.ceil(shortDescription.length / 54)))
         : 0;
-    const priceCharsPerLine = hasDetailColumn ? 29 : 58;
-    const flavorCharsPerLine = 31;
+    const flavorCharsPerLine = 26;
 
-    const priceVisualLines = priceDetailLines.reduce((total, line) => {
-        return total + Math.max(1, Math.ceil(String(line).length / priceCharsPerLine));
+    const priceDetailsHeight = priceDetailLines.reduce((total, line) => {
+        const parts = getPriceLineParts(line);
+        const labelChars = hasDetailColumn ? 23 : 48;
+        const valueChars = hasDetailColumn ? 17 : 36;
+        const labelRows = parts.label
+            ? Math.max(1, Math.ceil(parts.label.length / labelChars))
+            : 0;
+        const valueRows = Math.max(1, Math.ceil(parts.value.length / valueChars));
+
+        return total +
+            (labelRows * 30) +
+            (valueRows * (parts.estimated ? 34 : 42)) +
+            14;
     }, 0);
 
     const flavorVisualLines = flavors.reduce((total, flavor) => {
         return total + Math.max(1, Math.ceil(String(flavor).length / flavorCharsPerLine));
     }, 0);
 
-    const weightVisualLines = weightText
-        ? Math.max(1, Math.ceil(String(weightText).length / (hasDetailColumn ? 30 : 60)))
+    const weightVisualLines = displayWeightText
+        ? Math.max(1, Math.ceil(String(displayWeightText).length / (hasDetailColumn ? 26 : 54)))
         : 0;
 
-    const headerHeight = 136 + (titleRows * 60) + (descriptionRows * 33);
+    const headerHeight = 178 + (titleRows * 72) + (descriptionRows * 39);
     const priceBlockHeight =
-        42 +
-        (primaryPriceToDisplay ? (primaryPriceLabel ? 88 : 64) : 0) +
-        (showPriceDetails ? 34 + (priceVisualLines * 36) + (priceDetailLines.length * 10) : 0) +
-        (hasEstimatedPriceNote ? 58 : 0) +
-        (weightText ? 62 + (weightVisualLines * 33) : 0);
+        50 +
+        (primaryPriceToDisplay ? (primaryPriceLabel ? 100 : 72) : 0) +
+        (showPriceDetailsHeading ? 38 : 0) +
+        priceDetailsHeight +
+        (displayWeightText ? 70 + (weightVisualLines * 38) : 0);
     const flavorBlockHeight =
-        42 +
-        (flavorVisualLines * 32) +
-        (flavors.length * 10);
+        50 +
+        (flavorVisualLines * 38) +
+        (flavors.length * 12);
 
     const infoHeight = hasDetailColumn
         ? Math.max(priceBlockHeight, flavorBlockHeight)
@@ -5715,28 +5837,28 @@ async function buildProductShareBlob(item) {
     const left = panelX + 56;
     const right = panelX + panelWidth - 56;
     const contentWidth = right - left;
-    let y = panelY + 58;
+    let y = panelY + 64;
 
     // Categoria.
     ctx.fillStyle = '#B27845';
-    ctx.font = "700 22px 'DM Sans', sans-serif";
+    ctx.font = "700 28px 'DM Sans', sans-serif";
     ctx.fillText(String(item.category || 'CARDÁPIO'), left, y);
 
     // Nome.
-    y += 58;
+    y += 72;
     ctx.fillStyle = '#22201C';
-    ctx.font = "400 59px 'Lora', serif";
-    y = shareWrapText(ctx, item.name, left, y, contentWidth, 60, 2);
-    y -= 26;
+    ctx.font = "400 68px 'Lora', serif";
+    y = shareWrapText(ctx, item.name, left, y, contentWidth, 72, 2);
+    y -= 14;
 
     // Descrição novamente visível e próxima ao nome.
     if (shortDescription) {
         ctx.fillStyle = '#6F6B63';
-        ctx.font = "400 24px 'DM Sans', sans-serif";
-        y = shareWrapText(ctx, shortDescription, left, y, contentWidth, 33, 5);
-        y += 10;
+        ctx.font = "400 29px 'DM Sans', sans-serif";
+        y = shareWrapText(ctx, shortDescription, left, y, contentWidth, 39, 5);
+        y += 12;
     } else {
-        y += 8;
+        y += 10;
     }
 
     // Detalhe caramelo.
@@ -5747,87 +5869,86 @@ async function buildProductShareBlob(item) {
     ctx.lineTo(left + 94, y + 4);
     ctx.stroke();
 
-    y += 38;
+    y += 44;
     const infoTop = y;
 
     function drawPrices(startX, startY, maxWidth) {
         let priceY = startY;
         drawShareSectionLabel(ctx, 'Valores', startX, priceY);
-        priceY += 42;
+        priceY += 50;
 
-        // O preço principal continua grande e verde, preservando a hierarquia
-        // visual aprovada. As demais opções aparecem logo abaixo.
         if (primaryPriceToDisplay) {
             const primaryValue = primaryPriceToDisplay.replace(/^a partir de\s+/i, '');
 
             if (primaryPriceLabel) {
                 ctx.fillStyle = '#B27845';
-                ctx.font = "700 17px 'DM Sans', sans-serif";
+                ctx.font = "700 21px 'DM Sans', sans-serif";
                 ctx.fillText(primaryPriceLabel, startX, priceY);
-                priceY += 26;
+                priceY += 32;
             }
 
             ctx.fillStyle = '#2C5437';
-            ctx.font = "700 47px 'DM Sans', sans-serif";
-            priceY = shareWrapText(ctx, primaryValue, startX, priceY, maxWidth, 52, 2);
-            priceY += 6;
+            ctx.font = "700 56px 'DM Sans', sans-serif";
+            priceY = shareWrapText(ctx, primaryValue, startX, priceY, maxWidth, 62, 2);
+            priceY += 8;
         }
 
         if (showPriceDetails) {
-            ctx.fillStyle = '#B27845';
-            ctx.font = "700 18px 'DM Sans', sans-serif";
-            ctx.fillText('OPÇÕES E VARIAÇÕES', startX, priceY);
-            priceY += 30;
+            if (showPriceDetailsHeading) {
+                ctx.fillStyle = '#B27845';
+                ctx.font = "700 21px 'DM Sans', sans-serif";
+                ctx.fillText('OPÇÕES E VARIAÇÕES', startX, priceY);
+                priceY += 38;
+            }
 
             priceDetailLines.forEach(line => {
-                const isEstimated = /unidade estimada|aprox\./i.test(line);
+                const parts = getPriceLineParts(line);
 
-                // Todos os valores permanecem verdes. A estimativa recebe
-                // hierarquia menor para não competir com os preços oficiais.
+                if (parts.label) {
+                    ctx.fillStyle = '#766F65';
+                    ctx.font = "700 22px 'DM Sans', sans-serif";
+                    priceY = shareWrapText(
+                        ctx,
+                        parts.label.toUpperCase(),
+                        startX,
+                        priceY,
+                        maxWidth,
+                        30,
+                        Infinity
+                    );
+                    priceY += 4;
+                }
+
+                // Todo preço fica verde; a unidade estimada é menor.
                 ctx.fillStyle = '#2C5437';
-                ctx.font = isEstimated
-                    ? "600 19px 'DM Sans', sans-serif"
-                    : "700 25px 'DM Sans', sans-serif";
-
+                ctx.font = parts.estimated
+                    ? "600 24px 'DM Sans', sans-serif"
+                    : "700 32px 'DM Sans', sans-serif";
                 priceY = shareWrapText(
                     ctx,
-                    line,
+                    parts.value,
                     startX,
                     priceY,
                     maxWidth,
-                    isEstimated ? 29 : 36,
+                    parts.estimated ? 34 : 42,
                     Infinity
                 );
-                priceY += isEstimated ? 8 : 10;
+                priceY += 14;
             });
-        } else if (!primaryPriceToDisplay && !showPriceDetails) {
+        } else if (!primaryPriceToDisplay) {
             ctx.fillStyle = '#77736C';
-            ctx.font = "400 25px 'DM Sans', sans-serif";
-            priceY = shareWrapText(ctx, 'Consulte o valor.', startX, priceY, maxWidth, 34, 2);
+            ctx.font = "400 29px 'DM Sans', sans-serif";
+            priceY = shareWrapText(ctx, 'Consulte o valor.', startX, priceY, maxWidth, 39, 2);
         }
 
-        if (hasEstimatedPriceNote) {
-            ctx.fillStyle = '#8A857C';
-            ctx.font = "500 20px 'DM Sans', sans-serif";
-            priceY = shareWrapText(
-                ctx,
-                'O preço por quilo é oficial; a unidade é uma estimativa e varia conforme o peso.',
-                startX,
-                priceY + 4,
-                maxWidth,
-                28,
-                3
-            );
-        }
-
-        if (weightText) {
-            priceY += 18;
+        if (displayWeightText) {
+            priceY += 20;
             drawShareSectionLabel(ctx, 'Peso aproximado', startX, priceY);
-            priceY += 38;
+            priceY += 46;
 
             ctx.fillStyle = '#6F6B63';
-            ctx.font = "400 24px 'DM Sans', sans-serif";
-            shareWrapText(ctx, weightText, startX, priceY, maxWidth, 33, Infinity);
+            ctx.font = "400 28px 'DM Sans', sans-serif";
+            shareWrapText(ctx, displayWeightText, startX, priceY, maxWidth, 38, Infinity);
         }
     }
 
@@ -5854,27 +5975,27 @@ async function buildProductShareBlob(item) {
 
         let flavorY = infoTop;
         drawShareSectionLabel(ctx, 'Sabores / Recheios', rightX, flavorY);
-        flavorY += 42;
+        flavorY += 50;
 
-        ctx.font = "400 23px 'DM Sans', sans-serif";
+        ctx.font = "400 28px 'DM Sans', sans-serif";
 
         flavors.forEach(flavor => {
             ctx.fillStyle = '#2C4A34';
             ctx.beginPath();
-            ctx.arc(rightX + 5, flavorY - 7, 4, 0, Math.PI * 2);
+            ctx.arc(rightX + 6, flavorY - 9, 5, 0, Math.PI * 2);
             ctx.fill();
 
             ctx.fillStyle = '#5F5B55';
             flavorY = shareWrapText(
                 ctx,
                 flavor,
-                rightX + 20,
+                rightX + 24,
                 flavorY,
-                rightColWidth - 20,
-                32,
+                rightColWidth - 24,
+                38,
                 Infinity
             );
-            flavorY += 10;
+            flavorY += 12;
         });
     }
 
