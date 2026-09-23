@@ -6199,13 +6199,13 @@ async function buildCategoryShareBlob(categoryName) {
     if (!items.length) throw new Error('Categoria sem produtos.');
 
     const width = 1080;
-    const panelX = 82;
+    const panelX = 145;
     const panelWidth = width - (panelX * 2);
-    const panelPadding = 64;
+    const panelPadding = 54;
     const contentWidth = panelWidth - (panelPadding * 2);
-    const panelGap = 34;
-    const topSpace = 142;
-    const bottomSpace = 78;
+    const panelGap = 40;
+    const topSpace = 138;
+    const bottomSpace = 72;
 
     function getCategoryMenuEntry(item) {
         let price = getShareItemStartingPrice(item);
@@ -6234,17 +6234,17 @@ async function buildCategoryShareBlob(categoryName) {
         }
 
         const detailRows = detail
-            ? Math.min(3, Math.max(1, Math.ceil(detail.length / 58)))
+            ? Math.min(3, Math.max(1, Math.ceil(detail.length / 46)))
             : 0;
         const estimatedRows = estimated
-            ? Math.min(2, Math.max(1, Math.ceil(estimated.length / 58)))
+            ? Math.min(2, Math.max(1, Math.ceil(estimated.length / 48)))
             : 0;
         const height =
-            44 +
-            (estimatedRows * 27) +
-            (detailRows * 28) +
-            (detailRows ? 6 : 0) +
-            16;
+            50 +
+            (estimatedRows * 31) +
+            (detailRows * 32) +
+            (detailRows ? 8 : 0) +
+            18;
 
         return {
             item,
@@ -6259,14 +6259,14 @@ async function buildCategoryShareBlob(categoryName) {
     }
 
     const menuEntries = items.map(getCategoryMenuEntry);
-    const maxItemsPerPanel = 7;
+    const maxItemsPerPanel = 6;
     const panelCount = Math.ceil(menuEntries.length / maxItemsPerPanel);
     const balancedPanelSize = Math.ceil(menuEntries.length / panelCount);
     const panels = [];
 
     for (let index = 0; index < menuEntries.length; index += balancedPanelSize) {
         const entries = menuEntries.slice(index, index + balancedPanelSize);
-        const height = 132 + entries.reduce((total, entry) => total + entry.height, 0) + 38;
+        const height = 146 + entries.reduce((total, entry) => total + entry.height, 0) + 42;
         panels.push({ entries, height });
     }
 
@@ -6283,7 +6283,7 @@ async function buildCategoryShareBlob(categoryName) {
     canvas.height = height;
     const ctx = canvas.getContext('2d');
 
-    ctx.fillStyle = '#B9AA94';
+    ctx.fillStyle = '#D8CBB9';
     ctx.fillRect(0, 0, width, height);
 
     const backgroundItem =
@@ -6301,25 +6301,34 @@ async function buildCategoryShareBlob(categoryName) {
         : '';
     const backgroundImage = await loadShareProductImage(backgroundSource);
 
+    // Foto nítida ocupando todo o fundo, sem blur nem camada de cor.
     if (backgroundImage && backgroundImage.width && backgroundImage.height) {
-        const dominantColor = drawShareBlurredBackground(ctx, backgroundImage, width, height);
-
-        if (dominantColor) {
-            ctx.fillStyle =
-                'rgba(' +
-                dominantColor.red + ',' +
-                dominantColor.green + ',' +
-                dominantColor.blue + ',0.52)';
-            ctx.fillRect(0, 0, width, height);
-        }
+        drawShareCoverImage(ctx, backgroundImage, 0, 0, width, height);
     }
 
-    const backgroundVeil = ctx.createLinearGradient(0, 0, 0, height);
-    backgroundVeil.addColorStop(0, 'rgba(25,24,22,0.24)');
-    backgroundVeil.addColorStop(0.22, 'rgba(248,244,238,0.04)');
-    backgroundVeil.addColorStop(1, 'rgba(25,24,22,0.18)');
-    ctx.fillStyle = backgroundVeil;
+    // Textura granulada muito leve, semelhante a papel fotográfico.
+    const grainCanvas = document.createElement('canvas');
+    const grainSize = 144;
+    grainCanvas.width = grainSize;
+    grainCanvas.height = grainSize;
+    const grainCtx = grainCanvas.getContext('2d');
+    const grainImage = grainCtx.createImageData(grainSize, grainSize);
+
+    for (let index = 0; index < grainImage.data.length; index += 4) {
+        const light = Math.random() > 0.5 ? 255 : 0;
+        grainImage.data[index] = light;
+        grainImage.data[index + 1] = light;
+        grainImage.data[index + 2] = light;
+        grainImage.data[index + 3] = 18 + Math.floor(Math.random() * 10);
+    }
+
+    grainCtx.putImageData(grainImage, 0, 0);
+    ctx.save();
+    ctx.globalAlpha = 0.28;
+    ctx.globalCompositeOperation = 'soft-light';
+    ctx.fillStyle = ctx.createPattern(grainCanvas, 'repeat');
     ctx.fillRect(0, 0, width, height);
+    ctx.restore();
 
     ctx.save();
     ctx.textAlign = 'center';
@@ -6327,10 +6336,10 @@ async function buildCategoryShareBlob(categoryName) {
     ctx.shadowBlur = 16;
     ctx.shadowOffsetY = 3;
     ctx.fillStyle = 'rgba(255,255,255,0.96)';
-    ctx.font = "500 25px 'DM Sans', sans-serif";
-    ctx.fillText('DELÍCIAS DA VOVÓ', width / 2, 66);
-    ctx.font = "400 18px 'DM Sans', sans-serif";
-    ctx.fillText('CARDÁPIO PARA ENCOMENDAS', width / 2, 98);
+    ctx.font = "500 28px 'DM Sans', sans-serif";
+    ctx.fillText('DELÍCIAS DA VOVÓ', width / 2, 65);
+    ctx.font = "400 21px 'DM Sans', sans-serif";
+    ctx.fillText('CARDÁPIO PARA ENCOMENDAS', width / 2, 101);
     ctx.restore();
 
     function fitMenuText(text, maxWidth) {
@@ -6346,39 +6355,40 @@ async function buildCategoryShareBlob(categoryName) {
 
     function drawPanelHeading(title, panelY, panelIndex) {
         const color = panelIndex % 2 === 0 ? '#2C4A34' : '#B27845';
-        let fontSize = 54;
+        let fontSize = 60;
 
         ctx.textAlign = 'center';
         do {
-            ctx.font = "italic 400 " + fontSize + "px 'Lora', serif";
-            if (ctx.measureText(title).width <= contentWidth - 220 || fontSize <= 38) break;
+            ctx.font = "400 " + fontSize + "px 'Lora', serif";
+            if (ctx.measureText(title).width <= contentWidth - 120 || fontSize <= 42) break;
             fontSize -= 2;
-        } while (fontSize > 38);
+        } while (fontSize > 42);
 
         const centerX = width / 2;
         const titleWidth = ctx.measureText(title).width;
-        const lineEnd = Math.max(panelX + 112, centerX - (titleWidth / 2) - 34);
+        const lineEnd = Math.max(panelX + 82, centerX - (titleWidth / 2) - 28);
 
         ctx.strokeStyle = color;
         ctx.lineWidth = 4;
         ctx.beginPath();
-        ctx.moveTo(panelX + 46, panelY + 77);
-        ctx.lineTo(lineEnd, panelY + 77);
+        ctx.moveTo(panelX + 34, panelY + 82);
+        ctx.lineTo(lineEnd, panelY + 82);
         ctx.stroke();
 
         ctx.fillStyle = color;
-        ctx.fillText(title, centerX + 44, panelY + 91);
+        ctx.fillText(title, centerX, panelY + 102);
         ctx.textAlign = 'left';
     }
 
     function drawCategoryMenuItem(entry, itemY) {
         const left = panelX + panelPadding;
         const right = panelX + panelWidth - panelPadding;
-        const baseline = itemY + 27;
+        const baseline = itemY + 31;
 
-        ctx.font = "400 28px 'DM Sans', sans-serif";
+        ctx.font = "500 29px 'DM Sans', sans-serif";
         const priceWidth = ctx.measureText(entry.price).width;
-        const nameMaxWidth = Math.max(220, contentWidth - priceWidth - 78);
+        ctx.font = "400 31px 'DM Sans', sans-serif";
+        const nameMaxWidth = Math.max(210, contentWidth - priceWidth - 66);
         const fittedName = fitMenuText(entry.name, nameMaxWidth);
         const nameWidth = ctx.measureText(fittedName).width;
 
@@ -6388,7 +6398,7 @@ async function buildCategoryShareBlob(categoryName) {
 
         ctx.fillStyle = '#2B2925';
         ctx.textAlign = 'right';
-        ctx.font = "500 26px 'DM Sans', sans-serif";
+        ctx.font = "500 29px 'DM Sans', sans-serif";
         ctx.fillText(entry.price, right, baseline);
 
         const priceStart = right - ctx.measureText(entry.price).width;
@@ -6407,33 +6417,33 @@ async function buildCategoryShareBlob(categoryName) {
             ctx.restore();
         }
 
-        let detailY = baseline + 29;
+        let detailY = baseline + 33;
         ctx.textAlign = 'center';
 
         if (entry.estimated) {
             ctx.fillStyle = '#8A857C';
-            ctx.font = "400 21px 'DM Sans', sans-serif";
+            ctx.font = "400 24px 'DM Sans', sans-serif";
             detailY = shareWrapText(
                 ctx,
                 entry.estimated,
                 width / 2,
                 detailY,
                 contentWidth,
-                27,
+                31,
                 2
             );
         }
 
         if (entry.detail) {
             ctx.fillStyle = '#A46E3F';
-            ctx.font = "500 21px 'DM Sans', sans-serif";
+            ctx.font = "500 24px 'DM Sans', sans-serif";
             detailY = shareWrapText(
                 ctx,
                 entry.detail,
                 width / 2,
                 detailY + 1,
                 contentWidth,
-                28,
+                32,
                 3
             );
         }
@@ -6454,8 +6464,8 @@ async function buildCategoryShareBlob(categoryName) {
             panelY,
             panelWidth,
             panel.height,
-            22,
-            'rgba(251,248,242,0.95)'
+            16,
+            '#FBF8F2'
         );
         ctx.restore();
 
@@ -6465,7 +6475,7 @@ async function buildCategoryShareBlob(categoryName) {
             panelIndex
         );
 
-        let itemY = panelY + 126;
+        let itemY = panelY + 142;
         panel.entries.forEach(entry => {
             drawCategoryMenuItem(entry, itemY);
             itemY += entry.height;
