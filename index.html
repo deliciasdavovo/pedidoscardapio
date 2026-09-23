@@ -6556,9 +6556,38 @@ async function buildCategoryShareBlobs(categoryName) {
         }
     });
 
+    const CATEGORY_SHARE_COVER_ITEM_IDS = {
+        'Pão de bolinha': 'pb_pao_bolinha_doce',
+        'Lanches frios': 'lf_baguete',
+        'Mini salgados': 'ms_cuscuz',
+        'Tortas & Quiches': 'tq_torta_liquidificador',
+        'Salgados assados': 'sa_hotdog_folhado',
+        'Bolos caseiros': 'bc_brownie',
+        'Doces panificação': 'dp_hungaro',
+        'Mini sobremesas': 'ms_carolinas',
+        'Sobremesas unitárias': 'su_tortinha_unit',
+        'Bolos gelados': 'bg_confeitado',
+        'Tortas doces': 'td_torta_holandesa'
+    };
+
+    const preferredCoverItem = items.find(
+        item => item.id === CATEGORY_SHARE_COVER_ITEM_IDS[categoryName]
+    );
+    const preferredCoverSources = preferredCoverItem
+        ? [
+            ...(Array.isArray(preferredCoverItem.images) ? preferredCoverItem.images : []),
+            preferredCoverItem.image
+          ].filter(Boolean)
+        : [];
+
     const backgroundSources = [
-        ...availableBackgroundSources.filter(source => !/^https?:/i.test(source)),
-        ...availableBackgroundSources.filter(source => /^https?:/i.test(source))
+        ...preferredCoverSources,
+        ...availableBackgroundSources.filter(source =>
+            !preferredCoverSources.includes(source) && !/^https?:/i.test(source)
+        ),
+        ...availableBackgroundSources.filter(source =>
+            !preferredCoverSources.includes(source) && /^https?:/i.test(source)
+        )
     ];
     let backgroundImage = null;
 
