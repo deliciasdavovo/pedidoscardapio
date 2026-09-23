@@ -6499,9 +6499,13 @@ async function buildCategoryShareBlob(categoryName) {
     }
 
     const menuEntries = items.map(getCategoryMenuEntry);
-    const maxItemsPerPanel = 6;
-    const panelCount = Math.ceil(menuEntries.length / maxItemsPerPanel);
-    const balancedPanelSize = Math.ceil(menuEntries.length / panelCount);
+    // A categoria é sempre tratada como um único cardápio.
+    // Só quebramos visualmente quando a imagem ficaria longa demais.
+    const totalContentHeight =
+        154 + menuEntries.reduce((total, entry) => total + entry.height, 0) + 42;
+    const maxSharePageHeight = 1900;
+    const pageCount = totalContentHeight > maxSharePageHeight ? 2 : 1;
+    const balancedPanelSize = Math.ceil(menuEntries.length / pageCount);
     const panels = [];
 
     for (let index = 0; index < menuEntries.length; index += balancedPanelSize) {
@@ -6695,7 +6699,7 @@ async function buildCategoryShareBlob(categoryName) {
     let panelY = 0;
     panels.forEach((panel, panelIndex) => {
         drawPanelHeading(
-            panelIndex === 0 ? categoryName : 'Mais opções',
+            categoryName,
             panelY,
             panelIndex
         );
