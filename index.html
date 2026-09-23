@@ -1280,7 +1280,11 @@
 
                             <div class="space-y-2">
                                 <label class="text-[11px] font-semibold text-[#8C8676] ml-1 block">Endereço</label>
-                                <input type="text" id="delivery-address" name="street-address" autocomplete="street-address" oninput="this.dataset.autoFilled='false'" placeholder="Rua, número, bairro e complemento" class="w-full bg-[#ECE9E1]/50 border border-[#8C8676]/10 rounded-2xl px-5 py-3.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#8C8676]/20 transition-all">
+                                <input type="text" id="delivery-address" name="street-address" autocomplete="street-address" oninput="this.dataset.autoFilled='false'" placeholder="Rua e bairro" class="w-full bg-[#ECE9E1]/50 border border-[#8C8676]/10 rounded-2xl px-5 py-3.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#8C8676]/20 transition-all">
+                                <div class="grid grid-cols-[110px_minmax(0,1fr)] gap-2">
+                                    <input type="text" id="delivery-number" name="address-line2" inputmode="numeric" autocomplete="off" placeholder="Número" class="w-full bg-[#ECE9E1]/50 border border-[#8C8676]/10 rounded-2xl px-4 py-3.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#8C8676]/20 transition-all">
+                                    <input type="text" id="delivery-complement" autocomplete="off" placeholder="Complemento (opcional)" class="w-full bg-[#ECE9E1]/50 border border-[#8C8676]/10 rounded-2xl px-4 py-3.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#8C8676]/20 transition-all">
+                                </div>
                             </div>
 
                             <div id="special-delivery-note" class="hidden rounded-2xl bg-[#FFF3E7] border border-[#C96F2B]/20 px-4 py-3 text-[11px] leading-relaxed text-[#7A4A27]">
@@ -4094,7 +4098,9 @@ function readCheckoutPreferences() {
                 fulfillment: activeFulfillment,
                 pickupLocation: document.getElementById('pickup-location')?.value || 'Matriz',
                 cep: document.getElementById('delivery-cep')?.value || '',
-                address: document.getElementById('delivery-address')?.value?.trim() || ''
+                address: document.getElementById('delivery-address')?.value?.trim() || '',
+                number: document.getElementById('delivery-number')?.value?.trim() || '',
+                complement: document.getElementById('delivery-complement')?.value?.trim() || ''
             };
 
             try {
@@ -4109,6 +4115,8 @@ function readCheckoutPreferences() {
             const pickup = document.getElementById('pickup-location');
             const cepInput = document.getElementById('delivery-cep');
             const addressInput = document.getElementById('delivery-address');
+            const numberInput = document.getElementById('delivery-number');
+            const complementInput = document.getElementById('delivery-complement');
 
             if (nameInput && prefs.name) nameInput.value = prefs.name;
             if (pickup && prefs.pickupLocation) pickup.value = prefs.pickupLocation;
@@ -4121,6 +4129,8 @@ function readCheckoutPreferences() {
                 addressInput.value = prefs.address;
                 addressInput.dataset.autoFilled = 'false';
             }
+            if (numberInput && prefs.number) numberInput.value = prefs.number;
+            if (complementInput && prefs.complement) complementInput.value = prefs.complement;
 
             setFulfillment(prefs.fulfillment === 'Entrega' ? 'Entrega' : 'Retirada');
 
@@ -4134,8 +4144,10 @@ function readCheckoutPreferences() {
             const pickup = document.getElementById('pickup-location');
             const cepInput = document.getElementById('delivery-cep');
             const addressInput = document.getElementById('delivery-address');
+            const numberInput = document.getElementById('delivery-number');
+            const complementInput = document.getElementById('delivery-complement');
 
-            [nameInput, cepInput, addressInput].forEach(el => {
+            [nameInput, cepInput, addressInput, numberInput, complementInput].forEach(el => {
                 if (el) el.addEventListener('input', saveCheckoutPreferences);
             });
 
@@ -4792,11 +4804,14 @@ if (!item.sizes && flavor && item.variants && item.variants[flavor]) {
 
         function askDeliveryFeeOnWhatsApp() {
             const address = document.getElementById('delivery-address')?.value?.trim();
+            const number = document.getElementById('delivery-number')?.value?.trim();
+            const complement = document.getElementById('delivery-complement')?.value?.trim();
+            const fullAddress = [address, number ? 'nº ' + number : '', complement].filter(Boolean).join(', ');
             const items = cart.length
                 ? '\n\nItens no carrinho:\n' + cart.map(item => '- ' + item.name + (item.flavor ? ' - ' + item.flavor : '')).join('\n')
                 : '';
-            const addressText = address
-                ? '\nEndereço: ' + address
+            const addressText = fullAddress
+                ? '\nEndereço: ' + fullAddress
                 : '\nEndereço: vou informar aqui na conversa.';
             const message = 'Olá! Não sei meu CEP e gostaria de consultar a taxa de entrega.' + addressText + items;
             window.open('https://wa.me/' + WHATSAPP_NUMBER + '?text=' + encodeURIComponent(message), '_blank');
@@ -4989,12 +5004,21 @@ function formatWhatsAppOrderDate(value) {
             }
 
             const address = document.getElementById('delivery-address')?.value?.trim() || '';
+            const number = document.getElementById('delivery-number')?.value?.trim() || '';
+            const complement = document.getElementById('delivery-complement')?.value?.trim() || '';
+            const fullAddress = [address, number ? 'nº ' + number : '', complement].filter(Boolean).join(', ');
             const cep = getDeliveryCep();
             const specialDelivery = cartRequiresSpecialDelivery();
 
             if (activeFulfillment === 'Entrega' && !address) {
                 showValidationPopup('Por favor, informe o endereço da entrega!');
                 document.getElementById('delivery-address').focus();
+                return;
+            }
+
+            if (activeFulfillment === 'Entrega' && !number) {
+                showValidationPopup('Por favor, informe o número da entrega!');
+                document.getElementById('delivery-number').focus();
                 return;
             }
 
@@ -5038,7 +5062,7 @@ function formatWhatsAppOrderDate(value) {
             }
 
             const fulfillmentInfo = activeFulfillment === 'Entrega'
-                ? 'Entrega: ' + address
+                ? 'Entrega: ' + fullAddress
                 : 'Retirada: ' + document.getElementById('pickup-location').value;
 
             const selectedDate = document.getElementById('order-date').value;
