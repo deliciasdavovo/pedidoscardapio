@@ -735,6 +735,176 @@
 .search-empty-state {
     animation: fadeIn 0.35s ease-out forwards;
 }
+    
+        /* Controles do modal inspirados no iOS: superfícies leves, sem cards em volta. */
+        .modal-choice-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            padding: 2px 0;
+        }
+        .modal-choice-heading {
+            display: flex;
+            align-items: baseline;
+            justify-content: space-between;
+            gap: 12px;
+            padding: 0 2px;
+            color: #6F6B63;
+        }
+        .modal-choice-heading > span {
+            font-size: 10px;
+            line-height: 1.2;
+            font-weight: 650;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+        }
+        .modal-choice-heading > small {
+            font-size: 9px;
+            line-height: 1.2;
+            font-weight: 400;
+            color: rgba(140, 134, 118, 0.68);
+        }
+        .modal-segmented-control {
+            display: grid;
+            gap: 3px;
+            padding: 3px;
+            border: 0;
+            border-radius: 15px;
+            background: rgba(34, 32, 28, 0.065);
+            box-shadow: inset 0 0 0 1px rgba(34, 32, 28, 0.025);
+        }
+        .modal-segment-btn {
+            min-width: 0;
+            min-height: 44px;
+            padding: 8px 10px;
+            border: 0;
+            border-radius: 12px;
+            background: transparent;
+            color: rgba(111, 107, 99, 0.68);
+            font-size: 11px;
+            line-height: 1.2;
+            font-weight: 550;
+            text-align: center;
+            -webkit-tap-highlight-color: transparent;
+            transition: color 0.2s ease, background 0.2s ease, box-shadow 0.2s ease, transform 0.12s ease;
+        }
+        .modal-segment-btn:active {
+            transform: scale(0.98);
+        }
+        .modal-segment-btn.is-active {
+            background: rgba(255, 255, 255, 0.96);
+            color: #2C4A34;
+            font-weight: 650;
+            box-shadow: 0 1px 2px rgba(34, 32, 28, 0.10), 0 5px 14px rgba(34, 32, 28, 0.07);
+        }
+        .modal-segment-description {
+            display: block;
+            margin-top: 3px;
+            font-size: 8px;
+            line-height: 1.15;
+            font-weight: 400;
+            opacity: 0.72;
+        }
+        .modal-picker-trigger {
+            width: 100%;
+            min-height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            padding: 8px 9px 8px 16px;
+            border: 0;
+            border-radius: 15px;
+            background: rgba(255, 255, 255, 0.80);
+            color: #22201C;
+            font-size: 12px;
+            line-height: 1.2;
+            font-weight: 550;
+            text-align: left;
+            box-shadow: 0 1px 2px rgba(34, 32, 28, 0.07), 0 0 0 1px rgba(34, 32, 28, 0.045);
+            -webkit-tap-highlight-color: transparent;
+            transition: box-shadow 0.2s ease, background 0.2s ease, transform 0.12s ease;
+        }
+        .modal-picker-trigger:active {
+            transform: scale(0.992);
+        }
+        .modal-picker-trigger[aria-expanded="true"] {
+            background: #FFFFFF;
+            box-shadow: 0 0 0 3px rgba(44, 74, 52, 0.12), 0 8px 22px rgba(34, 32, 28, 0.09);
+        }
+        .modal-picker-chevron {
+            width: 32px;
+            height: 32px;
+            flex: 0 0 32px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            background: rgba(44, 74, 52, 0.08);
+            color: #2C4A34;
+            font-size: 9px;
+        }
+        .modal-picker-chevron i {
+            transition: transform 0.22s ease;
+        }
+        .modal-picker-menu {
+            max-height: 208px;
+            overflow-y: auto;
+            margin-top: -2px;
+            padding: 6px;
+            border: 0;
+            border-radius: 16px;
+            background: rgba(255, 255, 255, 0.97);
+            box-shadow: 0 14px 32px rgba(34, 32, 28, 0.14), 0 0 0 1px rgba(34, 32, 28, 0.035);
+            -webkit-overflow-scrolling: touch;
+        }
+        .modal-flavor-option {
+            width: 100%;
+            min-height: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            padding: 9px 10px 9px 12px;
+            border: 0;
+            border-radius: 12px;
+            background: transparent;
+            color: rgba(34, 32, 28, 0.76);
+            font-size: 12px;
+            line-height: 1.25;
+            font-weight: 450;
+            text-align: left;
+            -webkit-tap-highlight-color: transparent;
+            transition: background 0.16s ease, color 0.16s ease;
+        }
+        .modal-flavor-option:active,
+        .modal-flavor-option.is-selected {
+            background: rgba(44, 74, 52, 0.09);
+            color: #2C4A34;
+        }
+        .modal-flavor-option.is-selected {
+            font-weight: 650;
+        }
+        .modal-option-check {
+            width: 24px;
+            height: 24px;
+            flex: 0 0 24px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            background: rgba(44, 74, 52, 0.11);
+            color: #2C4A34;
+            font-size: 8px;
+            opacity: 0;
+            transform: scale(0.82);
+            transition: opacity 0.16s ease, transform 0.16s ease;
+        }
+        .modal-flavor-option.is-selected .modal-option-check {
+            opacity: 1;
+            transform: scale(1);
+        }
+
     </style>
 </head>
 <body class="relative min-h-screen">
@@ -6677,29 +6847,29 @@ function buildProductModalContent(item) {
             </div>
 
             ${hasUnitToggle ? `
-            <div class="rounded-xl border border-[#8C8676]/15 bg-[#F8F5EE] p-3 space-y-2">
-                <div class="flex items-center justify-between gap-3">
-                    <span class="text-[10px] uppercase tracking-[0.12em] font-semibold text-[#6F6B63]">Forma de venda</span>
-                    <span class="text-[9px] text-[#8C8676]/65">Escolha uma opção</span>
+            <div class="modal-choice-group">
+                <div class="modal-choice-heading">
+                    <span>Forma de venda</span>
+                    <small>Escolha uma opção</small>
                 </div>
-                <div class="flex bg-[#ECE9E1] p-1 rounded-lg">
-                    <button type="button" onclick="setModalUnit('un')" id="modal-unit-un" class="flex-1 py-2 rounded-md text-[11px] font-semibold bg-[#2C4A34] text-white transition-all">Unidade aprox.</button>
-                    <button type="button" onclick="setModalUnit('kg')" id="modal-unit-kg" class="flex-1 py-2 rounded-md text-[11px] font-semibold text-[#8C8676]/60 transition-all">Quilo</button>
+                <div class="modal-segmented-control" style="grid-template-columns: repeat(2, minmax(0, 1fr));">
+                    <button type="button" onclick="setModalUnit('un')" id="modal-unit-un" class="modal-segment-btn is-active" aria-pressed="true">Unidade aprox.</button>
+                    <button type="button" onclick="setModalUnit('kg')" id="modal-unit-kg" class="modal-segment-btn" aria-pressed="false">Quilo</button>
                 </div>
             </div>
             ` : ''}
 
             ${hasSizes ? `
-            <div class="rounded-xl border border-[#8C8676]/15 bg-[#F8F5EE] p-3 space-y-2">
-                <div class="flex items-center justify-between gap-3">
-                    <span class="text-[10px] uppercase tracking-[0.12em] font-semibold text-[#6F6B63]">Tamanho</span>
-                    <span class="text-[9px] text-[#8C8676]/65">Escolha uma opção</span>
+            <div class="modal-choice-group">
+                <div class="modal-choice-heading">
+                    <span>Tamanho</span>
+                    <small>Escolha uma opção</small>
                 </div>
-                <div class="grid ${item.sizes.length === 2 ? 'grid-cols-2' : 'grid-cols-3'} gap-1 bg-[#ECE9E1] p-1 rounded-lg">
+                <div class="modal-segmented-control" style="grid-template-columns: repeat(${item.sizes.length}, minmax(0, 1fr));">
                     ${item.sizes.map((s, idx) => `
-                        <button type="button" onclick="setModalSize(${idx})" id="modal-size-${idx}" class="${idx === 0 ? 'bg-[#2C4A34] text-white' : 'text-[#8C8676]/60'} py-2 rounded-md text-[11px] font-medium transition-all">
+                        <button type="button" onclick="setModalSize(${idx})" id="modal-size-${idx}" class="modal-segment-btn ${idx === 0 ? 'is-active' : ''}" aria-pressed="${idx === 0 ? 'true' : 'false'}">
                             ${escapeHtml(s.label)}
-                            ${s.description ? `<span class="block text-[8px] font-normal opacity-75 normal-case tracking-normal mt-0.5 leading-tight">${escapeHtml(s.description)}</span>` : ''}
+                            ${s.description ? `<span class="modal-segment-description">${escapeHtml(s.description)}</span>` : ''}
                         </button>
                     `).join('')}
                 </div>
@@ -6707,21 +6877,23 @@ function buildProductModalContent(item) {
             ` : ''}
 
             ${hasFlavors ? `
-            <div class="rounded-xl border border-[#8C8676]/15 bg-[#F8F5EE] p-3 space-y-2">
-                <div class="flex items-center justify-between gap-3">
-                    <span class="text-[10px] uppercase tracking-[0.12em] font-semibold text-[#6F6B63]">Sabor</span>
-                    <span class="text-[9px] text-[#8C8676]/65">Escolha uma opção</span>
+            <div class="modal-choice-group">
+                <div class="modal-choice-heading">
+                    <span>Sabor</span>
+                    <small>Escolha uma opção</small>
                 </div>
                 <input type="hidden" id="modal-flavor" value="">
-                <button type="button" id="modal-flavor-trigger" aria-expanded="false" onclick="toggleModalFlavorMenu()" class="w-full min-h-[44px] flex items-center justify-between gap-3 bg-[#FBF8F2] border border-[#8C8676]/20 rounded-lg px-3.5 py-2.5 text-left focus:outline-none focus:border-[#2C4A34]/35 focus:ring-2 focus:ring-[#2C4A34]/10 transition-all">
-                    <span id="modal-flavor-label" class="text-[12px] font-medium text-[#8C8676]">Selecione uma opção</span>
-                    <i id="modal-flavor-chevron" class="fas fa-chevron-down text-[9px] text-[#2C4A34]/65 transition-transform"></i>
+                <button type="button" id="modal-flavor-trigger" aria-expanded="false" onclick="toggleModalFlavorMenu()" class="modal-picker-trigger">
+                    <span id="modal-flavor-label" class="text-[#8C8676]">Selecione uma opção</span>
+                    <span class="modal-picker-chevron" aria-hidden="true">
+                        <i id="modal-flavor-chevron" class="fas fa-chevron-down"></i>
+                    </span>
                 </button>
-                <div id="modal-flavor-menu" class="hidden max-h-52 overflow-y-auto rounded-lg border border-[#8C8676]/15 bg-[#FBF8F2] shadow-[0_12px_28px_rgba(34,32,28,0.12)] divide-y divide-[#8C8676]/10">
+                <div id="modal-flavor-menu" class="modal-picker-menu hidden" role="listbox">
                     ${getFlavorList(item).map(f => `
-                        <button type="button" data-flavor="${escapeHtml(f.label)}" onclick="selectModalFlavor(this.dataset.flavor)" class="modal-flavor-option w-full flex items-center justify-between gap-3 px-3.5 py-2.5 text-left text-[12px] text-[#22201C]/75 hover:bg-[#ECE9E1]/70 active:bg-[#ECE9E1] transition-colors">
+                        <button type="button" role="option" aria-selected="false" data-flavor="${escapeHtml(f.label)}" onclick="selectModalFlavor(this.dataset.flavor)" class="modal-flavor-option">
                             <span>${escapeHtml(f.label)}</span>
-                            <i class="fas fa-check text-[9px] text-[#2C4A34] opacity-0"></i>
+                            <span class="modal-option-check" aria-hidden="true"><i class="fas fa-check"></i></span>
                         </button>
                     `).join('')}
                 </div>
@@ -6754,7 +6926,7 @@ function getModalUnit() {
     const item = MENU_ITEMS.find(i => i.id === currentModalItemId);
     if (item && Array.isArray(item.units) && item.units.includes('kg') && !item.units.includes('un')) return 'kg';
     const btnKg = document.getElementById('modal-unit-kg');
-    return (btnKg && btnKg.classList.contains('bg-[#2C4A34]')) ? 'kg' : 'un';
+    return (btnKg && btnKg.classList.contains('is-active')) ? 'kg' : 'un';
 }
 
 function setModalUnit(unit) {
@@ -6764,13 +6936,10 @@ function setModalUnit(unit) {
     if (!btnUn || !btnKg || !input) return;
 
     [btnUn, btnKg].forEach(button => {
-        button.classList.remove('bg-[#2C4A34]', 'text-white', 'text-[#8C8676]/50');
-        button.classList.add('text-[#8C8676]/60');
+        const selected = button === (unit === 'kg' ? btnKg : btnUn);
+        button.classList.toggle('is-active', selected);
+        button.setAttribute('aria-pressed', selected ? 'true' : 'false');
     });
-
-    const activeButton = unit === 'kg' ? btnKg : btnUn;
-    activeButton.classList.add('bg-[#2C4A34]', 'text-white');
-    activeButton.classList.remove('text-[#8C8676]/60');
 
     if (unit === 'un') {
         input.value = '1';
@@ -6788,9 +6957,9 @@ function setModalSize(idx) {
     item.sizes.forEach((_, i) => {
         const btn = document.getElementById(`modal-size-${i}`);
         if (!btn) return;
-        btn.classList.toggle('bg-[#2C4A34]', i === idx);
-        btn.classList.toggle('text-white', i === idx);
-        btn.classList.toggle('text-[#8C8676]/60', i !== idx);
+        const selected = i === idx;
+        btn.classList.toggle('is-active', selected);
+        btn.setAttribute('aria-pressed', selected ? 'true' : 'false');
     });
     if (item.sizes[idx] && item.sizes[idx].image) {
         document.getElementById('modal-img').src = item.sizes[idx].image;
@@ -6834,7 +7003,7 @@ function updateModalPricePreview() {
     } else if (item.sizes && item.sizes.length > 0) {
         const activeIdx = item.sizes.findIndex((_, i) => {
             const btn = document.getElementById(`modal-size-${i}`);
-            return btn && btn.classList.contains('bg-[#2C4A34]');
+            return btn && btn.classList.contains('is-active');
         });
         price = item.sizes[Math.max(0, activeIdx)].price;
     } else {
@@ -6893,11 +7062,8 @@ function selectModalFlavor(flavor) {
 
     document.querySelectorAll('.modal-flavor-option').forEach(option => {
         const selected = option.dataset.flavor === flavor;
-        option.classList.toggle('bg-[#E8EEE8]', selected);
-        option.classList.toggle('text-[#2C4A34]', selected);
-        option.classList.toggle('font-semibold', selected);
-        const check = option.querySelector('.fa-check');
-        if (check) check.classList.toggle('opacity-0', !selected);
+        option.classList.toggle('is-selected', selected);
+        option.setAttribute('aria-selected', selected ? 'true' : 'false');
     });
 
     toggleModalFlavorMenu(false);
@@ -6971,7 +7137,7 @@ function addToCartFromModal() {
     if (item.sizes && item.sizes.length > 0) {
         const activeIdx = item.sizes.findIndex((_, i) => {
             const btn = document.getElementById(`modal-size-${i}`);
-            return btn && btn.classList.contains('bg-[#2C4A34]');
+            return btn && btn.classList.contains('is-active');
         });
         size = item.sizes[Math.max(0, activeIdx)].label;
     }
