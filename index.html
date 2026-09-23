@@ -5234,6 +5234,41 @@ function getShareDominantColor(sampleCtx, width, height) {
     }
 }
 
+function getShareDominantColorFromImage(img) {
+    if (!img || !img.width || !img.height) return null;
+
+    const sampleCanvas = document.createElement('canvas');
+    const sampleSize = 72;
+    sampleCanvas.width = sampleSize;
+    sampleCanvas.height = sampleSize;
+
+    const sampleCtx = sampleCanvas.getContext('2d');
+    sampleCtx.imageSmoothingEnabled = true;
+    sampleCtx.imageSmoothingQuality = 'high';
+    drawShareCoverImage(sampleCtx, img, 0, 0, sampleSize, sampleSize);
+
+    return getShareDominantColor(sampleCtx, sampleSize, sampleSize);
+}
+
+function drawShareTrackedText(ctx, text, centerX, y, tracking) {
+    const characters = Array.from(String(text || ''));
+    if (!characters.length) return;
+
+    const widths = characters.map(character => ctx.measureText(character).width);
+    const totalWidth =
+        widths.reduce((total, width) => total + width, 0) +
+        (Math.max(0, characters.length - 1) * tracking);
+    let x = centerX - (totalWidth / 2);
+    const previousAlign = ctx.textAlign;
+
+    ctx.textAlign = 'left';
+    characters.forEach((character, index) => {
+        ctx.fillText(character, x, y);
+        x += widths[index] + tracking;
+    });
+    ctx.textAlign = previousAlign;
+}
+
 function drawShareBlurredBackground(ctx, img, width, height) {
     if (!img || !img.width || !img.height) return null;
 
@@ -5855,7 +5890,8 @@ async function buildProductShareBlob(item) {
         360,
         Math.ceil(headerHeight + infoHeight + 30)
     );
-    const height = Math.max(1350, panelHeight + 670);
+    const footerHeight = 94;
+    const height = Math.max(1350, panelHeight + 760);
 
     const canvas = document.createElement('canvas');
     canvas.width = width;
@@ -5867,55 +5903,31 @@ async function buildProductShareBlob(item) {
         : (item.image || '');
 
     const img = await loadShareProductImage(imageSrc);
+    const dominantColor = getShareDominantColorFromImage(img);
 
-    // Fundo realmente fora de foco: baixa resolução + ampliação suave + blur.
-    ctx.fillStyle = '#DDD5C8';
-    ctx.fillRect(0, 0, width, height);
-
-    if (img && img.width && img.height) {
-        const dominantColor = drawShareBlurredBackground(ctx, img, width, height);
-
-        // A cor predominante cobre 70% do fundo, preservando a foto desfocada.
-        if (dominantColor) {
-            ctx.fillStyle =
-                'rgba(' +
-                dominantColor.red + ',' +
-                dominantColor.green + ',' +
-                dominantColor.blue + ',0.70)';
-            ctx.fillRect(0, 0, width, height);
-        }
-
-        // Véu mínimo apenas para separar o fundo da moldura.
-        ctx.fillStyle = 'rgba(248,244,238,0.06)';
-        ctx.fillRect(0, 0, width, height);
-    }
-
-    const photoVeil = ctx.createLinearGradient(0, 0, 0, height);
-    photoVeil.addColorStop(0, 'rgba(255,255,255,0.02)');
-    photoVeil.addColorStop(0.55, 'rgba(248,244,238,0.04)');
-    photoVeil.addColorStop(1, 'rgba(34,32,28,0.10)');
-    ctx.fillStyle = photoVeil;
+    // Fundo padrão do site, sem repetir nem desfocar a foto.
+    ctx.fillStyle = '#F4F1EA';
     ctx.fillRect(0, 0, width, height);
 
     const panelX = 70;
-    const panelY = height - panelHeight - 48;
+    const panelY = height - panelHeight - footerHeight - 28;
     const panelWidth = width - (panelX * 2);
 
-    // Moldura central preenchida por completo, mantendo a proporção da foto.
-    const frameX = 110;
-    const frameY = 70;
+    // Foto maior, com margens menores e mais presença vertical.
+    const frameX = 44;
+    const frameY = 34;
     const frameWidth = width - (frameX * 2);
-    const frameBottom = panelY + 112;
-    const frameHeight = Math.max(520, frameBottom - frameY);
+    const frameBottom = panelY + 128;
+    const frameHeight = Math.max(650, frameBottom - frameY);
 
-    const innerInset = 10;
+    const innerInset = 8;
     const innerX = frameX + innerInset;
     const innerY = frameY + innerInset;
     const innerWidth = frameWidth - (innerInset * 2);
     const innerHeight = frameHeight - (innerInset * 2);
 
     ctx.save();
-    createShareRoundedRectPath(ctx, innerX, innerY, innerWidth, innerHeight, 58);
+    createShareRoundedRectPath(ctx, innerX, innerY, innerWidth, innerHeight, 52);
     ctx.clip();
 
     ctx.fillStyle = '#F5F0E7';
@@ -5933,10 +5945,10 @@ async function buildProductShareBlob(item) {
         frameY,
         frameWidth,
         frameHeight,
-        72,
+        62,
         null,
         'rgba(255,255,255,0.96)',
-        14
+        10
     );
 
     // Card branco de informações.
@@ -6135,6 +6147,36 @@ async function buildProductShareBlob(item) {
             flavorY += 12;
         });
     }
+
+    // Faixa de assinatura com a cor predominante da foto.
+    const footerY = height - footerHeight;
+    const footerColor = dominantColor || {
+        red: 44,
+        green: 74,
+        blue: 52
+    };
+    ctx.fillStyle =
+        'rgb(' +
+        footerColor.red + ',' +
+        footerColor.green + ',' +
+        footerColor.blue + ')';
+    ctx.fillRect(0, footerY, width, footerHeight);
+
+    const footerLuminance =
+        (footerColor.red * 0.299) +
+        (footerColor.green * 0.587) +
+        (footerColor.blue * 0.114);
+    ctx.fillStyle = footerLuminance > 170
+        ? 'rgba(34,32,28,0.84)'
+        : 'rgba(255,255,255,0.94)';
+    ctx.font = "400 23px 'DM Sans', sans-serif";
+    drawShareTrackedText(
+        ctx,
+        'DELÍCIAS DA VOVÓ',
+        width / 2,
+        footerY + 59,
+        9
+    );
 
     return new Promise((resolve, reject) => {
         try {
