@@ -924,8 +924,10 @@
 <body class="relative min-h-screen">
 
     <div id="site-toast" class="pointer-events-none fixed top-24 left-1/2 -translate-x-1/2 z-[90] opacity-0">
-        <div class="min-w-[260px] max-w-[92vw] bg-[#22201C] text-white/95 px-5 py-3 rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.35)] border border-white/10 flex items-center gap-3">
-            <i class="fas fa-circle-exclamation text-[#F7B267]"></i>
+        <div id="site-toast-surface" class="min-w-[260px] max-w-[92vw] bg-[#22201C] text-white/95 px-5 py-3 rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.35)] border border-white/10 flex items-center gap-3">
+            <span id="site-toast-icon" class="w-7 h-7 shrink-0 rounded-full bg-[#F7B267]/15 flex items-center justify-center">
+                <i class="fas fa-circle-exclamation text-[#F7B267] text-xs"></i>
+            </span>
             <span id="site-toast-text" class="text-xs sm:text-sm leading-relaxed"></span>
         </div>
     </div>
@@ -5031,13 +5033,26 @@ function formatWhatsAppOrderDate(value) {
           showValidationPopup(PRONTA_ENTREGA_MSG);
         }
 
-        function showValidationPopup(message) {
+        function showValidationPopup(message, type = 'info') {
           if (!message) return;
           const toast = document.getElementById('site-toast');
           const toastText = document.getElementById('site-toast-text');
+          const toastSurface = document.getElementById('site-toast-surface');
+          const toastIcon = document.getElementById('site-toast-icon');
           if (!toast || !toastText) return;
 
           toastText.textContent = message;
+          if (toastSurface) {
+            toastSurface.classList.toggle('bg-[#2C4A34]', type === 'cart');
+            toastSurface.classList.toggle('bg-[#22201C]', type !== 'cart');
+          }
+          if (toastIcon) {
+            toastIcon.innerHTML = type === 'cart'
+              ? '<i class="fas fa-check text-white text-[10px]"></i>'
+              : '<i class="fas fa-circle-exclamation text-[#F7B267] text-xs"></i>';
+            toastIcon.classList.toggle('bg-white/15', type === 'cart');
+            toastIcon.classList.toggle('bg-[#F7B267]/15', type !== 'cart');
+          }
           toast.classList.remove('opacity-0', 'site-toast-hide');
           toast.classList.add('site-toast-show');
 
@@ -7177,7 +7192,7 @@ function addToCartFromModal() {
     const image = getImageForSelection(item, flavor, size);
     addIndividualToCart(id, unit, qty, flavor, size, price, image);
     updateCartSummary();
-    showValidationPopup(item.name + ' adicionado à cesta!');
+    showValidationPopup(item.name + ' entrou na sua cesta', 'cart');
 }
      </script>
 </body>
