@@ -5887,21 +5887,16 @@ async function buildProductShareBlob(item) {
     const frameBottom = panelY + 112;
     const frameHeight = Math.max(650, frameBottom - frameY);
 
-    const innerInset = 16;
-    const innerX = frameX + innerInset;
-    const innerY = frameY + innerInset;
-    const innerWidth = frameWidth - (innerInset * 2);
-    const innerHeight = frameHeight - (innerInset * 2);
-
+    // A foto ocupa toda a moldura; a borda branca é desenhada por cima.
     ctx.save();
-    createShareRoundedRectPath(ctx, innerX, innerY, innerWidth, innerHeight, 52);
+    createShareRoundedRectPath(ctx, frameX, frameY, frameWidth, frameHeight, 62);
     ctx.clip();
 
     ctx.fillStyle = '#F5F0E7';
-    ctx.fillRect(innerX, innerY, innerWidth, innerHeight);
+    ctx.fillRect(frameX, frameY, frameWidth, frameHeight);
 
     if (img && img.width && img.height) {
-        drawShareCoverImage(ctx, img, innerX, innerY, innerWidth, innerHeight);
+        drawShareCoverImage(ctx, img, frameX, frameY, frameWidth, frameHeight);
     }
 
     ctx.restore();
