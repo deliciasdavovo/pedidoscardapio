@@ -4947,30 +4947,19 @@ if (!item.sizes && flavor && item.variants && item.variants[flavor]) {
         function formatWhatsAppCartItem(item) {
             const isKg = item.unit === 'kg';
             const qtyText = item.qty.toFixed(isKg ? 1 : 0).replace('.', ',') + (isKg ? ' kg' : ' un');
-            const unitLabel = isKg ? 'kg' : 'un';
             const estimatedUnit = !isKg && hasEstimatedUnitPrice(item);
             const subtotal = item.finalPrice * item.qty;
 
             const lines = [
-                '*' + item.name + '*',
-                '   Quantidade: ' + qtyText
+                '*' + item.name + '* — ' + qtyText
             ];
 
-            if (item.size) {
-                lines.push('   Tamanho: ' + item.size);
+            const details = [item.size, item.flavor].filter(Boolean);
+            if (details.length) {
+                lines.push(details.join(' • '));
             }
 
-            if (item.flavor) {
-                lines.push('   Sabor: ' + item.flavor);
-            }
-
-            lines.push(
-                '   Valor ' + unitLabel + ': ' +
-                formatWhatsAppMoney(item.finalPrice) +
-                (estimatedUnit ? ' >> _aproximado*_ <<' : '')
-            );
-
-            lines.push('   *Subtotal' + (estimatedUnit ? ' estimado' : '') + ': ' + formatWhatsAppMoney(subtotal) + '*');
+            lines.push('*' + formatWhatsAppMoney(subtotal) + (estimatedUnit ? ' aprox.' : '') + '*');
 
             return lines.join('\n');
         }
@@ -5077,26 +5066,18 @@ function formatWhatsAppOrderDate(value) {
 
             const message =
                 '*PEDIDO • DELÍCIAS DA VOVÓ*\n' +
-                '__________________________\n\n' +
-
-                '*DADOS DO PEDIDO*\n' +
                 'Cliente: ' + name + '\n' +
-                'Tipo: ' + activeOrderType + encomendaDateTimeText + '\n\n' +
-
-                '*RETIRADA / ENTREGA*\n' +
+                activeOrderType + encomendaDateTimeText + '\n' +
                 fulfillmentInfo + deliveryText + '\n\n' +
-
-                '*ITENS DO PEDIDO*\n\n' +
                 itemsText + '\n\n' +
-                '__________________________\n' +
                 totalLabel + formatWhatsAppMoney(total) +
                 (cart.some(item => item.unit !== 'kg' && hasEstimatedUnitPrice(item))
-                    ? '\n_O valor aproximado pode mudar conforme os itens que serão pesados._'
+                    ? '\n_Valores aproximados podem variar conforme o peso final._'
                     : '') +
                 (activeFulfillment === 'Entrega' && !deliveryFee
                     ? '\n_Taxa de entrega será confirmada pela equipe._'
                     : '') +
-                '\n\n_Aguardo a confirmação do pedido._';
+                '\n\n_Aguardo confirmação._';
 
             saveCheckoutPreferences();
 
