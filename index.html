@@ -5880,10 +5880,10 @@ async function buildProductShareBlob(item) {
     const panelY = height - panelHeight - 48;
     const panelWidth = width - (panelX * 2);
 
-    // Moldura e card compartilham o mesmo alinhamento e formam uma peça única.
-    const frameX = panelX;
+    // A moldura fica mais estreita e entra por trás do card, como uma peça única.
+    const frameX = panelX + 32;
     const frameY = 34;
-    const frameWidth = panelWidth;
+    const frameWidth = panelWidth - 64;
     const frameBottom = panelY + 112;
     const frameHeight = Math.max(650, frameBottom - frameY);
 
