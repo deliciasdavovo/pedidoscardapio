@@ -6926,8 +6926,8 @@ function buildProductModalContent(item) {
                     </div>
                     <div class="text-right self-end pb-0.5 min-w-0">
                         <p class="text-[9px] uppercase tracking-[0.12em] font-semibold text-[#8C8676]/75 mb-1.5">Total</p>
-                        <p class="text-[24px] leading-none font-bold tracking-[-0.025em] text-[#2C4A34]" id="modal-price-preview">R$ 0,00</p>
-                        <p class="text-[10px] leading-tight text-[#8C8676] font-medium mt-1.5" id="modal-unit-price-label"></p>
+                        <p class="text-[25px] leading-none font-bold tracking-[-0.025em] text-[#2C4A34]" id="modal-price-preview">R$ 0,00</p>
+                        <p class="text-[9.5px] leading-tight text-[#8C8676]/80 font-medium mt-1.5" id="modal-unit-price-label"></p>
                     </div>
                 </div>
 
@@ -7010,8 +7010,8 @@ function updateModalPricePreview() {
         const unitPrice = qty > 0 ? total / qty : 0;
         const lbl = document.getElementById('modal-unit-price-label');
         const prv = document.getElementById('modal-price-preview');
-        if (lbl) lbl.innerText = 'R$ ' + unitPrice.toFixed(2).replace('.', ',') + ' ' + suffix;
-        if (prv) prv.innerHTML = '<span class="text-[11px] font-semibold align-top text-[#2C4A34]/65 mr-0.5">R$</span>' + total.toFixed(2).replace('.', ',');
+        if (lbl) lbl.innerText = unitPrice.toFixed(2).replace('.', ',') + ' ' + suffix;
+        if (prv) prv.textContent = 'R$ ' + total.toFixed(2).replace('.', ',');
         return;
     }
 
@@ -7041,13 +7041,17 @@ function updateModalPricePreview() {
     if (typeof price !== 'number' || Number.isNaN(price)) price = 0;
 
     const isEstimatedUnit = unit === 'un' && hasEstimatedUnitPrice(item);
-    if (lbl) lbl.innerText = isEstimatedUnit
-        ? 'aprox. R$ ' + price.toFixed(2).replace('.', ',') + ' /un'
-        : 'R$ ' + price.toFixed(2).replace('.', ',') + ' ' + suffix;
+    if (lbl) {
+        if (qty > 1) {
+            lbl.innerText = (isEstimatedUnit ? 'aprox. ' : '') + price.toFixed(2).replace('.', ',') + ' ' + suffix;
+        } else {
+            lbl.innerText = isEstimatedUnit ? 'valor aproximado' : '';
+        }
+    }
 
-    if (prv) prv.innerHTML =
-        (isEstimatedUnit ? '<span class="text-[10px] font-semibold text-[#8C8676] mr-1">aprox.</span>' : '') +
-        '<span class="text-[11px] font-semibold align-top text-[#2C4A34]/65 mr-0.5">R$</span>' +
+    if (prv) prv.textContent =
+        (isEstimatedUnit ? '≈ ' : '') +
+        'R$ ' +
         (price * qty).toFixed(2).replace('.', ',');
 }
 
