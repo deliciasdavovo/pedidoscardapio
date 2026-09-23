@@ -6702,20 +6702,29 @@ function buildProductModalContent(item) {
             </div>
 
             ${hasUnitToggle ? `
-            <div class="flex bg-[#ECE9E1] p-1 rounded-xl border border-[#8C8676]/5">
-                <button onclick="setModalUnit('un')" id="modal-unit-un" class="flex-1 py-2 rounded-lg text-[12px] font-semibold bg-[#2C4A34] text-white transition-all">Unidade aprox.</button>
-                <button onclick="setModalUnit('kg')" id="modal-unit-kg" class="flex-1 py-2 rounded-lg text-[12px] font-semibold text-[#8C8676]/50 transition-all">Quilo</button>
+            <div class="rounded-xl border border-[#8C8676]/15 bg-[#F8F5EE] p-3 space-y-2">
+                <div class="flex items-center justify-between gap-3">
+                    <span class="text-[10px] uppercase tracking-[0.12em] font-semibold text-[#6F6B63]">Forma de venda</span>
+                    <span class="text-[9px] text-[#8C8676]/65">Escolha uma opção</span>
+                </div>
+                <div class="flex bg-[#ECE9E1] p-1 rounded-lg">
+                    <button type="button" onclick="setModalUnit('un')" id="modal-unit-un" class="flex-1 py-2 rounded-md text-[11px] font-semibold bg-[#2C4A34] text-white transition-all">Unidade aprox.</button>
+                    <button type="button" onclick="setModalUnit('kg')" id="modal-unit-kg" class="flex-1 py-2 rounded-md text-[11px] font-semibold text-[#8C8676]/60 transition-all">Quilo</button>
+                </div>
             </div>
             ` : ''}
 
             ${hasSizes ? `
-            <div class="space-y-1.5">
-                <label class="text-[11px] font-semibold text-[#8C8676]">Escolha o tamanho</label>
-                <div class="grid ${item.sizes.length === 2 ? 'grid-cols-2' : 'grid-cols-3'} gap-1 bg-[#ECE9E1] p-1 rounded-xl">
+            <div class="rounded-xl border border-[#8C8676]/15 bg-[#F8F5EE] p-3 space-y-2">
+                <div class="flex items-center justify-between gap-3">
+                    <span class="text-[10px] uppercase tracking-[0.12em] font-semibold text-[#6F6B63]">Tamanho</span>
+                    <span class="text-[9px] text-[#8C8676]/65">Escolha uma opção</span>
+                </div>
+                <div class="grid ${item.sizes.length === 2 ? 'grid-cols-2' : 'grid-cols-3'} gap-1 bg-[#ECE9E1] p-1 rounded-lg">
                     ${item.sizes.map((s, idx) => `
-                        <button onclick="setModalSize(${idx})" id="modal-size-${idx}" class="${idx === 0 ? 'bg-[#8C8676] text-white' : 'text-[#8C8676]/60'} py-2 rounded-lg text-[11px] font-medium transition-all">
+                        <button type="button" onclick="setModalSize(${idx})" id="modal-size-${idx}" class="${idx === 0 ? 'bg-[#2C4A34] text-white' : 'text-[#8C8676]/60'} py-2 rounded-md text-[11px] font-medium transition-all">
                             ${escapeHtml(s.label)}
-                            ${s.description ? `<span class="block text-[8px] font-normal opacity-70 normal-case tracking-normal mt-0.5 leading-tight">${escapeHtml(s.description)}</span>` : ''}
+                            ${s.description ? `<span class="block text-[8px] font-normal opacity-75 normal-case tracking-normal mt-0.5 leading-tight">${escapeHtml(s.description)}</span>` : ''}
                         </button>
                     `).join('')}
                 </div>
@@ -6723,17 +6732,23 @@ function buildProductModalContent(item) {
             ` : ''}
 
             ${hasFlavors ? `
-            <div class="rounded-2xl border border-[#2C4A34]/10 bg-[#F4F1EA] px-4 py-3.5">
-                <div class="flex items-end justify-between gap-3 mb-2.5">
-                    <label for="modal-flavor" class="serif-font text-[17px] leading-none text-[#22201C]">Escolha seu sabor</label>
-                    <span class="text-[9px] uppercase tracking-[0.14em] font-semibold text-[#8C8676]/75">Sabores</span>
+            <div class="rounded-xl border border-[#8C8676]/15 bg-[#F8F5EE] p-3 space-y-2">
+                <div class="flex items-center justify-between gap-3">
+                    <span class="text-[10px] uppercase tracking-[0.12em] font-semibold text-[#6F6B63]">Sabor</span>
+                    <span class="text-[9px] text-[#8C8676]/65">Escolha uma opção</span>
                 </div>
-                <div class="relative">
-                    <select id="modal-flavor" onchange="onModalFlavorChange()" class="w-full min-h-[46px] bg-[#FBF8F2] border border-[#2C4A34]/15 rounded-xl pl-4 pr-11 py-3 text-[13px] font-medium focus:outline-none focus:border-[#2C4A34]/35 focus:ring-2 focus:ring-[#2C4A34]/10 appearance-none text-[#22201C] transition-all">
-                        <option value="" selected disabled>Selecione uma opção</option>
-                        ${getFlavorList(item).map(f => `<option value="${escapeHtml(f.label)}">${escapeHtml(f.label)}</option>`).join('')}
-                    </select>
-                    <i class="fas fa-chevron-down pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-[10px] text-[#2C4A34]/70"></i>
+                <input type="hidden" id="modal-flavor" value="">
+                <button type="button" id="modal-flavor-trigger" aria-expanded="false" onclick="toggleModalFlavorMenu()" class="w-full min-h-[44px] flex items-center justify-between gap-3 bg-[#FBF8F2] border border-[#8C8676]/20 rounded-lg px-3.5 py-2.5 text-left focus:outline-none focus:border-[#2C4A34]/35 focus:ring-2 focus:ring-[#2C4A34]/10 transition-all">
+                    <span id="modal-flavor-label" class="text-[12px] font-medium text-[#8C8676]">Selecione uma opção</span>
+                    <i id="modal-flavor-chevron" class="fas fa-chevron-down text-[9px] text-[#2C4A34]/65 transition-transform"></i>
+                </button>
+                <div id="modal-flavor-menu" class="hidden max-h-52 overflow-y-auto rounded-lg border border-[#8C8676]/15 bg-[#FBF8F2] shadow-[0_12px_28px_rgba(34,32,28,0.12)] divide-y divide-[#8C8676]/10">
+                    ${getFlavorList(item).map(f => `
+                        <button type="button" data-flavor="${escapeHtml(f.label)}" onclick="selectModalFlavor(this.dataset.flavor)" class="modal-flavor-option w-full flex items-center justify-between gap-3 px-3.5 py-2.5 text-left text-[12px] text-[#22201C]/75 hover:bg-[#ECE9E1]/70 active:bg-[#ECE9E1] transition-colors">
+                            <span>${escapeHtml(f.label)}</span>
+                            <i class="fas fa-check text-[9px] text-[#2C4A34] opacity-0"></i>
+                        </button>
+                    `).join('')}
                 </div>
             </div>
             ` : ''}
@@ -6790,7 +6805,7 @@ function setModalSize(idx) {
     item.sizes.forEach((_, i) => {
         const btn = document.getElementById(`modal-size-${i}`);
         if (!btn) return;
-        btn.classList.toggle('bg-[#8C8676]', i === idx);
+        btn.classList.toggle('bg-[#2C4A34]', i === idx);
         btn.classList.toggle('text-white', i === idx);
         btn.classList.toggle('text-[#8C8676]/60', i !== idx);
     });
@@ -6836,7 +6851,7 @@ function updateModalPricePreview() {
     } else if (item.sizes && item.sizes.length > 0) {
         const activeIdx = item.sizes.findIndex((_, i) => {
             const btn = document.getElementById(`modal-size-${i}`);
-            return btn && btn.classList.contains('bg-[#8C8676]');
+            return btn && btn.classList.contains('bg-[#2C4A34]');
         });
         price = item.sizes[Math.max(0, activeIdx)].price;
     } else {
@@ -6864,6 +6879,46 @@ function updateModalPricePreview() {
         (isEstimatedUnit ? '<span class="text-[10px] font-semibold text-[#8C8676] mr-1">aprox.</span>' : '') +
         '<span class="text-[11px] font-semibold align-top text-[#2C4A34]/65 mr-0.5">R$</span>' +
         (price * qty).toFixed(2).replace('.', ',');
+}
+
+function toggleModalFlavorMenu(forceOpen = null) {
+    const menu = document.getElementById('modal-flavor-menu');
+    const trigger = document.getElementById('modal-flavor-trigger');
+    const chevron = document.getElementById('modal-flavor-chevron');
+    if (!menu || !trigger) return;
+
+    const shouldOpen = forceOpen === null
+        ? menu.classList.contains('hidden')
+        : Boolean(forceOpen);
+
+    menu.classList.toggle('hidden', !shouldOpen);
+    trigger.setAttribute('aria-expanded', shouldOpen ? 'true' : 'false');
+    if (chevron) chevron.classList.toggle('rotate-180', shouldOpen);
+}
+
+function selectModalFlavor(flavor) {
+    const input = document.getElementById('modal-flavor');
+    const label = document.getElementById('modal-flavor-label');
+    if (!input) return;
+
+    input.value = flavor;
+    if (label) {
+        label.textContent = flavor;
+        label.classList.remove('text-[#8C8676]');
+        label.classList.add('text-[#22201C]');
+    }
+
+    document.querySelectorAll('.modal-flavor-option').forEach(option => {
+        const selected = option.dataset.flavor === flavor;
+        option.classList.toggle('bg-[#E8EEE8]', selected);
+        option.classList.toggle('text-[#2C4A34]', selected);
+        option.classList.toggle('font-semibold', selected);
+        const check = option.querySelector('.fa-check');
+        if (check) check.classList.toggle('opacity-0', !selected);
+    });
+
+    toggleModalFlavorMenu(false);
+    onModalFlavorChange();
 }
 
 function onModalFlavorChange() {
@@ -6923,7 +6978,9 @@ function addToCartFromModal() {
 
     if (item.flavors && item.flavors.length > 0 && !flavor) {
         showValidationPopup('Escolha um sabor antes de adicionar à cesta.');
-        if (flavorSelect) flavorSelect.focus();
+        toggleModalFlavorMenu(true);
+        const flavorTrigger = document.getElementById('modal-flavor-trigger');
+        if (flavorTrigger) flavorTrigger.focus();
         return;
     }
 
@@ -6931,7 +6988,7 @@ function addToCartFromModal() {
     if (item.sizes && item.sizes.length > 0) {
         const activeIdx = item.sizes.findIndex((_, i) => {
             const btn = document.getElementById(`modal-size-${i}`);
-            return btn && btn.classList.contains('bg-[#8C8676]');
+            return btn && btn.classList.contains('bg-[#2C4A34]');
         });
         size = item.sizes[Math.max(0, activeIdx)].label;
     }
