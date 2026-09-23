@@ -6787,14 +6787,22 @@ function setModalUnit(unit) {
     const btnKg = document.getElementById('modal-unit-kg');
     const input = document.getElementById('modal-qty');
     if (!btnUn || !btnKg || !input) return;
+
+    [btnUn, btnKg].forEach(button => {
+        button.classList.remove('bg-[#2C4A34]', 'text-white', 'text-[#8C8676]/50');
+        button.classList.add('text-[#8C8676]/60');
+    });
+
+    const activeButton = unit === 'kg' ? btnKg : btnUn;
+    activeButton.classList.add('bg-[#2C4A34]', 'text-white');
+    activeButton.classList.remove('text-[#8C8676]/60');
+
     if (unit === 'un') {
-        btnUn.classList.add('bg-[#2C4A34]', 'text-white'); btnUn.classList.remove('text-[#8C8676]/50');
-        btnKg.classList.remove('bg-[#2C4A34]', 'text-white'); btnKg.classList.add('text-[#8C8676]/50');
-        input.value = '1'; input.step = '1';
+        input.value = '1';
+        input.step = '1';
     } else {
-        btnKg.classList.add('bg-[#2C4A34]', 'text-white'); btnKg.classList.remove('text-[#8C8676]/50');
-        btnUn.classList.remove('bg-[#2C4A34]', 'text-white'); btnUn.classList.add('text-[#8C8676]/50');
-        input.value = '0.5'; input.step = '0.1';
+        input.value = '0.5';
+        input.step = '0.1';
     }
     updateModalPricePreview();
 }
