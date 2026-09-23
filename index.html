@@ -736,106 +736,118 @@
     animation: fadeIn 0.35s ease-out forwards;
 }
     
-        /* Controles do modal inspirados no iOS: superfícies leves, sem cards em volta. */
+        /* Controles do modal — linguagem de sistema Apple, leves e sem molduras externas. */
         .modal-choice-group {
             display: flex;
             flex-direction: column;
-            gap: 8px;
-            padding: 2px 0;
+            gap: 7px;
+            padding: 1px 0;
+            margin: 0;
+            background: transparent !important;
+            border: 0 !important;
+            border-radius: 0 !important;
+            box-shadow: none !important;
         }
         .modal-choice-heading {
             display: flex;
-            align-items: baseline;
-            justify-content: space-between;
-            gap: 12px;
+            align-items: center;
+            justify-content: flex-start;
             padding: 0 2px;
-            color: #6F6B63;
+            margin: 0;
+            color: #777168;
+            background: transparent;
+            border: 0;
         }
         .modal-choice-heading > span {
-            font-size: 10px;
+            font-size: 9.5px;
             line-height: 1.2;
             font-weight: 650;
-            letter-spacing: 0.12em;
+            letter-spacing: 0.11em;
             text-transform: uppercase;
         }
         .modal-choice-heading > small {
-            font-size: 9px;
-            line-height: 1.2;
-            font-weight: 400;
-            color: rgba(140, 134, 118, 0.68);
+            display: none;
         }
+
         .modal-segmented-control {
             display: grid;
-            gap: 3px;
-            padding: 3px;
-            border: 0;
-            border-radius: 15px;
-            background: rgba(34, 32, 28, 0.065);
-            box-shadow: inset 0 0 0 1px rgba(34, 32, 28, 0.025);
+            gap: 8px;
+            padding: 0;
+            border: 0 !important;
+            border-radius: 0 !important;
+            background: transparent !important;
+            box-shadow: none !important;
         }
         .modal-segment-btn {
             min-width: 0;
-            min-height: 44px;
-            padding: 8px 10px;
+            min-height: 45px;
+            padding: 9px 12px;
             border: 0;
-            border-radius: 12px;
-            background: transparent;
-            color: rgba(111, 107, 99, 0.68);
-            font-size: 11px;
-            line-height: 1.2;
-            font-weight: 550;
+            border-radius: 13px;
+            background: rgba(255, 255, 255, 0.58);
+            color: rgba(34, 32, 28, 0.62);
+            font-size: 11.5px;
+            line-height: 1.15;
+            font-weight: 560;
             text-align: center;
+            box-shadow: 0 1px 2px rgba(34, 32, 28, 0.05);
+            -webkit-backdrop-filter: blur(12px) saturate(120%);
+            backdrop-filter: blur(12px) saturate(120%);
             -webkit-tap-highlight-color: transparent;
-            transition: color 0.2s ease, background 0.2s ease, box-shadow 0.2s ease, transform 0.12s ease;
+            transition: color 0.18s ease, background 0.18s ease, box-shadow 0.18s ease, transform 0.12s ease;
         }
         .modal-segment-btn:active {
-            transform: scale(0.98);
+            transform: scale(0.975);
         }
         .modal-segment-btn.is-active {
-            background: rgba(255, 255, 255, 0.96);
-            color: #2C4A34;
+            background: #2C4A34;
+            color: #FFFFFF;
             font-weight: 650;
-            box-shadow: 0 1px 2px rgba(34, 32, 28, 0.10), 0 5px 14px rgba(34, 32, 28, 0.07);
+            box-shadow: 0 5px 14px rgba(44, 74, 52, 0.16);
         }
         .modal-segment-description {
             display: block;
             margin-top: 3px;
             font-size: 8px;
             line-height: 1.15;
-            font-weight: 400;
-            opacity: 0.72;
+            font-weight: 450;
+            opacity: 0.76;
         }
+
         .modal-picker-trigger {
             width: 100%;
-            min-height: 50px;
+            min-height: 47px;
             display: flex;
             align-items: center;
             justify-content: space-between;
             gap: 12px;
-            padding: 8px 9px 8px 16px;
-            border: 0;
-            border-radius: 15px;
-            background: rgba(255, 255, 255, 0.80);
+            padding: 7px 8px 7px 14px;
+            border: 0 !important;
+            border-radius: 13px;
+            background: rgba(255, 255, 255, 0.62);
             color: #22201C;
             font-size: 12px;
             line-height: 1.2;
-            font-weight: 550;
+            font-weight: 560;
             text-align: left;
-            box-shadow: 0 1px 2px rgba(34, 32, 28, 0.07), 0 0 0 1px rgba(34, 32, 28, 0.045);
+            box-shadow: 0 1px 2px rgba(34, 32, 28, 0.05);
+            -webkit-backdrop-filter: blur(12px) saturate(120%);
+            backdrop-filter: blur(12px) saturate(120%);
             -webkit-tap-highlight-color: transparent;
-            transition: box-shadow 0.2s ease, background 0.2s ease, transform 0.12s ease;
+            transition: background 0.18s ease, box-shadow 0.18s ease, transform 0.12s ease;
         }
         .modal-picker-trigger:active {
-            transform: scale(0.992);
+            transform: scale(0.987);
+            background: rgba(255, 255, 255, 0.76);
         }
         .modal-picker-trigger[aria-expanded="true"] {
-            background: #FFFFFF;
-            box-shadow: 0 0 0 3px rgba(44, 74, 52, 0.12), 0 8px 22px rgba(34, 32, 28, 0.09);
+            background: rgba(255, 255, 255, 0.92);
+            box-shadow: 0 6px 18px rgba(34, 32, 28, 0.09);
         }
         .modal-picker-chevron {
-            width: 32px;
-            height: 32px;
-            flex: 0 0 32px;
+            width: 31px;
+            height: 31px;
+            flex: 0 0 31px;
             display: inline-flex;
             align-items: center;
             justify-content: center;
@@ -850,55 +862,57 @@
         .modal-picker-menu {
             max-height: 208px;
             overflow-y: auto;
-            margin-top: -2px;
+            margin-top: 1px;
             padding: 6px;
-            border: 0;
-            border-radius: 16px;
-            background: rgba(255, 255, 255, 0.97);
-            box-shadow: 0 14px 32px rgba(34, 32, 28, 0.14), 0 0 0 1px rgba(34, 32, 28, 0.035);
+            border: 0 !important;
+            border-radius: 15px;
+            background: rgba(255, 255, 255, 0.96);
+            box-shadow: 0 12px 30px rgba(34, 32, 28, 0.12);
+            -webkit-backdrop-filter: blur(18px) saturate(130%);
+            backdrop-filter: blur(18px) saturate(130%);
             -webkit-overflow-scrolling: touch;
         }
         .modal-flavor-option {
             width: 100%;
-            min-height: 44px;
+            min-height: 43px;
             display: flex;
             align-items: center;
             justify-content: space-between;
             gap: 12px;
-            padding: 9px 10px 9px 12px;
+            padding: 9px 10px 9px 11px;
             border: 0;
-            border-radius: 12px;
+            border-radius: 11px;
             background: transparent;
             color: rgba(34, 32, 28, 0.76);
             font-size: 12px;
             line-height: 1.25;
-            font-weight: 450;
+            font-weight: 470;
             text-align: left;
             -webkit-tap-highlight-color: transparent;
-            transition: background 0.16s ease, color 0.16s ease;
+            transition: background 0.15s ease, color 0.15s ease;
         }
         .modal-flavor-option:active,
         .modal-flavor-option.is-selected {
-            background: rgba(44, 74, 52, 0.09);
+            background: rgba(44, 74, 52, 0.085);
             color: #2C4A34;
         }
         .modal-flavor-option.is-selected {
             font-weight: 650;
         }
         .modal-option-check {
-            width: 24px;
-            height: 24px;
-            flex: 0 0 24px;
+            width: 23px;
+            height: 23px;
+            flex: 0 0 23px;
             display: inline-flex;
             align-items: center;
             justify-content: center;
             border-radius: 50%;
-            background: rgba(44, 74, 52, 0.11);
+            background: rgba(44, 74, 52, 0.10);
             color: #2C4A34;
             font-size: 8px;
             opacity: 0;
             transform: scale(0.82);
-            transition: opacity 0.16s ease, transform 0.16s ease;
+            transition: opacity 0.15s ease, transform 0.15s ease;
         }
         .modal-flavor-option.is-selected .modal-option-check {
             opacity: 1;
@@ -6850,7 +6864,7 @@ function buildProductModalContent(item) {
             <div class="modal-choice-group">
                 <div class="modal-choice-heading">
                     <span>Forma de venda</span>
-                    <small>Escolha uma opção</small>
+                    
                 </div>
                 <div class="modal-segmented-control" style="grid-template-columns: repeat(2, minmax(0, 1fr));">
                     <button type="button" onclick="setModalUnit('un')" id="modal-unit-un" class="modal-segment-btn is-active" aria-pressed="true">Unidade aprox.</button>
@@ -6863,7 +6877,7 @@ function buildProductModalContent(item) {
             <div class="modal-choice-group">
                 <div class="modal-choice-heading">
                     <span>Tamanho</span>
-                    <small>Escolha uma opção</small>
+                    
                 </div>
                 <div class="modal-segmented-control" style="grid-template-columns: repeat(${item.sizes.length}, minmax(0, 1fr));">
                     ${item.sizes.map((s, idx) => `
@@ -6880,7 +6894,7 @@ function buildProductModalContent(item) {
             <div class="modal-choice-group">
                 <div class="modal-choice-heading">
                     <span>Sabor</span>
-                    <small>Escolha uma opção</small>
+                    
                 </div>
                 <input type="hidden" id="modal-flavor" value="">
                 <button type="button" id="modal-flavor-trigger" aria-expanded="false" onclick="toggleModalFlavorMenu()" class="modal-picker-trigger">
