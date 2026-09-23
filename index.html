@@ -306,36 +306,70 @@
             .add-reveal { transition: opacity 0.25s ease; transform: none; }
         }
 
-        /* Segmented control estilo iOS: trilho cinza claro, thumb branco deslizante */
+        /* Segmented control estilo sistema: compacto, claro e previsível */
         .toggle-container {
             position: relative;
-            background: rgba(120, 110, 90, 0.10);
-            border-radius: 12px;
-            padding: 3px;
+            background: #E9E9EB;
+            border-radius: 11px;
+            padding: 2px;
             display: flex;
-            gap: 3px;
-            border: none;
+            gap: 2px;
+            border: 1px solid rgba(0,0,0,0.03);
         }
         .toggle-btn {
             position: relative;
             z-index: 2;
             flex: 1;
             text-align: center;
-            padding: 8px 0;
+            min-height: 36px;
+            padding: 7px 10px;
             border-radius: 9px;
             font-size: 13px;
             font-weight: 500;
             text-transform: none;
             letter-spacing: -0.01em;
             white-space: nowrap;
-            transition: color 0.25s ease, background 0.25s ease, box-shadow 0.25s ease;
-            color: var(--ink);
+            transition: color 0.18s ease, background 0.18s ease, box-shadow 0.18s ease, transform 0.12s ease;
+            color: #5A5A5F;
         }
+        .toggle-btn:active { transform: scale(0.98); }
         .toggle-btn.active {
-            color: var(--ink);
+            color: #1C1C1E;
             font-weight: 600;
             background: #FFFFFF;
-            box-shadow: var(--shadow-1);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.10), 0 0 0 0.5px rgba(0,0,0,0.04);
+        }
+
+        /* Checkout: bottom sheet no celular e painel lateral no desktop */
+        #checkout-panel {
+            transform: translateY(100%);
+            transition: transform 0.32s cubic-bezier(0.22, 1, 0.36, 1);
+            will-change: transform;
+        }
+        #checkout-panel.checkout-open {
+            transform: translateY(0);
+        }
+        @media (min-width: 640px) {
+            #checkout-panel {
+                transform: translateX(100%);
+            }
+            #checkout-panel.checkout-open {
+                transform: translateX(0);
+            }
+        }
+        .checkout-field {
+            background: #F2F2F7;
+            border: 1px solid rgba(60,60,67,0.08);
+            border-radius: 14px;
+            min-height: 48px;
+            color: #1C1C1E;
+            transition: background 0.16s ease, border-color 0.16s ease, box-shadow 0.16s ease;
+        }
+        .checkout-field:focus {
+            outline: none;
+            background: #FFFFFF;
+            border-color: rgba(44,74,52,0.28);
+            box-shadow: 0 0 0 3px rgba(44,74,52,0.08);
         }
         
         #cart-items-list {
@@ -1174,145 +1208,119 @@
     </div>
 
     <!-- Finalização do Pedido -->
-    <div id="checkout-modal" class="fixed inset-0 z-[65] invisible">
-        <div id="checkout-overlay" class="absolute inset-0 bg-[#22201C]/70 backdrop-blur-md opacity-0 transition-opacity duration-300" onclick="closeCheckout()"></div>
+    <div id="checkout-modal" class="fixed inset-0 z-[65] invisible" role="dialog" aria-modal="true" aria-labelledby="checkout-title">
+        <div id="checkout-overlay" class="absolute inset-0 bg-black/35 opacity-0 transition-opacity duration-200" onclick="closeCheckout()"></div>
 
-        <div id="checkout-panel" class="absolute inset-y-0 right-0 w-full max-w-lg bg-[#F4F1EA] shadow-2xl translate-x-full transition-transform duration-500 flex flex-col h-full overflow-hidden">
-            <div class="px-6 sm:px-8 py-5 sm:py-6 border-b border-[#8C8676]/10 bg-white flex items-center justify-between shrink-0">
-                <div>
-                    <p class="text-[11px] uppercase tracking-[0.12em] font-semibold text-[#8C8676] mb-1">Última etapa</p>
-                    <h2 class="serif-font text-2xl sm:text-[28px] text-[#22201C]">Finalização</h2>
-                </div>
-                <button onclick="closeCheckout()" class="text-[#8C8676] w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center rounded-full hover:bg-[#ECE9E1] transition-all">
-                    <i class="fas fa-times text-xl"></i>
+        <div id="checkout-panel" class="absolute inset-x-0 bottom-0 h-[94dvh] sm:inset-y-0 sm:right-0 sm:left-auto sm:h-full w-full sm:max-w-lg bg-[#F7F7F8] shadow-[0_-12px_40px_rgba(0,0,0,0.16)] sm:shadow-2xl rounded-t-[30px] sm:rounded-none flex flex-col overflow-hidden">
+            <div class="sm:hidden shrink-0 flex justify-center pt-2.5 pb-1 bg-[#F7F7F8]">
+                <div class="w-9 h-1 rounded-full bg-[#C7C7CC]"></div>
+            </div>
+
+            <div class="shrink-0 grid grid-cols-[1fr_auto_1fr] items-center px-4 sm:px-5 h-[54px] bg-[#F7F7F8]/95 border-b border-black/[0.06]">
+                <button type="button" onclick="backToCart()" class="justify-self-start inline-flex items-center gap-1 text-[15px] font-medium text-[#2C4A34] active:opacity-50 transition-opacity">
+                    <i class="fas fa-chevron-left text-[11px]"></i>
+                    Cesta
+                </button>
+                <h2 id="checkout-title" class="text-[16px] font-semibold tracking-[-0.01em] text-[#1C1C1E]">Finalizar pedido</h2>
+                <button type="button" onclick="closeCheckout()" aria-label="Fechar" class="justify-self-end w-8 h-8 rounded-full bg-[#E9E9EB] text-[#636366] flex items-center justify-center active:scale-95 transition-transform">
+                    <i class="fas fa-times text-[13px]"></i>
                 </button>
             </div>
 
-            <div class="flex-grow min-h-0 overflow-y-auto px-5 sm:px-8 py-5 sm:py-6 space-y-5 custom-scrollbar">
-                <button type="button" onclick="backToCart()" class="inline-flex items-center gap-2 text-[13px] font-semibold text-[#8C8676] hover:text-[#22201C] transition-colors">
-                    <i class="fas fa-arrow-left text-xs"></i>
-                    Voltar à cesta
-                </button>
-
-                <section class="rounded-[22px] bg-white px-4 py-4 sm:px-5 sm:py-5 shadow-[0_1px_0_rgba(34,32,28,0.03)] space-y-5">
-                    <div class="flex items-center gap-2">
-                        <span class="w-7 h-7 rounded-full bg-[#2C4A34]/10 text-[#2C4A34] flex items-center justify-center text-[11px] font-bold">1</span>
-                        <div>
-                            <p class="text-[10px] uppercase tracking-[0.12em] font-semibold text-[#8C8676]">Seus dados</p>
-                            <p class="text-[12px] text-[#22201C]/65">Nome, data e horário</p>
-                        </div>
-                    </div>
-                    <div class="space-y-2">
-                        <label class="text-[12px] font-semibold text-[#8C8676] ml-1">Seu nome</label>
-                        <input type="text" id="order-name" name="name" autocomplete="name" placeholder="Como podemos te chamar?" class="w-full bg-[#ECE9E1]/50 border border-[#8C8676]/10 rounded-2xl px-5 py-3.5 text-sm focus:outline-none focus:ring-4 focus:ring-[#8C8676]/5 transition-all">
-                    </div>
-
-                    <div class="space-y-3">
-                        <div class="flex items-center gap-2 ml-1">
-                            <label class="text-[12px] font-semibold text-[#8C8676]">Quando você deseja?</label>
-                            <button type="button" onclick="showProntaEntregaInfo()" aria-label="Informação sobre pronta entrega" class="w-5 h-5 shrink-0 rounded-full bg-[#8C8676]/15 text-[#8C8676] text-[10px] flex items-center justify-center hover:bg-[#8C8676]/25 active:scale-90 transition-all">
-                                <i class="fas fa-info"></i>
-                            </button>
-                        </div>
-                        <div id="sched-fields" class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                            <div class="space-y-1">
-                                <label class="text-[11px] font-semibold text-[#8C8676] ml-1 block">Data</label>
-                                <input type="date" id="order-date" class="w-full min-w-0 bg-[#ECE9E1]/50 rounded-xl px-3 py-3 text-sm border border-[#8C8676]/10 outline-none">
+            <div class="flex-grow min-h-0 overflow-y-auto px-4 sm:px-6 pt-4 pb-6 custom-scrollbar">
+                <div class="space-y-5">
+                    <section class="space-y-2">
+                        <p class="px-1 text-[12px] font-semibold text-[#636366]">Seus dados</p>
+                        <div class="bg-white rounded-[18px] overflow-hidden border border-black/[0.05]">
+                            <div class="p-3">
+                                <label for="order-name" class="block text-[11px] font-medium text-[#8E8E93] mb-1.5 px-1">Nome</label>
+                                <input type="text" id="order-name" name="name" autocomplete="name" placeholder="Seu nome" class="checkout-field w-full px-4 text-[15px]">
                             </div>
-                            <div class="space-y-1">
-                                <label class="text-[11px] font-semibold text-[#8C8676] ml-1 block">Horário</label>
-                                <input type="time" id="order-time" class="w-full min-w-0 bg-[#ECE9E1]/50 rounded-xl px-3 py-3 text-sm border border-[#8C8676]/10 outline-none">
+                            <div class="h-px bg-black/[0.06] ml-4"></div>
+                            <div class="p-3">
+                                <div class="flex items-center justify-between gap-3 mb-1.5 px-1">
+                                    <label class="text-[11px] font-medium text-[#8E8E93]">Data e horário</label>
+                                    <button type="button" onclick="showProntaEntregaInfo()" class="text-[11px] font-medium text-[#2C4A34]">Pronta entrega?</button>
+                                </div>
+                                <div id="sched-fields" class="grid grid-cols-[minmax(0,1.35fr)_minmax(0,.85fr)] gap-2">
+                                    <input type="date" id="order-date" aria-label="Data do pedido" class="checkout-field w-full min-w-0 px-3 text-[14px]">
+                                    <input type="time" id="order-time" aria-label="Horário do pedido" class="checkout-field w-full min-w-0 px-3 text-[14px]">
+                                </div>
                             </div>
                         </div>
-                        <p class="text-[10px] text-[#8C8676]/70 leading-relaxed">Encomendas a partir de amanhã. Para pronta entrega hoje, ligue <a href="tel:+551140135248" class="font-semibold underline text-[#22201C]">(11) 4013-5248</a>.</p>
-                    </div>
-                </section>
+                        <p class="px-1 text-[10px] leading-relaxed text-[#8E8E93]">Encomendas a partir de amanhã. Para hoje, ligue <a href="tel:+551140135248" class="font-semibold text-[#2C4A34]">(11) 4013-5248</a>.</p>
+                    </section>
 
-                <section class="rounded-[22px] bg-[#EEF2EC] px-4 py-4 sm:px-5 sm:py-5 space-y-5">
-                    <div class="flex items-center gap-2">
-                        <span class="w-7 h-7 rounded-full bg-[#2C4A34] text-white flex items-center justify-center text-[11px] font-bold">2</span>
-                        <div>
-                            <p class="text-[10px] uppercase tracking-[0.12em] font-semibold text-[#2C4A34]/70">Recebimento</p>
-                            <p class="text-[12px] text-[#2C4A34]/70">Escolha retirada ou entrega</p>
-                        </div>
-                    </div>
-                    <div class="space-y-2">
-                        <label class="text-[12px] font-semibold text-[#2C4A34] ml-1">Como prefere receber?</label>
+                    <section class="space-y-2">
+                        <p class="px-1 text-[12px] font-semibold text-[#636366]">Recebimento</p>
                         <div class="toggle-container">
                             <button type="button" onclick="setFulfillment('Retirada')" id="btn-pickup" class="toggle-btn active">Retirada</button>
                             <button type="button" onclick="setFulfillment('Entrega')" id="btn-delivery" class="toggle-btn">Entrega</button>
                         </div>
-                    </div>
 
-                    <div id="fulfillment-details" class="animate-fade">
-                        <div id="pickup-location-container" class="space-y-2">
-                            <label class="text-[11px] font-semibold text-[#8C8676] ml-1 block">Unidade para retirada</label>
-                            <select id="pickup-location" class="w-full bg-[#ECE9E1]/50 border border-[#8C8676]/10 rounded-2xl px-5 py-3.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#8C8676]/20 appearance-none text-[#22201C]">
-                                <option value="Matriz">Unidade Matriz - Centro</option>
-                                <option value="Vila Nova">Unidade Vila Nova - Unicenter</option>
-                            </select>
-                        </div>
-
-                        <div id="delivery-address-container" class="hidden space-y-4">
-                            <div class="space-y-2">
-                                <label class="text-[11px] font-semibold text-[#8C8676] ml-1 block">CEP da entrega</label>
-                                <div class="grid grid-cols-1 sm:grid-cols-[minmax(0,1fr)_auto] gap-2">
-                                    <input
-                                        type="text"
-                                        id="delivery-cep"
-                                        name="postal-code"
-                                        inputmode="numeric"
-                                        maxlength="9"
-                                        autocomplete="postal-code"
-                                        placeholder="00000-000"
-                                        oninput="handleDeliveryCepInput(this)"
-                                        class="flex-1 min-w-0 bg-[#ECE9E1]/50 border border-[#8C8676]/10 rounded-2xl px-5 py-3.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#8C8676]/20 transition-all"
-                                    >
-                                    <button type="button" onclick="lookupDeliveryCep()" class="w-full sm:w-auto shrink-0 px-5 py-3.5 rounded-2xl bg-[#22201C] text-white text-[12px] font-semibold active:scale-95 transition-all">
-                                        Calcular
-                                    </button>
-                                </div>
-                                <p id="delivery-cep-status" class="text-[10px] text-[#8C8676]/75 ml-1 leading-relaxed">A taxa é calculada automaticamente pela distância aproximada do CEP.</p>
-                                <button type="button" onclick="askDeliveryFeeOnWhatsApp()" class="text-[11px] font-semibold text-[#2C4A34] underline underline-offset-4 ml-1">
-                                    Não sei meu CEP — consultar no WhatsApp
-                                </button>
+                        <div id="fulfillment-details">
+                            <div id="pickup-location-container" class="bg-white rounded-[18px] border border-black/[0.05] p-3">
+                                <label for="pickup-location" class="block text-[11px] font-medium text-[#8E8E93] mb-1.5 px-1">Unidade</label>
+                                <select id="pickup-location" class="checkout-field w-full px-4 text-[15px] appearance-none">
+                                    <option value="Matriz">Matriz · Centro</option>
+                                    <option value="Vila Nova">Vila Nova · Unicenter</option>
+                                </select>
                             </div>
 
-                            <div class="space-y-2">
-                                <label class="text-[11px] font-semibold text-[#8C8676] ml-1 block">Endereço</label>
-                                <input type="text" id="delivery-address" name="street-address" autocomplete="street-address" oninput="this.dataset.autoFilled='false'" placeholder="Rua e bairro" class="w-full bg-[#ECE9E1]/50 border border-[#8C8676]/10 rounded-2xl px-5 py-3.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#8C8676]/20 transition-all">
-                                <div class="grid grid-cols-[110px_minmax(0,1fr)] gap-2">
-                                    <input type="text" id="delivery-number" name="address-line2" inputmode="numeric" autocomplete="off" placeholder="Número" class="w-full bg-[#ECE9E1]/50 border border-[#8C8676]/10 rounded-2xl px-4 py-3.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#8C8676]/20 transition-all">
-                                    <input type="text" id="delivery-complement" autocomplete="off" placeholder="Complemento (opcional)" class="w-full bg-[#ECE9E1]/50 border border-[#8C8676]/10 rounded-2xl px-4 py-3.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#8C8676]/20 transition-all">
-                                </div>
-                            </div>
+                            <div id="delivery-address-container" class="hidden space-y-2">
+                                <div class="bg-white rounded-[18px] border border-black/[0.05] overflow-hidden">
+                                    <div class="p-3">
+                                        <div class="flex items-center justify-between gap-2 mb-1.5 px-1">
+                                            <label for="delivery-cep" class="text-[11px] font-medium text-[#8E8E93]">CEP</label>
+                                            <button type="button" onclick="askDeliveryFeeOnWhatsApp()" class="text-[11px] font-medium text-[#2C4A34]">Não sei o CEP</button>
+                                        </div>
+                                        <input
+                                            type="text"
+                                            id="delivery-cep"
+                                            name="postal-code"
+                                            inputmode="numeric"
+                                            maxlength="9"
+                                            autocomplete="postal-code"
+                                            placeholder="00000-000"
+                                            oninput="handleDeliveryCepInput(this)"
+                                            class="checkout-field w-full px-4 text-[15px]"
+                                        >
+                                        <p id="delivery-cep-status" class="mt-2 px-1 text-[10px] leading-relaxed text-[#8E8E93]">Ao completar o CEP, calculamos a taxa automaticamente.</p>
+                                    </div>
 
-                            <div id="special-delivery-note" class="hidden rounded-2xl bg-[#FFF3E7] border border-[#C96F2B]/20 px-4 py-3 text-[11px] leading-relaxed text-[#7A4A27]">
-                                <div class="flex gap-2.5">
-                                    <span class="w-6 h-6 shrink-0 rounded-full bg-[#C96F2B]/12 text-[#C96F2B] flex items-center justify-center"><i class="fas fa-truck text-[9px]"></i></span>
-                                    <div><strong class="block text-[#9A5523] mb-0.5">Taxa confirmada pela equipe</strong>Para bolos e sobremesas, o transporte pode precisar ser feito de carro. A taxa costuma ficar entre <strong>R$ 13 e R$ 25</strong> e será confirmada antes do envio.</div>
+                                    <div class="h-px bg-black/[0.06] ml-4"></div>
+
+                                    <div class="p-3 space-y-2">
+                                        <label for="delivery-address" class="block text-[11px] font-medium text-[#8E8E93] px-1">Endereço</label>
+                                        <input type="text" id="delivery-address" name="street-address" autocomplete="street-address" oninput="this.dataset.autoFilled='false'" placeholder="Rua e bairro" class="checkout-field w-full px-4 text-[15px]">
+                                        <div class="grid grid-cols-[100px_minmax(0,1fr)] gap-2">
+                                            <input type="text" id="delivery-number" name="address-line2" inputmode="numeric" autocomplete="off" placeholder="Número" class="checkout-field w-full px-3 text-[14px]">
+                                            <input type="text" id="delivery-complement" autocomplete="off" placeholder="Complemento (opcional)" class="checkout-field w-full px-3 text-[14px]">
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div id="special-delivery-note" class="hidden rounded-[14px] bg-[#FFF4E8] px-3.5 py-3 text-[11px] leading-relaxed text-[#7A4A27]">
+                                    <strong class="font-semibold">Taxa a confirmar.</strong> Bolos e sobremesas podem precisar de transporte de carro. A equipe confirma antes do envio.
                                 </div>
                             </div>
                         </div>
-                    </div>
-                </section>
+                    </section>
+                </div>
             </div>
 
-            <div class="shrink-0 bg-[#FFFDF9] border-t border-[#8C8676]/10 px-5 sm:px-8 pt-4 pb-[max(1.5rem,env(safe-area-inset-bottom))] space-y-3">
-                <div id="delivery-fee-row" class="hidden flex justify-between items-center text-[13px] text-[#8C8676]">
-                    <span class="font-medium">Taxa de entrega</span>
-                    <span id="delivery-fee-value" class="font-bold">Informe o CEP</span>
+            <div class="shrink-0 bg-white/95 border-t border-black/[0.06] px-4 sm:px-6 pt-3 pb-[max(0.9rem,env(safe-area-inset-bottom))]">
+                <div id="delivery-fee-row" class="hidden mb-2 flex justify-between items-center text-[12px] text-[#636366]">
+                    <span>Taxa de entrega</span>
+                    <span id="delivery-fee-value" class="font-semibold text-[#1C1C1E]">Informe o CEP</span>
                 </div>
-                <div class="flex justify-between items-end">
-                    <div>
-                        <span class="text-[#8C8676] text-[12px] font-semibold block">Total estimado</span>
-                        <span class="text-[10px] text-gray-400">Pesagem final quando aplicável</span>
-                    </div>
-                    <span class="text-3xl font-bold text-[#22201C] tracking-tight" id="cart-final-total">R$ 0,00</span>
+                <div class="flex items-center justify-between gap-4 mb-3">
+                    <span class="text-[13px] font-medium text-[#636366]">Total estimado</span>
+                    <span class="text-[24px] font-semibold text-[#1C1C1E] tracking-[-0.03em]" id="cart-final-total">R$ 0,00</span>
                 </div>
-                <button onclick="sendWhatsAppOrder()" class="w-full bg-[#1F8F7A] hover:bg-[#176E60] text-white py-4 sm:py-[18px] rounded-2xl font-semibold tracking-[-0.01em] text-[16px] transition-all shadow-[0_8px_24px_rgba(31,143,122,0.24)] flex items-center justify-center gap-3 active:scale-95 group">
-                    <i class="fab fa-whatsapp text-xl"></i>
-                    Enviar pedido
+                <button onclick="sendWhatsAppOrder()" class="w-full min-h-[50px] bg-[#2C4A34] hover:bg-[#243D2B] text-white rounded-[14px] font-semibold text-[15px] transition-all flex items-center justify-center gap-2 active:scale-[0.985]">
+                    <i class="fab fa-whatsapp text-[18px]"></i>
+                    Enviar pedido no WhatsApp
                 </button>
             </div>
         </div>
@@ -3331,7 +3339,7 @@ flavors: ['Sonho de Valsa', 'Ouro branco', 'Ninho trufado', 'Pessêgo', 'Amendoi
             const cartPanel = document.getElementById('cart-panel');
 
             if (checkoutOverlay) checkoutOverlay.classList.remove('opacity-100');
-            if (checkoutPanel) checkoutPanel.classList.add('translate-x-full');
+            if (checkoutPanel) checkoutPanel.classList.remove('checkout-open');
             if (checkoutModal) checkoutModal.classList.add('invisible');
 
             if (cartOverlay) cartOverlay.classList.remove('opacity-100');
@@ -4181,10 +4189,12 @@ function readCheckoutPreferences() {
             cartModal.classList.add('invisible');
 
             const checkoutModal = document.getElementById('checkout-modal');
+            const checkoutPanel = document.getElementById('checkout-panel');
             checkoutModal.classList.remove('invisible');
+
             requestAnimationFrame(() => {
                 document.getElementById('checkout-overlay').classList.add('opacity-100');
-                document.getElementById('checkout-panel').classList.remove('translate-x-full');
+                checkoutPanel.classList.add('checkout-open');
             });
 
             document.body.classList.add('cart-open');
@@ -4195,16 +4205,16 @@ function readCheckoutPreferences() {
         function closeCheckout() {
             const modal = document.getElementById('checkout-modal');
             document.getElementById('checkout-overlay').classList.remove('opacity-100');
-            document.getElementById('checkout-panel').classList.add('translate-x-full');
+            document.getElementById('checkout-panel').classList.remove('checkout-open');
             setTimeout(() => {
                 modal.classList.add('invisible');
                 document.body.classList.remove('cart-open');
-            }, 500);
+            }, 320);
         }
 
         function backToCart() {
             document.getElementById('checkout-overlay').classList.remove('opacity-100');
-            document.getElementById('checkout-panel').classList.add('translate-x-full');
+            document.getElementById('checkout-panel').classList.remove('checkout-open');
             document.getElementById('checkout-modal').classList.add('invisible');
             openCart();
         }
