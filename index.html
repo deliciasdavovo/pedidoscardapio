@@ -3395,7 +3395,7 @@ flavors: ['Sonho de Valsa', 'Ouro branco', 'Ninho trufado', 'Pessêgo', 'Amendoi
                 : (hasSizes ? item.sizes[0].price : (item.units[0] === 'kg' ? item.priceKg : item.price));
             const unitSuffix = item.isKit ? '/pessoa' : (item.units[0] === 'kg' ? '/kg' : '/un');
             const initialPriceLabel = estimatedUnit
-                ? `R$ ${item.priceKg.toFixed(2).replace('.', ',')}/kg <span class="block text-[11px] font-medium text-[#8C8676] mt-1">aprox. R$ ${item.price.toFixed(2).replace('.', ',')}/un</span>`
+                ? `R$ ${item.priceKg.toFixed(2).replace('.', ',')}/kg <span class="block text-[11px] font-normal text-[#8C8676] mt-1">aprox. R$ ${item.price.toFixed(2).replace('.', ',')}/un</span>`
                 : `R$ ${initialPrice.toFixed(2).replace('.', ',')} ${unitSuffix}`;
 
             return `
@@ -3449,7 +3449,6 @@ flavors: ['Sonho de Valsa', 'Ouro branco', 'Ninho trufado', 'Pessêgo', 'Amendoi
                                 <button onclick="setCardUnit('${item.id}', 'un')" id="unit-un-${item.id}" class="unit-btn active flex-1 py-2 rounded-xl text-[12px] font-semibold bg-[#22201C] text-white">Unidade aprox.</button>
                                 <button onclick="setCardUnit('${item.id}', 'kg')" id="unit-kg-${item.id}" class="unit-btn flex-1 py-2 rounded-xl text-[12px] font-semibold text-[#8C8676]/50">Quilo</button>
                             </div>
-                            <p class="text-[10px] leading-relaxed text-[#8C8676]/75 px-1">Preço oficial por quilo. O valor por unidade é uma estimativa e pode variar conforme o peso.</p>
                             ` : ''}
 
                             <!-- Seleção de Tamanho (Aro) -->
@@ -6272,13 +6271,15 @@ function createProductListItem(item) {
     const imgSrc = (item.images && item.images.length) ? item.images[0] : (item.image || '');
 
     let priceText;
+    let estimatedUnitPriceText = '';
     if (item.isKit) {
         const kitTotal = getKitComputedTotal(item, 10);
         priceText = 'a partir de R$ ' + (kitTotal / 10).toFixed(2).replace('.', ',') + '/pessoa';
     } else if (hasSizes) {
         priceText = 'a partir de R$ ' + item.sizes[0].price.toFixed(2).replace('.', ',');
     } else if (hasEstimatedUnitPrice(item)) {
-        priceText = 'R$ ' + item.priceKg.toFixed(2).replace('.', ',') + '/kg · aprox. R$ ' + item.price.toFixed(2).replace('.', ',') + '/un';
+        priceText = 'R$ ' + item.priceKg.toFixed(2).replace('.', ',') + '/kg';
+        estimatedUnitPriceText = 'aprox. R$ ' + item.price.toFixed(2).replace('.', ',') + '/un';
     } else if (item.units && item.units[0] === 'kg') {
         priceText = 'R$ ' + (item.priceKg || 0).toFixed(2).replace('.', ',') + '/kg';
     } else {
@@ -6313,7 +6314,7 @@ function createProductListItem(item) {
                     <span class="text-[13px] text-[#BE6B2E]" style="font-family: 'DM Sans', sans-serif; font-weight: 700; letter-spacing: -0.01em;">${priceText}</span>
                     ${flavorBadge}${kitBadge}
                 </div>
-                ${hasEstimatedUnitPrice(item) ? '<p class="text-[9px] text-[#8C8676]/70 mt-1">valor por unidade estimado pelo peso</p>' : ''}
+                ${estimatedUnitPriceText ? `<p class="text-[11px] leading-snug font-normal text-[#BE6B2E]/75 mt-1">${estimatedUnitPriceText}</p>` : ''}
             </div>
             <i class="fas fa-chevron-right text-[#8C8676]/30 shrink-0 text-sm ml-1"></i>
         </div>
@@ -6405,7 +6406,6 @@ function buildProductModalContent(item) {
                 <button onclick="setModalUnit('un')" id="modal-unit-un" class="flex-1 py-2 rounded-lg text-[12px] font-semibold bg-[#2C4A34] text-white transition-all">Unidade aprox.</button>
                 <button onclick="setModalUnit('kg')" id="modal-unit-kg" class="flex-1 py-2 rounded-lg text-[12px] font-semibold text-[#8C8676]/50 transition-all">Quilo</button>
             </div>
-            <p class="text-[10px] leading-relaxed text-[#8C8676]/80 px-1">Preço oficial por quilo. O valor por unidade é estimado e pode variar conforme o peso real.</p>
             ` : ''}
 
             ${hasSizes ? `
