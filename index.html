@@ -5174,8 +5174,67 @@ function drawShareCoverImage(ctx, img, x, y, width, height) {
     ctx.drawImage(img, sx, sy, sw, sh, x, y, width, height);
 }
 
+function getShareDominantColor(sampleCtx, width, height) {
+    try {
+        const pixels = sampleCtx.getImageData(0, 0, width, height).data;
+        const buckets = new Map();
+
+        for (let i = 0; i < pixels.length; i += 4) {
+            const alpha = pixels[i + 3];
+            if (alpha < 128) continue;
+
+            const red = pixels[i];
+            const green = pixels[i + 1];
+            const blue = pixels[i + 2];
+            const maxChannel = Math.max(red, green, blue);
+            const minChannel = Math.min(red, green, blue);
+            const saturation = maxChannel - minChannel;
+            const luminance = (red * 0.299) + (green * 0.587) + (blue * 0.114);
+
+            // Evita que branco puro ou sombras quase pretas dominem a leitura.
+            if ((luminance > 245 && saturation < 14) || luminance < 18) continue;
+
+            const redBucket = red >> 5;
+            const greenBucket = green >> 5;
+            const blueBucket = blue >> 5;
+            const key = (redBucket << 6) | (greenBucket << 3) | blueBucket;
+            const weight = 0.45 + ((saturation / 255) * 1.55);
+            const bucket = buckets.get(key) || {
+                score: 0,
+                red: 0,
+                green: 0,
+                blue: 0,
+                weight: 0
+            };
+
+            bucket.score += weight;
+            bucket.red += red * weight;
+            bucket.green += green * weight;
+            bucket.blue += blue * weight;
+            bucket.weight += weight;
+            buckets.set(key, bucket);
+        }
+
+        let dominant = null;
+        buckets.forEach(bucket => {
+            if (!dominant || bucket.score > dominant.score) dominant = bucket;
+        });
+
+        if (!dominant || !dominant.weight) return null;
+
+        return {
+            red: Math.round(dominant.red / dominant.weight),
+            green: Math.round(dominant.green / dominant.weight),
+            blue: Math.round(dominant.blue / dominant.weight)
+        };
+    } catch (_) {
+        // Caso uma imagem externa bloqueie a leitura de pixels, mantém o fundo atual.
+        return null;
+    }
+}
+
 function drawShareBlurredBackground(ctx, img, width, height) {
-    if (!img || !img.width || !img.height) return;
+    if (!img || !img.width || !img.height) return null;
 
     // Reduzir a foto antes de ampliá-la elimina os detalhes mesmo em
     // navegadores cujo filtro de canvas produz um blur muito discreto.
@@ -5189,6 +5248,7 @@ function drawShareBlurredBackground(ctx, img, width, height) {
     softCtx.imageSmoothingEnabled = true;
     softCtx.imageSmoothingQuality = 'high';
     drawShareCoverImage(softCtx, img, 0, 0, softWidth, softHeight);
+    const dominantColor = getShareDominantColor(softCtx, softWidth, softHeight);
 
     ctx.save();
     ctx.imageSmoothingEnabled = true;
@@ -5196,6 +5256,8 @@ function drawShareBlurredBackground(ctx, img, width, height) {
     ctx.filter = 'blur(16px)';
     ctx.drawImage(softCanvas, -36, -36, width + 72, height + 72);
     ctx.restore();
+
+    return dominantColor;
 }
 
 
@@ -5810,7 +5872,17 @@ async function buildProductShareBlob(item) {
     ctx.fillRect(0, 0, width, height);
 
     if (img && img.width && img.height) {
-        drawShareBlurredBackground(ctx, img, width, height);
+        const dominantColor = drawShareBlurredBackground(ctx, img, width, height);
+
+        // A cor predominante cobre 70% do fundo, preservando a foto desfocada.
+        if (dominantColor) {
+            ctx.fillStyle =
+                'rgba(' +
+                dominantColor.red + ',' +
+                dominantColor.green + ',' +
+                dominantColor.blue + ',0.70)';
+            ctx.fillRect(0, 0, width, height);
+        }
 
         // Véu mínimo apenas para separar o fundo da moldura.
         ctx.fillStyle = 'rgba(248,244,238,0.06)';
