@@ -372,38 +372,44 @@
             border-color: rgba(44,74,52,0.38);
             box-shadow: 0 0 0 3px rgba(44,74,52,0.07);
         }
-        #order-date,
-        #order-time {
+        /* Data e horário: o Safari/iOS dá largura intrínseca grande aos inputs
+           nativos. O shell isola essa largura para impedir sobreposição. */
+        #sched-fields {
+            width: 100%;
+            min-width: 0;
+        }
+        .schedule-field-shell {
+            position: relative;
             min-width: 0;
             width: 100%;
-            max-width: 100%;
+            height: 48px;
+            overflow: hidden;
+            border-radius: 12px;
+        }
+        .schedule-field-shell > .checkout-field {
+            position: absolute;
+            inset: 0;
+            min-width: 0 !important;
+            width: 100% !important;
+            max-width: 100% !important;
+            height: 100% !important;
+            min-height: 0 !important;
             box-sizing: border-box;
-            font-size: 16px;
-            padding-left: 12px;
-            padding-right: 10px;
+            margin: 0;
+            font-size: 16px !important;
+            line-height: 1.2;
+            padding: 0 10px;
+        }
+        #order-time {
+            text-align: center;
         }
         @media (max-width: 520px) {
-            /* No iPhone, data e horário continuam na mesma linha.
-               Ambos aceitam encolher para não estourar o card. */
             #sched-fields {
-                grid-template-columns: minmax(0, 1.55fr) minmax(96px, 0.72fr) !important;
+                grid-template-columns: minmax(0, 1fr) 112px !important;
                 gap: 8px;
-                width: 100%;
             }
-            #order-date,
-            #order-time {
-                min-width: 0 !important;
-                width: 100% !important;
-                max-width: 100% !important;
+            .schedule-field-shell {
                 height: 46px;
-                min-height: 46px;
-                padding-left: 10px;
-                padding-right: 8px;
-                font-size: 16px !important;
-                line-height: 1.2;
-            }
-            #order-time {
-                text-align: center;
             }
         }
         
@@ -1255,9 +1261,13 @@
                                     <label class="text-[11px] font-medium text-[#8E8E93]">Data e horário</label>
                                     <button type="button" onclick="showProntaEntregaInfo()" class="text-[11px] font-medium text-[#2C4A34]">Pronta entrega?</button>
                                 </div>
-                                <div id="sched-fields" class="grid grid-cols-[minmax(0,1.35fr)_minmax(0,.8fr)] gap-2">
-                                    <input type="date" id="order-date" aria-label="Data do pedido" class="checkout-field w-full min-w-0 px-3 text-[14px]">
-                                    <input type="time" id="order-time" aria-label="Horário do pedido" class="checkout-field w-full min-w-0 px-3 text-[14px]">
+                                <div id="sched-fields" class="grid grid-cols-[minmax(0,1fr)_112px] gap-2">
+                                    <div class="schedule-field-shell">
+                                        <input type="date" id="order-date" aria-label="Data do pedido" class="checkout-field">
+                                    </div>
+                                    <div class="schedule-field-shell">
+                                        <input type="time" id="order-time" aria-label="Horário do pedido" class="checkout-field">
+                                    </div>
                                 </div>
                             </div>
                         </div>
