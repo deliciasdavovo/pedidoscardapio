@@ -383,14 +383,27 @@
             padding-right: 10px;
         }
         @media (max-width: 520px) {
+            /* No iPhone, data e horário continuam na mesma linha.
+               Ambos aceitam encolher para não estourar o card. */
             #sched-fields {
-                grid-template-columns: 1fr !important;
+                grid-template-columns: minmax(0, 1.55fr) minmax(96px, 0.72fr) !important;
                 gap: 8px;
+                width: 100%;
             }
             #order-date,
             #order-time {
+                min-width: 0 !important;
+                width: 100% !important;
+                max-width: 100% !important;
+                height: 46px;
+                min-height: 46px;
+                padding-left: 10px;
+                padding-right: 8px;
                 font-size: 16px !important;
-                min-height: 48px;
+                line-height: 1.2;
+            }
+            #order-time {
+                text-align: center;
             }
         }
         
@@ -1227,8 +1240,8 @@
                 </button>
             </div>
 
-            <div class="flex-grow min-h-0 overflow-y-auto px-4 sm:px-6 pt-4 pb-6 custom-scrollbar">
-                <div class="space-y-5">
+            <div id="checkout-scroll" class="flex-grow min-h-0 overflow-y-auto px-4 sm:px-6 pt-4 pb-5 custom-scrollbar">
+                <div class="space-y-4 sm:space-y-5">
                     <section class="space-y-2">
                         <p class="px-1 text-[12px] font-semibold text-[#636366]">Seus dados</p>
                         <div class="bg-white rounded-[18px] overflow-hidden border border-black/[0.05]">
