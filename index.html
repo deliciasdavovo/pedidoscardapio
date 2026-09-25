@@ -5089,17 +5089,17 @@ function formatWhatsAppOrderDate(value) {
             const selectedDate = document.getElementById('order-date').value;
             const selectedTime = document.getElementById('order-time').value;
             const encomendaDateTimeText =
-                '\nData: ' + formatWhatsAppOrderDate(selectedDate) +
-                '\nHorário: ' + selectedTime;
+                'Data: ' + formatWhatsAppOrderDate(selectedDate) +
+                ' • Horário: ' + selectedTime;
 
             const totalLabel = activeFulfillment === 'Entrega' && !deliveryFee
                 ? '*Subtotal dos produtos:* '
                 : '*Total estimado:* ';
 
             const message =
-                '*PEDIDO • DELÍCIAS DA VOVÓ*\n' +
+                '*ENCOMENDA • DELÍCIAS DA VOVÓ*\n' +
                 'Cliente: ' + name + '\n' +
-                activeOrderType + encomendaDateTimeText + '\n' +
+                encomendaDateTimeText + '\n' +
                 fulfillmentInfo + deliveryText + '\n\n' +
                 itemsText + '\n\n' +
                 totalLabel + formatWhatsAppMoney(total) +
