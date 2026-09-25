@@ -723,52 +723,30 @@
     .discovery-footnote { margin-top: 9px; font-size: 11px; }
 }
 
-/* Refinamento da página inicial: mais verde-pinho e composição centralizada */
+/* Refinamento da página inicial: composição mais editorial e limpa */
 .discovery-card {
+    min-height: clamp(78px, 10vh, 92px);
+    padding: 18px 16px;
     align-items: center;
     justify-content: center;
     text-align: center;
     border-color: rgba(44, 74, 52, 0.10);
-    gap: 9px;
+    border-radius: 20px;
+    gap: 0;
 }
 .discovery-card:hover {
     background: rgba(44, 74, 52, 0.045);
     border-color: rgba(44, 74, 52, 0.16);
 }
-.discovery-card-icon {
-    width: auto;
-    height: auto;
-    padding: 0;
-    color: #2C4A34;
-    background: transparent;
-    border: 0;
-    border-radius: 0;
-    box-shadow: none;
-}
-.discovery-card-icon i {
-    color: #2C4A34;
-    font-size: 22px;
+.discovery-card-icon,
+.discovery-arrow {
+    display: none !important;
 }
 .discovery-card-title,
 .discovery-card-wide .discovery-card-title {
     max-width: none;
     width: 100%;
     text-align: center;
-}
-.discovery-arrow {
-    width: auto;
-    height: auto;
-    padding: 0;
-    align-self: center;
-    background: transparent;
-    border: 0;
-    border-radius: 0;
-    color: #2C4A34;
-    box-shadow: none;
-}
-.discovery-arrow i {
-    color: #2C4A34;
-    font-size: 17px;
 }
 .discovery-cta {
     background: #2C4A34;
@@ -3456,9 +3434,7 @@ flavors: ['Sonho de Valsa', 'Ouro branco', 'Ninho trufado', 'Pessêgo', 'Amendoi
                 const groupNameAttr = group.name.replace(/'/g, "\'");
                 return `
                     <button type="button" class="discovery-card ${isLastOdd ? 'discovery-card-wide' : ''}" onclick="hideDiscovery('${groupNameAttr}')">
-                        <span class="discovery-card-icon" aria-hidden="true"><i class="fas ${group.icon || 'fa-circle'}"></i></span>
                         <span class="discovery-card-title">${group.short || group.name}</span>
-                        <span class="discovery-arrow" aria-hidden="true"><i class="fas fa-arrow-right"></i></span>
                     </button>`;
             }).join('');
         }
