@@ -1013,6 +1013,51 @@
         .modal-flavor-option.is-selected {
             font-weight: 650;
         }
+
+        /* Painel de informações e programação da loja */
+        #info-panel {
+            transform: translateY(100%);
+            transition: transform 0.32s cubic-bezier(0.22, 1, 0.36, 1);
+            will-change: transform;
+        }
+        #info-panel.info-open {
+            transform: translateY(0);
+        }
+        .info-card {
+            background: #FFFFFF;
+            border: 1px solid rgba(44, 74, 52, 0.08);
+            border-radius: 18px;
+            padding: 16px;
+        }
+        .info-kicker {
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 0.14em;
+            text-transform: uppercase;
+            color: #8C8676;
+        }
+        .info-title {
+            margin-top: 4px;
+            font-family: 'Lora', serif;
+            font-size: 20px;
+            line-height: 1.2;
+            color: #2C4A34;
+        }
+        .info-copy {
+            margin-top: 6px;
+            font-size: 13px;
+            line-height: 1.5;
+            color: rgba(34, 32, 28, 0.62);
+        }
+        @media (min-width: 640px) {
+            #info-panel {
+                transform: translateX(100%);
+            }
+            #info-panel.info-open {
+                transform: translateX(0);
+            }
+        }
+
         .modal-option-check {
             width: 23px;
             height: 23px;
@@ -1084,6 +1129,56 @@
                 <!-- Injetado via JS -->
             </nav>
         </aside>
+    </div>
+
+    <!-- Informações e programação -->
+    <div id="info-modal" class="fixed inset-0 z-[72] invisible" role="dialog" aria-modal="true" aria-labelledby="info-title">
+        <div id="info-overlay" class="absolute inset-0 bg-[#22201C]/45 backdrop-blur-sm opacity-0 transition-opacity duration-300" onclick="closeInfoPanel()"></div>
+        <section id="info-panel" class="absolute inset-x-0 bottom-0 max-h-[88dvh] bg-[#F4F1EA] rounded-t-[30px] shadow-[0_-18px_50px_rgba(0,0,0,0.20)] overflow-hidden sm:inset-y-0 sm:right-0 sm:left-auto sm:w-full sm:max-w-md sm:max-h-none sm:rounded-none flex flex-col">
+            <div class="sm:hidden shrink-0 flex justify-center pt-2.5 pb-1">
+                <div class="w-9 h-1 rounded-full bg-[#C7C7CC]"></div>
+            </div>
+
+            <div class="shrink-0 flex items-center justify-between px-5 h-[58px] border-b border-black/[0.06]">
+                <div>
+                    <p class="text-[9px] uppercase tracking-[0.16em] font-semibold text-[#8C8676]">Delícias da Vovó</p>
+                    <h2 id="info-title" class="serif-font text-[19px] text-[#2C4A34]">Informações & programação</h2>
+                </div>
+                <button type="button" onclick="closeInfoPanel()" aria-label="Fechar informações" class="w-9 h-9 rounded-full bg-[#E9E2D7] text-[#6F6A5E] flex items-center justify-center active:scale-95 transition-transform">
+                    <i class="fas fa-times text-[13px]"></i>
+                </button>
+            </div>
+
+            <div class="flex-grow min-h-0 overflow-y-auto px-4 sm:px-5 py-4 space-y-3 custom-scrollbar">
+                <div class="info-card">
+                    <p class="info-kicker">Segunda a sexta</p>
+                    <h3 class="info-title">Almoço</h3>
+                    <p class="info-copy">Almoço na Matriz durante a semana. Consulte a programação do dia.</p>
+                </div>
+
+                <div class="info-card">
+                    <p class="info-kicker">Sábados e feriados</p>
+                    <h3 class="info-title">Café da manhã por quilo</h3>
+                    <p class="info-copy">Buffet de café da manhã por quilo na Matriz.</p>
+                </div>
+
+                <div class="info-card">
+                    <p class="info-kicker">Toda quinta</p>
+                    <h3 class="info-title">Quinta do Pastel</h3>
+                    <p class="info-copy">Programação especial de pastéis às quintas-feiras.</p>
+                </div>
+
+                <div class="info-card">
+                    <p class="info-kicker">Dias frios</p>
+                    <h3 class="info-title">Caldos</h3>
+                    <p class="info-copy">Servimos caldos em dias frios. <strong class="font-semibold text-[#2C4A34]">Consulte disponibilidade.</strong></p>
+                </div>
+
+                <p class="px-1 pt-1 text-[11px] leading-relaxed text-[#8C8676]">
+                    A programação pode sofrer alterações conforme produção e disponibilidade.
+                </p>
+            </div>
+        </section>
     </div>
 
     <!-- Overlay de Busca -->
@@ -3343,6 +3438,8 @@ flavors: ['Sonho de Valsa', 'Ouro branco', 'Ninho trufado', 'Pessêgo', 'Amendoi
                 const checkoutModal = document.getElementById('checkout-modal');
                 const productModal = document.getElementById('product-detail-modal');
                 const sideMenu = document.getElementById('side-menu');
+                const infoModal = document.getElementById('info-modal');
+                if (infoModal && !infoModal.classList.contains('invisible')) { closeInfoPanel(); return; }
                 if (!sideMenu.classList.contains('invisible')) { closeSideMenu(); return; }
                 if (!bar.classList.contains('opacity-0')) { toggleSearch(); return; }
                 if (!kitModal.classList.contains('invisible')) { closeKitFlavorModal(); return; }
@@ -3556,6 +3653,14 @@ flavors: ['Sonho de Valsa', 'Ouro branco', 'Ninho trufado', 'Pessêgo', 'Amendoi
                 html += `</div></div>`;
             });
 
+            html += `
+                <div class="my-3 h-px bg-[#8C8676]/15"></div>
+                <button type="button" onclick="openInfoPanel()" class="side-group">
+                    <i class="fas fa-circle-info mr-2.5 text-[11px] opacity-60"></i>
+                    Informações & programação
+                </button>
+            `;
+
             list.innerHTML = html;
         }
 
@@ -3568,6 +3673,37 @@ flavors: ['Sonho de Valsa', 'Ouro branco', 'Ninho trufado', 'Pessêgo', 'Amendoi
                 if (s !== section) s.classList.remove('open');
             });
             section.classList.toggle('open', willOpen);
+        }
+
+        function openInfoPanel() {
+            closeSideMenu();
+            const modal = document.getElementById('info-modal');
+            const overlay = document.getElementById('info-overlay');
+            const panel = document.getElementById('info-panel');
+            if (!modal || !overlay || !panel) return;
+
+            setTimeout(() => {
+                modal.classList.remove('invisible');
+                requestAnimationFrame(() => {
+                    overlay.classList.remove('opacity-0');
+                    panel.classList.add('info-open');
+                });
+                document.body.classList.add('cart-open');
+            }, 220);
+        }
+
+        function closeInfoPanel() {
+            const modal = document.getElementById('info-modal');
+            const overlay = document.getElementById('info-overlay');
+            const panel = document.getElementById('info-panel');
+            if (!modal || !overlay || !panel) return;
+
+            overlay.classList.add('opacity-0');
+            panel.classList.remove('info-open');
+            setTimeout(() => {
+                modal.classList.add('invisible');
+                document.body.classList.remove('cart-open');
+            }, 320);
         }
 
         // ===== Controle de abertura/fechamento do menu lateral =====
