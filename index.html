@@ -3454,12 +3454,27 @@ flavors: ['Sonho de Valsa', 'Ouro branco', 'Ninho trufado', 'Pessêgo', 'Amendoi
             const container = document.getElementById('discovery-cards');
             if (!container) return;
 
-            container.innerHTML = MACRO_GROUPS.map((group, i) => {
-                const isLastOdd = i === MACRO_GROUPS.length - 1 && MACRO_GROUPS.length % 2 !== 0;
-                const groupNameAttr = group.name.replace(/'/g, "\'");
+            // Na abertura, destacamos categorias de compra imediata.
+            // Coffees & Cestas continuam no menu de categorias e no cardápio completo,
+            // mas não ficam mais como atalho na página inicial.
+            const discoveryItems = [
+                { label: 'Pão de bolinha', type: 'category', value: 'Pão de bolinha' },
+                { label: 'Salgados & Lanches', type: 'group', value: 'Salgados & Lanches' },
+                { label: 'Bolos & Doces', type: 'group', value: 'Bolos & Doces' },
+                { label: 'Sobremesas', type: 'group', value: 'Sobremesas' },
+                { label: 'Especiais', type: 'group', value: 'Especiais' }
+            ];
+
+            container.innerHTML = discoveryItems.map((item, i) => {
+                const isLastOdd = i === discoveryItems.length - 1 && discoveryItems.length % 2 !== 0;
+                const valueAttr = item.value.replace(/'/g, "\'");
+                const action = item.type === 'category'
+                    ? `hideDiscoveryCategory('${valueAttr}')`
+                    : `hideDiscovery('${valueAttr}')`;
+
                 return `
-                    <button type="button" class="discovery-card ${isLastOdd ? 'discovery-card-wide' : ''}" onclick="hideDiscovery('${groupNameAttr}')">
-                        <span class="discovery-card-title">${group.short || group.name}</span>
+                    <button type="button" class="discovery-card ${isLastOdd ? 'discovery-card-wide' : ''}" onclick="${action}">
+                        <span class="discovery-card-title">${item.label}</span>
                     </button>`;
             }).join('');
         }
@@ -3507,6 +3522,15 @@ flavors: ['Sonho de Valsa', 'Ouro branco', 'Ninho trufado', 'Pessêgo', 'Amendoi
                     setActiveGroup('Todos');
                     window.scrollTo({ top: 0, behavior: 'smooth' });
                 }
+            }, 400);
+        }
+
+        function hideDiscoveryCategory(categoryName) {
+            const overlay = document.getElementById('discovery-overlay');
+            overlay.classList.add('hiding');
+            setTimeout(() => {
+                overlay.style.display = 'none';
+                goToCategory(categoryName);
             }, 400);
         }
 
