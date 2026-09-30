@@ -5722,13 +5722,14 @@ function getShareDominantColor(sampleCtx, width, height) {
     }
 }
 
-function drawShareBlurredBackground(ctx, img, width, height) {
+function drawShareBlurredBackground(ctx, img, width, height, options = {}) {
     if (!img || !img.width || !img.height) return null;
 
-    // Reduzir a foto antes de ampliá-la elimina os detalhes mesmo em
-    // navegadores cujo filtro de canvas produz um blur muito discreto.
+    // No catálogo, preservamos um pouco mais da fotografia para o fundo
+    // continuar reconhecível, mantendo a suavidade do card padrão.
+    const softWidth = options.softWidth || 96;
+    const blurAmount = options.blurAmount || 16;
     const softCanvas = document.createElement('canvas');
-    const softWidth = 96;
     const softHeight = Math.max(96, Math.round(height * (softWidth / width)));
     softCanvas.width = softWidth;
     softCanvas.height = softHeight;
@@ -5742,7 +5743,7 @@ function drawShareBlurredBackground(ctx, img, width, height) {
     ctx.save();
     ctx.imageSmoothingEnabled = true;
     ctx.imageSmoothingQuality = 'high';
-    ctx.filter = 'blur(16px)';
+    ctx.filter = 'blur(' + blurAmount + 'px)';
     ctx.drawImage(softCanvas, -36, -36, width + 72, height + 72);
     ctx.restore();
 
@@ -6453,7 +6454,15 @@ async function buildProductShareBlob(item, options = {}) {
     ctx.fillRect(0, 0, width, height);
 
     if (img && img.width && img.height) {
-        drawShareBlurredBackground(ctx, img, width, height);
+        drawShareBlurredBackground(
+            ctx,
+            img,
+            width,
+            height,
+            includeHeroPhoto
+                ? {}
+                : { softWidth: 240, blurAmount: 10 }
+        );
     }
 
     const catalogInfoScale = includeHeroPhoto
@@ -6766,10 +6775,9 @@ async function buildProductShareBlob(item, options = {}) {
         ctx.stroke();
 
         if (useCenteredSimplePrice) {
-            const centeredPriceBlockHeight = 136;
-            const centeredPriceY =
-                infoTop + Math.max(0, (flavorBlockHeight - centeredPriceBlockHeight) / 2);
-            drawCenteredSimplePrice(leftX, centeredPriceY, leftColWidth);
+            // Alinha o valor ao topo da coluna, no mesmo eixo visual dos sabores.
+            // A regra vale tanto para o card completo quanto para o modo catálogo.
+            drawCenteredSimplePrice(leftX, infoTop, leftColWidth);
         } else {
             drawPrices(leftX, infoTop, leftColWidth);
         }
