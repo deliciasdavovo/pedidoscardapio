@@ -6160,39 +6160,65 @@ function drawShareSectionLabel(ctx, text, x, y) {
 
 
 
-function drawCatalogSequenceFrame(ctx, width, height, label, align = 'right') {
-    const borderInset = 27;
-    const labelHeight = 48;
-    const labelPadding = 18;
+function drawCatalogSequenceFrame(ctx, width, height, part = 'start') {
+    const inset = 27;
+    const middleY = height / 2;
+    const sideGap = 72;
 
     ctx.save();
-
-    // O mesmo filete reto nas duas imagens cria a sensação de continuidade.
-    ctx.strokeStyle = 'rgba(255, 253, 248, 0.88)';
+    ctx.strokeStyle = 'rgba(255, 253, 248, 0.9)';
     ctx.lineWidth = 4;
-    ctx.strokeRect(
-        borderInset,
-        borderInset,
-        width - (borderInset * 2),
-        height - (borderInset * 2)
-    );
+    ctx.lineCap = 'square';
+    ctx.lineJoin = 'miter';
+    ctx.shadowColor = 'rgba(34, 32, 28, 0.2)';
+    ctx.shadowBlur = 4;
 
-    ctx.font = "700 23px 'DM Sans', sans-serif";
-    ctx.textAlign = 'left';
-    ctx.textBaseline = 'alphabetic';
+    ctx.beginPath();
 
-    const labelWidth = Math.ceil(ctx.measureText(label).width);
-    const boxWidth = labelWidth + (labelPadding * 2);
-    const boxX = align === 'left'
-        ? borderInset + 18
-        : width - borderInset - boxWidth - 18;
-    const boxY = height - borderInset - labelHeight;
+    // Linhas superior e inferior continuam visualmente de uma imagem para a outra.
+    ctx.moveTo(inset, inset);
+    ctx.lineTo(width - inset, inset);
+    ctx.moveTo(inset, height - inset);
+    ctx.lineTo(width - inset, height - inset);
 
-    ctx.fillStyle = 'rgba(251, 248, 242, 0.94)';
-    ctx.fillRect(boxX, boxY, boxWidth, labelHeight);
+    if (part === 'start') {
+        // A primeira imagem começa a moldura e deixa a lateral direita aberta.
+        ctx.moveTo(inset, inset);
+        ctx.lineTo(inset, height - inset);
+        ctx.moveTo(width - inset, inset);
+        ctx.lineTo(width - inset, middleY - sideGap);
+        ctx.moveTo(width - inset, middleY + sideGap);
+        ctx.lineTo(width - inset, height - inset);
+    } else {
+        // A segunda imagem recebe a linha pela esquerda e encerra a moldura à direita.
+        ctx.moveTo(width - inset, inset);
+        ctx.lineTo(width - inset, height - inset);
+        ctx.moveTo(inset, inset);
+        ctx.lineTo(inset, middleY - sideGap);
+        ctx.moveTo(inset, middleY + sideGap);
+        ctx.lineTo(inset, height - inset);
+    }
 
-    ctx.fillStyle = '#2C4A34';
-    ctx.fillText(label, boxX + labelPadding, boxY + 32);
+    ctx.stroke();
+
+    if (part === 'start') {
+        // Seta mínima, sem texto, indicando a continuação lateral.
+        const arrowStartX = width - inset - 68;
+        const arrowEndX = width - inset - 14;
+        ctx.beginPath();
+        ctx.moveTo(arrowStartX, middleY);
+        ctx.lineTo(arrowEndX, middleY);
+        ctx.moveTo(arrowEndX - 17, middleY - 15);
+        ctx.lineTo(arrowEndX, middleY);
+        ctx.lineTo(arrowEndX - 17, middleY + 15);
+        ctx.stroke();
+    } else {
+        // Pequeno traço de entrada conclui a continuidade iniciada na foto.
+        ctx.beginPath();
+        ctx.moveTo(0, middleY);
+        ctx.lineTo(inset + 54, middleY);
+        ctx.stroke();
+    }
 
     ctx.restore();
 }
@@ -6204,7 +6230,7 @@ async function buildProductCatalogPhotoBlob(item) {
     }
 
     const width = 1080;
-    const height = 1350;
+    const height = 810;
     const canvas = document.createElement('canvas');
     canvas.width = width;
     canvas.height = height;
@@ -6221,13 +6247,7 @@ async function buildProductCatalogPhotoBlob(item) {
     // Foto limpa e em tela cheia para servir como a imagem principal do catálogo.
     drawShareCoverImage(ctx, img, 0, 0, width, height);
 
-    drawCatalogSequenceFrame(
-        ctx,
-        width,
-        height,
-        'ARRASTE PARA VER DETALHES  →',
-        'right'
-    );
+    drawCatalogSequenceFrame(ctx, width, height, 'start');
 
     return new Promise((resolve, reject) => {
         try {
@@ -6435,7 +6455,7 @@ async function buildProductShareBlob(item, options = {}) {
     );
     const height = includeHeroPhoto
         ? Math.max(1350, panelHeight + 686)
-        : Math.max(1350, panelHeight + 96);
+        : 810;
 
     const canvas = document.createElement('canvas');
     canvas.width = width;
@@ -6456,10 +6476,23 @@ async function buildProductShareBlob(item, options = {}) {
         drawShareBlurredBackground(ctx, img, width, height);
     }
 
+    const catalogInfoScale = includeHeroPhoto
+        ? 1
+        : Math.min(1, (height - 96) / panelHeight);
+    const catalogLayoutHeight = includeHeroPhoto
+        ? height
+        : height / catalogInfoScale;
+
+    if (!includeHeroPhoto && catalogInfoScale < 1) {
+        ctx.save();
+        ctx.translate((width - (width * catalogInfoScale)) / 2, 0);
+        ctx.scale(catalogInfoScale, catalogInfoScale);
+    }
+
     const panelX = 70;
     const panelY = includeHeroPhoto
         ? height - panelHeight - 48
-        : Math.round((height - panelHeight) / 2);
+        : Math.round((catalogLayoutHeight - panelHeight) / 2);
     const panelWidth = width - (panelX * 2);
 
     if (includeHeroPhoto) {
@@ -6787,14 +6820,12 @@ async function buildProductShareBlob(item, options = {}) {
         });
     }
 
+    if (!includeHeroPhoto && catalogInfoScale < 1) {
+        ctx.restore();
+    }
+
     if (!includeHeroPhoto) {
-        drawCatalogSequenceFrame(
-            ctx,
-            width,
-            height,
-            'INFORMAÇÕES DO PRODUTO',
-            'left'
-        );
+        drawCatalogSequenceFrame(ctx, width, height, 'end');
     }
 
     return new Promise((resolve, reject) => {
