@@ -1699,6 +1699,8 @@
     'Kibe Tradicional'
   ],
 
+  sharePriceGroupLabels: ['Pastelzinhos mini', 'Demais mini salgados'],
+
   variants: {
     'Pastelzinho de Carne': {
       price: 2.20,
@@ -5902,6 +5904,60 @@ function getSharePriceLines(item) {
         return parts;
     }
 
+    function getCompactPriceGroupLabel(labels, groupIndex, totalGroups) {
+        if (
+            Array.isArray(item.sharePriceGroupLabels) &&
+            item.sharePriceGroupLabels[groupIndex]
+        ) {
+            return String(item.sharePriceGroupLabels[groupIndex]).trim();
+        }
+
+        const cleaned = (labels || [])
+            .map(label => String(label || '').trim())
+            .filter(Boolean);
+
+        if (!cleaned.length) return '';
+        if (cleaned.length === 1) return cleaned[0];
+
+        const firstWords = cleaned.map(label => label.split(/\s+/)[0]).filter(Boolean);
+        const sameFirstWord = firstWords.length === cleaned.length &&
+            firstWords.every(word => normalizeName(word) === normalizeName(firstWords[0]));
+
+        if (sameFirstWord) {
+            const baseWord = firstWords[0];
+            const normalized = normalizeName(baseWord);
+            const irregular = {
+                'pao': 'Pães',
+                'pastel': 'Pastéis',
+                'pastelzinho': 'Pastelzinhos',
+                'folhado': 'Folhados',
+                'bolo': 'Bolos',
+                'torta': 'Tortas',
+                'brigadeiro': 'Brigadeiros',
+                'quiche': 'Quiches',
+                'pizza': 'Pizzas',
+                'sonho': 'Sonhos',
+                'croissant': 'Croissants'
+            };
+
+            if (irregular[normalized]) return irregular[normalized];
+
+            if (/zinho$/i.test(baseWord)) return baseWord.replace(/zinho$/i, 'zinhos');
+            if (/[aeiouáéíóúãõ]$/i.test(baseWord)) return baseWord + 's';
+            return baseWord + 's';
+        }
+
+        if (totalGroups === 2 && groupIndex === 1) {
+            const category = String(item.category || '').trim().toLowerCase();
+            if (category && category.length <= 28) {
+                return 'Demais ' + category;
+            }
+            return 'Demais opções';
+        }
+
+        return cleaned.length + ' opções';
+    }
+
     // Agrupa sabores/tipos que possuem exatamente o mesmo padrão de preço.
     if (flavors.length) {
         const groups = new Map();
@@ -5933,13 +5989,22 @@ function getSharePriceLines(item) {
         });
 
         if (hasSpecificFlavorPrice && groups.size > 1) {
-            groups.forEach(group => {
-                const optionLabel = group.labels.join(' / ');
+            const grouped = Array.from(groups.values());
+
+            grouped.forEach((group, groupIndex) => {
+                // A coluna da direita já mostra todos os sabores/recheios.
+                // Aqui o rótulo identifica somente o grupo de preço, sem
+                // repetir a lista inteira de opções.
+                const optionLabel = getCompactPriceGroupLabel(
+                    group.labels,
+                    groupIndex,
+                    grouped.length
+                );
 
                 // Cada tipo de valor ganha sua própria linha para deixar
                 // unidade, quilo e estimativas visualmente inequívocos.
                 group.parts.forEach(part => {
-                    lines.push(optionLabel + ' · ' + part);
+                    lines.push((optionLabel ? optionLabel + ' · ' : '') + part);
                 });
             });
             return lines;
