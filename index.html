@@ -6160,13 +6160,51 @@ function drawShareSectionLabel(ctx, text, x, y) {
 
 
 
+function drawCatalogSequenceFrame(ctx, width, height, label, align = 'right') {
+    const borderInset = 27;
+    const labelHeight = 48;
+    const labelPadding = 18;
+
+    ctx.save();
+
+    // O mesmo filete reto nas duas imagens cria a sensação de continuidade.
+    ctx.strokeStyle = 'rgba(255, 253, 248, 0.88)';
+    ctx.lineWidth = 4;
+    ctx.strokeRect(
+        borderInset,
+        borderInset,
+        width - (borderInset * 2),
+        height - (borderInset * 2)
+    );
+
+    ctx.font = "700 23px 'DM Sans', sans-serif";
+    ctx.textAlign = 'left';
+    ctx.textBaseline = 'alphabetic';
+
+    const labelWidth = Math.ceil(ctx.measureText(label).width);
+    const boxWidth = labelWidth + (labelPadding * 2);
+    const boxX = align === 'left'
+        ? borderInset + 18
+        : width - borderInset - boxWidth - 18;
+    const boxY = height - borderInset - labelHeight;
+
+    ctx.fillStyle = 'rgba(251, 248, 242, 0.94)';
+    ctx.fillRect(boxX, boxY, boxWidth, labelHeight);
+
+    ctx.fillStyle = '#2C4A34';
+    ctx.fillText(label, boxX + labelPadding, boxY + 32);
+
+    ctx.restore();
+}
+
+
 async function buildProductCatalogPhotoBlob(item) {
     if (document.fonts && document.fonts.ready) {
         try { await document.fonts.ready; } catch (_) {}
     }
 
     const width = 1080;
-    const height = 1080;
+    const height = 1350;
     const canvas = document.createElement('canvas');
     canvas.width = width;
     canvas.height = height;
@@ -6183,18 +6221,13 @@ async function buildProductCatalogPhotoBlob(item) {
     // Foto limpa e em tela cheia para servir como a imagem principal do catálogo.
     drawShareCoverImage(ctx, img, 0, 0, width, height);
 
-    // Apenas um filete reto e delicado — sem moldura grossa nem cantos arredondados.
-    const borderInset = 27;
-    ctx.save();
-    ctx.strokeStyle = 'rgba(255, 253, 248, 0.88)';
-    ctx.lineWidth = 4;
-    ctx.strokeRect(
-        borderInset,
-        borderInset,
-        width - (borderInset * 2),
-        height - (borderInset * 2)
+    drawCatalogSequenceFrame(
+        ctx,
+        width,
+        height,
+        'ARRASTE PARA VER DETALHES  →',
+        'right'
     );
-    ctx.restore();
 
     return new Promise((resolve, reject) => {
         try {
@@ -6402,7 +6435,7 @@ async function buildProductShareBlob(item, options = {}) {
     );
     const height = includeHeroPhoto
         ? Math.max(1350, panelHeight + 686)
-        : Math.max(1080, panelHeight + 96);
+        : Math.max(1350, panelHeight + 96);
 
     const canvas = document.createElement('canvas');
     canvas.width = width;
@@ -6752,6 +6785,16 @@ async function buildProductShareBlob(item, options = {}) {
             );
             flavorY += 12;
         });
+    }
+
+    if (!includeHeroPhoto) {
+        drawCatalogSequenceFrame(
+            ctx,
+            width,
+            height,
+            'INFORMAÇÕES DO PRODUTO',
+            'left'
+        );
     }
 
     return new Promise((resolve, reject) => {
