@@ -6377,16 +6377,14 @@ async function buildProductShareBlob(item, options = {}) {
 
     let primaryPriceToDisplay = '';
     let priceDetailLines = [];
+    let estimatedUnitPriceText = '';
+    let estimatedUnitWeightText = '';
 
     if (isSimpleKgAndUnit) {
-        const estimatedWeight = getShareEstimatedUnitWeightText(item);
+        estimatedUnitWeightText = getShareEstimatedUnitWeightText(item);
         primaryPriceToDisplay = getKgPriceText(item);
-        priceDetailLines = [
-            'Unidade estimada · aprox. R$ ' +
-            item.price.toFixed(2).replace('.', ',') +
-            '/un' +
-            (estimatedWeight ? ' · unidade de ' + estimatedWeight : '')
-        ];
+        estimatedUnitPriceText =
+            'R$ ' + item.price.toFixed(2).replace('.', ',') + '/un';
     } else if (priceLines.length > 1) {
         // Variações reais: nenhum preço é tratado como principal.
         priceDetailLines = [...priceLines];
@@ -6511,6 +6509,7 @@ async function buildProductShareBlob(item, options = {}) {
     const priceBlockHeight =
         50 +
         (primaryPriceToDisplay ? (primaryPriceLabel ? 100 : 72) : 0) +
+        (isSimpleKgAndUnit ? 126 : 0) +
         (showPriceDetailsHeading ? 38 : 0) +
         priceDetailsHeight +
         (displayWeightText ? 70 + (weightVisualLines * 38) : 0);
@@ -6730,6 +6729,45 @@ async function buildProductShareBlob(item, options = {}) {
             ctx.font = "700 56px 'DM Sans', sans-serif";
             priceY = shareWrapText(ctx, primaryValue, startX, priceY, maxWidth, 62, 2);
             priceY += 8;
+        }
+
+        if (isSimpleKgAndUnit && estimatedUnitPriceText) {
+            priceY += 16;
+
+            ctx.fillStyle = '#766F65';
+            ctx.font = "700 20px 'DM Sans', sans-serif";
+            ctx.fillText('UNIDADE ESTIMADA', startX, priceY);
+            priceY += 38;
+
+            // O preço unitário é a segunda informação mais importante do bloco:
+            // recebe destaque próprio, sem competir com o preço por quilo.
+            ctx.fillStyle = '#2C5437';
+            ctx.font = "700 36px 'DM Sans', sans-serif";
+            priceY = shareWrapText(
+                ctx,
+                estimatedUnitPriceText,
+                startX,
+                priceY,
+                maxWidth,
+                44,
+                2
+            );
+
+            if (estimatedUnitWeightText) {
+                ctx.fillStyle = '#8A857C';
+                ctx.font = "500 22px 'DM Sans', sans-serif";
+                priceY = shareWrapText(
+                    ctx,
+                    'aprox. ' + estimatedUnitWeightText + ' por unidade',
+                    startX,
+                    priceY + 2,
+                    maxWidth,
+                    30,
+                    2
+                );
+            }
+
+            priceY += 10;
         }
 
         if (showPriceDetails) {
