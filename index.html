@@ -6187,12 +6187,12 @@ function drawCatalogCarouselHint(ctx, width, height, activePage = 1) {
     });
 
     if (activePage === 1) {
-        // Chevron mínimo sobre a beirada creme que continua no próximo card.
-        const arrowX = width - 30;
+        // A seta fica ainda sobre a foto, imediatamente antes do card que entra.
+        const arrowX = width - 105;
         const arrowY = height / 2;
 
-        ctx.strokeStyle = '#2C5437';
-        ctx.shadowColor = 'rgba(255, 253, 248, 0.48)';
+        ctx.strokeStyle = 'rgba(255, 253, 248, 0.96)';
+        ctx.shadowColor = 'rgba(34, 32, 28, 0.42)';
         ctx.lineWidth = 3;
         ctx.lineCap = 'round';
         ctx.lineJoin = 'round';
@@ -6231,19 +6231,19 @@ async function buildProductCatalogPhotoBlob(item) {
     // Foto limpa e em tela cheia para servir como a imagem principal do catálogo.
     drawShareCoverImage(ctx, img, 0, 0, width, height);
 
-    // Uma pequena aba do card de informações aparece na borda direita.
-    // Ao arrastar, ela encontra a continuação desenhada na segunda imagem.
+    // O próprio card de informações começa a entrar pela direita:
+    // uma faixa alta, com o topo arredondado, como na referência.
     ctx.save();
-    ctx.shadowColor = 'rgba(34, 32, 28, 0.18)';
-    ctx.shadowBlur = 18;
-    ctx.shadowOffsetX = -6;
+    ctx.shadowColor = 'rgba(34, 32, 28, 0.20)';
+    ctx.shadowBlur = 22;
+    ctx.shadowOffsetX = -7;
     drawShareRoundedRect(
         ctx,
-        width - 42,
-        (height / 2) - 38,
-        64,
-        76,
-        18,
+        width - 64,
+        170,
+        140,
+        height,
+        42,
         '#FBF8F2'
     );
     ctx.restore();
@@ -6539,25 +6539,6 @@ async function buildProductShareBlob(item, options = {}) {
         );
     }
 
-    // No catálogo, a mesma aba nasce da borda esquerda e entra no card:
-    // as duas imagens parecem uma única peça quando são vistas em sequência.
-    if (!includeHeroPhoto) {
-        ctx.save();
-        ctx.shadowColor = 'rgba(34, 32, 28, 0.12)';
-        ctx.shadowBlur = 16;
-        ctx.shadowOffsetX = 5;
-        drawShareRoundedRect(
-            ctx,
-            -18,
-            (catalogLayoutHeight / 2) - 38,
-            panelX + 42,
-            76,
-            18,
-            '#FBF8F2'
-        );
-        ctx.restore();
-    }
-
     // Card branco de informações.
     ctx.save();
     ctx.shadowColor = 'rgba(34, 32, 28, 0.18)';
@@ -6573,6 +6554,16 @@ async function buildProductShareBlob(item, options = {}) {
         '#FBF8F2'
     );
     ctx.restore();
+
+    // Filete caramelo discreto: marca a continuação do card que apareceu na foto.
+    if (!includeHeroPhoto) {
+        ctx.strokeStyle = 'rgba(190, 107, 46, 0.58)';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(panelX + 18, panelY + 52);
+        ctx.lineTo(panelX + 18, panelY + panelHeight - 52);
+        ctx.stroke();
+    }
 
     const left = panelX + 56;
     const right = panelX + panelWidth - 56;
