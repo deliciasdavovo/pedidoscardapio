@@ -6996,7 +6996,8 @@ async function buildProductShareBlob(item, options = {}) {
             primaryPriceToDisplay &&
             !primaryPriceLabel &&
             !showPriceDetails &&
-            !displayWeightText
+            !displayWeightText &&
+            !isSimpleKgAndUnit
         );
 
         ctx.strokeStyle = 'rgba(44, 74, 52, 0.16)';
