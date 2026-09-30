@@ -6258,14 +6258,6 @@ async function buildProductCatalogPhotoBlob(item, catalogLayout = {}) {
     );
     ctx.restore();
 
-    // O mesmo filete da página de informações aparece na continuação.
-    ctx.strokeStyle = 'rgba(190, 107, 46, 0.58)';
-    ctx.lineWidth = 2;
-    ctx.beginPath();
-    ctx.moveTo(width - 46, continuationY + 52);
-    ctx.lineTo(width - 46, continuationY + continuationHeight - 52);
-    ctx.stroke();
-
     drawCatalogCarouselHint(ctx, width, height, 1);
 
     return new Promise((resolve, reject) => {
@@ -6566,6 +6558,28 @@ async function buildProductShareBlob(item, options = {}) {
             'rgba(255,255,255,0.98)',
             18
         );
+    }
+
+    // No catálogo, o card continua diretamente pela borda esquerda.
+    // Não há margem nem um segundo arredondamento entre as duas imagens.
+    if (!includeHeroPhoto) {
+        const scaledOffsetX = (width - (width * catalogInfoScale)) / 2;
+        const extensionStartX = catalogInfoScale < 1
+            ? -(scaledOffsetX / catalogInfoScale)
+            : 0;
+
+        ctx.save();
+        ctx.shadowColor = 'rgba(34, 32, 28, 0.16)';
+        ctx.shadowBlur = 30;
+        ctx.shadowOffsetY = 14;
+        ctx.fillStyle = '#FBF8F2';
+        ctx.fillRect(
+            extensionStartX,
+            panelY,
+            (panelX + 58) - extensionStartX,
+            panelHeight
+        );
+        ctx.restore();
     }
 
     // Card branco de informações.
