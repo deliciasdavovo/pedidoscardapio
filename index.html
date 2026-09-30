@@ -1699,7 +1699,8 @@
     'Kibe Tradicional'
   ],
 
-  sharePriceGroupLabels: ['Pastelzinhos mini', 'Demais mini salgados'],
+  sharePriceGroupLabels: ['Pastelzinhos mini', 'Fritos tradicionais'],
+  sharePriceLayout: 'compact_unit_rows',
 
   variants: {
     'Pastelzinho de Carne': {
@@ -6396,8 +6397,12 @@ async function buildProductShareBlob(item, options = {}) {
         ? 'A PARTIR DE'
         : '';
     const showPriceDetails = priceDetailLines.length > 0;
-    const showPriceDetailsHeading = showPriceDetails && !isSimpleKgAndUnit;
     const displayWeightText = isSimpleKgAndUnit ? '' : weightText;
+    const useCompactUnitPriceRows = (
+        item.sharePriceLayout === 'compact_unit_rows' &&
+        priceDetailLines.length > 1
+    );
+    const showPriceDetailsHeading = showPriceDetails && !isSimpleKgAndUnit && !useCompactUnitPriceRows;
 
     function normalizeShareOptionLabel(value) {
         return String(value || '')
@@ -6476,7 +6481,9 @@ async function buildProductShareBlob(item, options = {}) {
         parsedPriceDetailsForLayout.length === 3 &&
         parsedPriceDetailsForLayout.every(parts => /^aro\s+/i.test(parts.label || ''));
 
-    const priceDetailsHeight = usesThreeAroColumns ? 155 : priceDetailLines.reduce((total, line) => {
+    const priceDetailsHeight = useCompactUnitPriceRows
+        ? (priceDetailLines.length * 58) + 8
+        : usesThreeAroColumns ? 155 : priceDetailLines.reduce((total, line) => {
         const parts = getPriceLineParts(line);
         const labelChars = hasDetailColumn ? 23 : 48;
         const valueChars = hasDetailColumn ? 17 : 36;
@@ -6712,7 +6719,12 @@ async function buildProductShareBlob(item, options = {}) {
 
     function drawPrices(startX, startY, maxWidth) {
         let priceY = startY;
-        drawShareSectionLabel(ctx, 'Valores', startX, priceY);
+        drawShareSectionLabel(
+            ctx,
+            useCompactUnitPriceRows ? 'Preços · por unidade' : 'Valores',
+            startX,
+            priceY
+        );
         priceY += 50;
 
         if (primaryPriceToDisplay) {
@@ -6784,7 +6796,42 @@ async function buildProductShareBlob(item, options = {}) {
                 parsedPriceDetails.length === 3 &&
                 parsedPriceDetails.every(parts => /^aro\s+/i.test(parts.label || ''));
 
-            if (isThreeAroLayout) {
+            if (useCompactUnitPriceRows) {
+                const rowGap = 18;
+
+                parsedPriceDetails.forEach((parts, index) => {
+                    const label = String(parts.label || '').trim();
+                    const value = String(parts.value || '')
+                        .replace(/^aprox\.\s*/i, '')
+                        .replace(/\/un\s*$/i, '')
+                        .trim();
+
+                    ctx.fillStyle = '#5F5B55';
+                    ctx.font = "600 22px 'DM Sans', sans-serif";
+                    ctx.textAlign = 'left';
+                    ctx.fillText(label, startX, priceY);
+
+                    ctx.fillStyle = '#2C5437';
+                    ctx.font = "700 34px 'DM Sans', sans-serif";
+                    ctx.textAlign = 'right';
+                    ctx.fillText(value, startX + maxWidth, priceY + 2);
+                    ctx.textAlign = 'left';
+
+                    priceY += 40;
+
+                    if (index < parsedPriceDetails.length - 1) {
+                        ctx.strokeStyle = 'rgba(44, 74, 52, 0.12)';
+                        ctx.lineWidth = 1.5;
+                        ctx.beginPath();
+                        ctx.moveTo(startX, priceY);
+                        ctx.lineTo(startX + maxWidth, priceY);
+                        ctx.stroke();
+                        priceY += rowGap;
+                    }
+                });
+
+                priceY += 8;
+            } else if (isThreeAroLayout) {
                 const colGap = 28;
                 const colWidth = (maxWidth - (colGap * 2)) / 3;
                 const topY = priceY;
