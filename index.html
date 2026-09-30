@@ -6591,6 +6591,40 @@ async function buildProductShareBlob(item) {
         }
     }
 
+    function drawCenteredSimplePrice(startX, startY, maxWidth) {
+        const centerX = startX + (maxWidth / 2);
+        const rawPrice = primaryPriceToDisplay.replace(/^a partir de\s+/i, '').trim();
+        const unitMatch = rawPrice.match(/\/(un|kg|pessoa)$/i);
+        const priceValue = unitMatch
+            ? rawPrice.slice(0, -unitMatch[0].length).trim()
+            : rawPrice;
+        const unitLabels = {
+            un: 'por unidade',
+            kg: 'por quilo',
+            pessoa: 'por pessoa'
+        };
+        const unitLabel = unitMatch
+            ? unitLabels[unitMatch[1].toLowerCase()]
+            : '';
+
+        ctx.save();
+        ctx.textAlign = 'center';
+
+        drawShareSectionLabel(ctx, 'Valor', centerX, startY);
+
+        ctx.fillStyle = '#2C5437';
+        ctx.font = "700 57px 'DM Sans', sans-serif";
+        ctx.fillText(priceValue, centerX, startY + 61);
+
+        if (unitLabel) {
+            ctx.fillStyle = '#766F65';
+            ctx.font = "500 25px 'DM Sans', sans-serif";
+            ctx.fillText(unitLabel, centerX, startY + 101);
+        }
+
+        ctx.restore();
+    }
+
     if (!hasDetailColumn) {
         // Sem sabores/recheios: os valores ocupam a largura inteira.
         drawPrices(left, infoTop, contentWidth);
@@ -6602,6 +6636,12 @@ async function buildProductShareBlob(item) {
         const leftColWidth = dividerX - leftX - 40;
         const rightColWidth = right - rightX;
         const dividerBottom = panelY + panelHeight - 42;
+        const useCenteredSimplePrice = Boolean(
+            primaryPriceToDisplay &&
+            !primaryPriceLabel &&
+            !showPriceDetails &&
+            !displayWeightText
+        );
 
         ctx.strokeStyle = 'rgba(44, 74, 52, 0.16)';
         ctx.lineWidth = 2;
@@ -6610,7 +6650,14 @@ async function buildProductShareBlob(item) {
         ctx.lineTo(dividerX, dividerBottom);
         ctx.stroke();
 
-        drawPrices(leftX, infoTop, leftColWidth);
+        if (useCenteredSimplePrice) {
+            const centeredPriceBlockHeight = 136;
+            const centeredPriceY =
+                infoTop + Math.max(0, (flavorBlockHeight - centeredPriceBlockHeight) / 2);
+            drawCenteredSimplePrice(leftX, centeredPriceY, leftColWidth);
+        } else {
+            drawPrices(leftX, infoTop, leftColWidth);
+        }
 
         let flavorY = infoTop;
         drawShareSectionLabel(ctx, 'Sabores / Recheios', rightX, flavorY);
