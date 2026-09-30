@@ -6180,31 +6180,21 @@ async function buildProductCatalogPhotoBlob(item) {
         throw new Error('Não foi possível carregar a foto deste produto.');
     }
 
-    // Fundo fotográfico suave para preencher perfeitamente o quadrado do catálogo.
-    ctx.fillStyle = '#DDD5C8';
-    ctx.fillRect(0, 0, width, height);
-    drawShareBlurredBackground(ctx, img, width, height);
+    // Foto limpa e em tela cheia para servir como a imagem principal do catálogo.
+    drawShareCoverImage(ctx, img, 0, 0, width, height);
 
-    const frame = 54;
-    const frameSize = width - (frame * 2);
-
+    // Apenas um filete reto e delicado — sem moldura grossa nem cantos arredondados.
+    const borderInset = 27;
     ctx.save();
-    createShareRoundedRectPath(ctx, frame, frame, frameSize, frameSize, 58);
-    ctx.clip();
-    drawShareCoverImage(ctx, img, frame, frame, frameSize, frameSize);
-    ctx.restore();
-
-    drawShareRoundedRect(
-        ctx,
-        frame,
-        frame,
-        frameSize,
-        frameSize,
-        58,
-        null,
-        'rgba(255,255,255,0.98)',
-        16
+    ctx.strokeStyle = 'rgba(255, 253, 248, 0.88)';
+    ctx.lineWidth = 4;
+    ctx.strokeRect(
+        borderInset,
+        borderInset,
+        width - (borderInset * 2),
+        height - (borderInset * 2)
     );
+    ctx.restore();
 
     return new Promise((resolve, reject) => {
         try {
