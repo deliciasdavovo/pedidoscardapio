@@ -6661,7 +6661,7 @@ async function buildProductShareBlob(item, options = {}) {
     }
 
     function drawCenteredSimplePrice(startX, startY, maxWidth) {
-        const centerX = startX + (maxWidth / 2);
+        const textX = startX;
         const rawPrice = primaryPriceToDisplay.replace(/^a partir de\s+/i, '').trim();
         const unitMatch = rawPrice.match(/\/(un|kg|pessoa)$/i);
         const priceValue = unitMatch
@@ -6677,18 +6677,18 @@ async function buildProductShareBlob(item, options = {}) {
             : '';
 
         ctx.save();
-        ctx.textAlign = 'center';
+        ctx.textAlign = 'left';
 
-        drawShareSectionLabel(ctx, 'Valor', centerX, startY);
+        drawShareSectionLabel(ctx, 'Valor', textX, startY);
 
         ctx.fillStyle = '#2C5437';
         ctx.font = "700 57px 'DM Sans', sans-serif";
-        ctx.fillText(priceValue, centerX, startY + 61);
+        ctx.fillText(priceValue, textX, startY + 61);
 
         if (unitLabel) {
             ctx.fillStyle = '#766F65';
             ctx.font = "500 25px 'DM Sans', sans-serif";
-            ctx.fillText(unitLabel, centerX, startY + 101);
+            ctx.fillText(unitLabel, textX, startY + 101);
         }
 
         ctx.restore();
