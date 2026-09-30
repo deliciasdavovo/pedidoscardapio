@@ -6210,8 +6210,9 @@ async function buildProductCatalogPhotoBlob(item) {
         try { await document.fonts.ready; } catch (_) {}
     }
 
+    // O catálogo do WhatsApp privilegia a miniatura quadrada.
     const width = 1080;
-    const height = 810;
+    const height = 1080;
     const canvas = document.createElement('canvas');
     canvas.width = width;
     canvas.height = height;
@@ -6436,7 +6437,7 @@ async function buildProductShareBlob(item, options = {}) {
     );
     const height = includeHeroPhoto
         ? Math.max(1350, panelHeight + 686)
-        : 810;
+        : 1080;
 
     const canvas = document.createElement('canvas');
     canvas.width = width;
