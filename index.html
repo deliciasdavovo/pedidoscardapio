@@ -6580,10 +6580,13 @@ async function buildProductShareBlob(item, options = {}) {
     }
 
     // Card branco de informações.
+    // No catálogo ele fica sem sombra própria para não marcar a emenda interna.
     ctx.save();
-    ctx.shadowColor = 'rgba(34, 32, 28, 0.18)';
-    ctx.shadowBlur = 34;
-    ctx.shadowOffsetY = 14;
+    if (includeHeroPhoto) {
+        ctx.shadowColor = 'rgba(34, 32, 28, 0.18)';
+        ctx.shadowBlur = 34;
+        ctx.shadowOffsetY = 14;
+    }
     drawShareRoundedRect(
         ctx,
         panelX,
