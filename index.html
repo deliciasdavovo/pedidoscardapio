@@ -108,6 +108,15 @@
             background: #F5F0E7;
             color: #2C4A34;
         }
+        .owner-catalog-btn {
+            background: rgba(44, 74, 52, 0.92);
+            border-color: rgba(255, 255, 255, 0.42);
+            color: #FFFDF8;
+        }
+        .owner-catalog-btn:hover {
+            background: #233A29;
+            color: #FFFFFF;
+        }
         
         input[type="number"]::-webkit-inner-spin-button, 
         input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
@@ -3863,6 +3872,9 @@ flavors: ['Sonho de Valsa', 'Ouro branco', 'Ninho trufado', 'Pessêgo', 'Amendoi
                     <button type="button" onclick="event.stopPropagation(); shareProductImage('${item.id}')" class="owner-share-btn absolute top-3 right-3 z-20 w-8 h-8 rounded-full" aria-label="${getOwnerShareActionLabel()} de ${item.name}" title="${getOwnerShareActionLabel()}">
                         ${getOwnerShareIconHtml('text-[10px]')}
                     </button>
+                    <button type="button" onclick="event.stopPropagation(); shareProductCatalog(\'${item.id}\')" class="owner-share-btn owner-catalog-btn absolute top-3 right-14 z-20 w-8 h-8 rounded-full" aria-label="Modo catálogo de ${item.name}" title="Modo catálogo: foto + informações">
+                        <i class="fas fa-images text-[10px]"></i>
+                    </button>
                     <div class="relative h-56 overflow-hidden">
   <img
     id="img-${item.id}"
@@ -6148,7 +6160,68 @@ function drawShareSectionLabel(ctx, text, x, y) {
 
 
 
-async function buildProductShareBlob(item) {
+async function buildProductCatalogPhotoBlob(item) {
+    if (document.fonts && document.fonts.ready) {
+        try { await document.fonts.ready; } catch (_) {}
+    }
+
+    const width = 1080;
+    const height = 1080;
+    const canvas = document.createElement('canvas');
+    canvas.width = width;
+    canvas.height = height;
+    const ctx = canvas.getContext('2d');
+    const imageSrc = (item.images && item.images.length)
+        ? item.images[0]
+        : (item.image || '');
+    const img = await loadShareProductImage(imageSrc);
+
+    if (!img || !img.width || !img.height) {
+        throw new Error('Não foi possível carregar a foto deste produto.');
+    }
+
+    // Fundo fotográfico suave para preencher perfeitamente o quadrado do catálogo.
+    ctx.fillStyle = '#DDD5C8';
+    ctx.fillRect(0, 0, width, height);
+    drawShareBlurredBackground(ctx, img, width, height);
+
+    const frame = 54;
+    const frameSize = width - (frame * 2);
+
+    ctx.save();
+    createShareRoundedRectPath(ctx, frame, frame, frameSize, frameSize, 58);
+    ctx.clip();
+    drawShareCoverImage(ctx, img, frame, frame, frameSize, frameSize);
+    ctx.restore();
+
+    drawShareRoundedRect(
+        ctx,
+        frame,
+        frame,
+        frameSize,
+        frameSize,
+        58,
+        null,
+        'rgba(255,255,255,0.98)',
+        16
+    );
+
+    return new Promise((resolve, reject) => {
+        try {
+            canvas.toBlob(blob => {
+                if (blob) resolve(blob);
+                else reject(new Error('Não foi possível gerar a foto do catálogo.'));
+            }, 'image/png', 0.95);
+        } catch (error) {
+            reject(error);
+        }
+    });
+}
+
+
+async function buildProductShareBlob(item, options = {}) {
+    const includeHeroPhoto = options.includeHeroPhoto !== false;
+
     if (document.fonts && document.fonts.ready) {
         try { await document.fonts.ready; } catch (_) {}
     }
@@ -6337,7 +6410,9 @@ async function buildProductShareBlob(item) {
         360,
         Math.ceil(headerHeight + infoHeight + 30)
     );
-    const height = Math.max(1350, panelHeight + 686);
+    const height = includeHeroPhoto
+        ? Math.max(1350, panelHeight + 686)
+        : Math.max(1080, panelHeight + 96);
 
     const canvas = document.createElement('canvas');
     canvas.width = width;
@@ -6359,41 +6434,45 @@ async function buildProductShareBlob(item) {
     }
 
     const panelX = 70;
-    const panelY = height - panelHeight - 48;
+    const panelY = includeHeroPhoto
+        ? height - panelHeight - 48
+        : Math.round((height - panelHeight) / 2);
     const panelWidth = width - (panelX * 2);
 
-    // A moldura fica mais estreita e entra por trás do card, como uma peça única.
-    const frameX = panelX + 32;
-    const frameY = 34;
-    const frameWidth = panelWidth - 64;
-    const frameBottom = panelY + 112;
-    const frameHeight = Math.max(650, frameBottom - frameY);
+    if (includeHeroPhoto) {
+        // A moldura fica mais estreita e entra por trás do card, como uma peça única.
+        const frameX = panelX + 32;
+        const frameY = 34;
+        const frameWidth = panelWidth - 64;
+        const frameBottom = panelY + 112;
+        const frameHeight = Math.max(650, frameBottom - frameY);
 
-    // A foto ocupa toda a moldura; a borda branca é desenhada por cima.
-    ctx.save();
-    createShareRoundedRectPath(ctx, frameX, frameY, frameWidth, frameHeight, 62);
-    ctx.clip();
+        // A foto ocupa toda a moldura; a borda branca é desenhada por cima.
+        ctx.save();
+        createShareRoundedRectPath(ctx, frameX, frameY, frameWidth, frameHeight, 62);
+        ctx.clip();
 
-    ctx.fillStyle = '#F5F0E7';
-    ctx.fillRect(frameX, frameY, frameWidth, frameHeight);
+        ctx.fillStyle = '#F5F0E7';
+        ctx.fillRect(frameX, frameY, frameWidth, frameHeight);
 
-    if (img && img.width && img.height) {
-        drawShareCoverImage(ctx, img, frameX, frameY, frameWidth, frameHeight);
+        if (img && img.width && img.height) {
+            drawShareCoverImage(ctx, img, frameX, frameY, frameWidth, frameHeight);
+        }
+
+        ctx.restore();
+
+        drawShareRoundedRect(
+            ctx,
+            frameX,
+            frameY,
+            frameWidth,
+            frameHeight,
+            62,
+            null,
+            'rgba(255,255,255,0.98)',
+            18
+        );
     }
-
-    ctx.restore();
-
-    drawShareRoundedRect(
-        ctx,
-        frameX,
-        frameY,
-        frameWidth,
-        frameHeight,
-        62,
-        null,
-        'rgba(255,255,255,0.98)',
-        18
-    );
 
     // Card branco de informações.
     ctx.save();
@@ -7157,6 +7236,77 @@ async function shareProductImage(itemId) {
     }
 }
 
+async function shareProductCatalog(itemId) {
+    const item = MENU_ITEMS.find(product => product.id === itemId);
+    if (!item || !document.body.classList.contains('owner-mode')) return;
+
+    showValidationPopup(
+        isMobileShareDevice()
+            ? 'Preparando as 2 imagens do catálogo…'
+            : 'Preparando as 2 imagens para download…'
+    );
+
+    try {
+        const [photoBlob, infoBlob] = await Promise.all([
+            buildProductCatalogPhotoBlob(item),
+            buildProductShareBlob(item, { includeHeroPhoto: false })
+        ]);
+        const blobs = [photoBlob, infoBlob];
+        const files = [
+            new File(
+                [photoBlob],
+                makeShareFileName(item.name + ' - 1 Foto', 'Produto - Foto'),
+                { type: 'image/png' }
+            ),
+            new File(
+                [infoBlob],
+                makeShareFileName(item.name + ' - 2 Informações', 'Produto - Informações'),
+                { type: 'image/png' }
+            )
+        ];
+
+        if (!isMobileShareDevice()) {
+            blobs.forEach((blob, index) => {
+                setTimeout(() => {
+                    downloadGeneratedShareFile(
+                        blob,
+                        files[index].name,
+                        index === 0
+                            ? 'Foto do catálogo baixada.'
+                            : 'Informações do catálogo baixadas.'
+                    );
+                }, index * 250);
+            });
+            return;
+        }
+
+        if (navigator.share && navigator.canShare && navigator.canShare({ files })) {
+            try {
+                await navigator.share({
+                    files,
+                    title: item.name + ' — catálogo'
+                });
+                return;
+            } catch (error) {
+                if (error && error.name === 'AbortError') return;
+            }
+        }
+
+        blobs.forEach((blob, index) => {
+            setTimeout(() => {
+                downloadGeneratedShareFile(
+                    blob,
+                    files[index].name,
+                    'Imagem ' + (index + 1) + ' do catálogo pronta.'
+                );
+            }, index * 250);
+        });
+    } catch (error) {
+        console.error(error);
+        showValidationPopup('Não foi possível gerar as imagens do catálogo.');
+    }
+}
+
 // ===== MOBILE: LISTA DE PRODUTOS =====
 
 function createProductListItem(item) {
@@ -7195,6 +7345,9 @@ function createProductListItem(item) {
         <div class="product-list-item relative flex items-center gap-4 px-4 py-3.5" onclick="openProductModal('${item.id}')">
             <button type="button" onclick="event.stopPropagation(); shareProductImage('${item.id}')" class="owner-share-btn absolute top-2.5 right-2.5 z-10 w-7 h-7 rounded-full" aria-label="${getOwnerShareActionLabel()} de ${escapeHtml(item.name)}" title="${getOwnerShareActionLabel()}">
                 ${getOwnerShareIconHtml('text-[9px]')}
+            </button>
+            <button type="button" onclick="event.stopPropagation(); shareProductCatalog(\'${item.id}\')" class="owner-share-btn owner-catalog-btn absolute top-2.5 right-11 z-10 w-7 h-7 rounded-full" aria-label="Modo catálogo de ${escapeHtml(item.name)}" title="Modo catálogo: foto + informações">
+                <i class="fas fa-images text-[9px]"></i>
             </button>
             <div class="shrink-0 w-[100px] h-[100px] rounded-2xl overflow-hidden bg-[#ECE9E1]">
                 ${imgSrc
@@ -7274,6 +7427,9 @@ function buildProductModalContent(item) {
         <div class="relative h-[34vh] min-h-[240px] max-h-[340px] overflow-hidden bg-[#ECE9E1]">
             <button type="button" onclick="event.stopPropagation(); shareProductImage('${item.id}')" class="owner-share-btn absolute top-3 right-3 z-20 w-9 h-9 rounded-full" aria-label="${getOwnerShareActionLabel()}" title="${getOwnerShareActionLabel()}">
                 ${getOwnerShareIconHtml('text-[11px]')}
+            </button>
+            <button type="button" onclick="event.stopPropagation(); shareProductCatalog(\'${item.id}\')" class="owner-share-btn owner-catalog-btn absolute top-3 right-16 z-20 w-9 h-9 rounded-full" aria-label="Modo catálogo de ${escapeHtml(item.name)}" title="Modo catálogo: foto + informações">
+                <i class="fas fa-images text-[11px]"></i>
             </button>
             <img id="modal-img" src="${escapeHtml(imgSrc)}" onerror="handleImgError(this)" class="w-full h-full object-cover">
             ${hasMultiImg ? `
