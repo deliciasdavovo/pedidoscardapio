@@ -6207,7 +6207,7 @@ function drawCatalogCarouselHint(ctx, width, height, activePage = 1) {
 }
 
 
-async function buildProductCatalogPhotoBlob(item) {
+async function buildProductCatalogPhotoBlob(item, catalogLayout = {}) {
     if (document.fonts && document.fonts.ready) {
         try { await document.fonts.ready; } catch (_) {}
     }
@@ -6231,8 +6231,18 @@ async function buildProductCatalogPhotoBlob(item) {
     // Foto limpa e em tela cheia para servir como a imagem principal do catálogo.
     drawShareCoverImage(ctx, img, 0, 0, width, height);
 
-    // O próprio card de informações começa a entrar pela direita:
-    // uma faixa alta, com o topo arredondado, como na referência.
+    // Usa exatamente a posição e a altura do card da segunda imagem.
+    // Assim a faixa que entra pela direita começa e termina no mesmo eixo.
+    const continuationY = Number.isFinite(catalogLayout.panelY)
+        ? catalogLayout.panelY
+        : 170;
+    const continuationHeight = Number.isFinite(catalogLayout.panelHeight)
+        ? catalogLayout.panelHeight
+        : 740;
+    const continuationRadius = Number.isFinite(catalogLayout.radius)
+        ? catalogLayout.radius
+        : 42;
+
     ctx.save();
     ctx.shadowColor = 'rgba(34, 32, 28, 0.20)';
     ctx.shadowBlur = 22;
@@ -6240,13 +6250,21 @@ async function buildProductCatalogPhotoBlob(item) {
     drawShareRoundedRect(
         ctx,
         width - 64,
-        170,
+        continuationY,
         140,
-        height,
-        42,
+        continuationHeight,
+        continuationRadius,
         '#FBF8F2'
     );
     ctx.restore();
+
+    // O mesmo filete da página de informações aparece na continuação.
+    ctx.strokeStyle = 'rgba(190, 107, 46, 0.58)';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(width - 46, continuationY + 52);
+    ctx.lineTo(width - 46, continuationY + continuationHeight - 52);
+    ctx.stroke();
 
     drawCatalogCarouselHint(ctx, width, height, 1);
 
@@ -6503,6 +6521,17 @@ async function buildProductShareBlob(item, options = {}) {
         ? height - panelHeight - 48
         : Math.round((catalogLayoutHeight - panelHeight) / 2);
     const panelWidth = width - (panelX * 2);
+
+    if (
+        !includeHeroPhoto &&
+        typeof options.captureCatalogLayout === 'function'
+    ) {
+        options.captureCatalogLayout({
+            panelY: panelY * catalogInfoScale,
+            panelHeight: panelHeight * catalogInfoScale,
+            radius: 48 * catalogInfoScale
+        });
+    }
 
     if (includeHeroPhoto) {
         // A moldura fica mais estreita e entra por trás do card, como uma peça única.
@@ -7329,10 +7358,17 @@ async function shareProductCatalog(itemId) {
     );
 
     try {
-        const [photoBlob, infoBlob] = await Promise.all([
-            buildProductCatalogPhotoBlob(item),
-            buildProductShareBlob(item, { includeHeroPhoto: false })
-        ]);
+        let catalogLayout = null;
+        const infoBlob = await buildProductShareBlob(item, {
+            includeHeroPhoto: false,
+            captureCatalogLayout: layout => {
+                catalogLayout = layout;
+            }
+        });
+        const photoBlob = await buildProductCatalogPhotoBlob(
+            item,
+            catalogLayout || {}
+        );
         const blobs = [photoBlob, infoBlob];
         const files = [
             new File(
