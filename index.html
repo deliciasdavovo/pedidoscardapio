@@ -6568,10 +6568,8 @@ async function buildProductShareBlob(item, options = {}) {
             ? -(scaledOffsetX / catalogInfoScale)
             : 0;
 
-        ctx.save();
-        ctx.shadowColor = 'rgba(34, 32, 28, 0.16)';
-        ctx.shadowBlur = 30;
-        ctx.shadowOffsetY = 14;
+        // A extensão não recebe sombra própria para não criar uma faixa
+        // escura reta sobre o topo do card.
         ctx.fillStyle = '#FBF8F2';
         ctx.fillRect(
             extensionStartX,
@@ -6579,7 +6577,6 @@ async function buildProductShareBlob(item, options = {}) {
             (panelX + 58) - extensionStartX,
             panelHeight
         );
-        ctx.restore();
     }
 
     // Card branco de informações.
