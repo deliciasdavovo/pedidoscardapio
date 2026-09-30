@@ -6555,18 +6555,20 @@ async function buildProductShareBlob(item) {
                     );
 
                     if (parts.description) {
+                        // Mantém o rendimento visualmente ligado ao tamanho e ao preço.
                         ctx.fillStyle = '#766F65';
                         ctx.font = "400 25px 'DM Sans', sans-serif";
                         priceY = shareWrapText(
                             ctx,
                             parts.description,
                             startX,
-                            priceY + 2,
+                            priceY - 5,
                             maxWidth,
                             30,
                             Infinity
                         );
-                        priceY += 12;
+                        // Separa melhor o próximo tamanho sem soltar a descrição do atual.
+                        priceY += 22;
                     } else {
                         priceY += 14;
                     }
