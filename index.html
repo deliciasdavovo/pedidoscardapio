@@ -6236,6 +6236,51 @@ function drawShareSectionLabel(ctx, text, x, y) {
 
 
 
+function drawCatalogSwipePrompt(ctx, width, height) {
+    ctx.save();
+
+    // Sombra marrom suave concentrada no canto inferior esquerdo.
+    // Ela dá contraste ao texto sem escurecer a fotografia inteira.
+    const shade = ctx.createRadialGradient(
+        0,
+        height,
+        20,
+        0,
+        height,
+        720
+    );
+    shade.addColorStop(0, 'rgba(74, 40, 22, 0.48)');
+    shade.addColorStop(0.48, 'rgba(74, 40, 22, 0.24)');
+    shade.addColorStop(1, 'rgba(74, 40, 22, 0)');
+    ctx.fillStyle = shade;
+    ctx.fillRect(0, Math.round(height * 0.66), Math.round(width * 0.72), Math.round(height * 0.34));
+
+    const left = 52;
+    const lineY = height - 164;
+
+    // Filete editorial acima da chamada.
+    ctx.strokeStyle = 'rgba(255, 252, 246, 0.92)';
+    ctx.lineWidth = 3;
+    ctx.lineCap = 'round';
+    ctx.beginPath();
+    ctx.moveTo(left, lineY);
+    ctx.lineTo(left + 184, lineY);
+    ctx.stroke();
+
+    // Chamada em Lora, seguindo a linguagem tipográfica do catálogo.
+    ctx.fillStyle = 'rgba(255, 252, 246, 0.98)';
+    ctx.font = "400 38px 'Lora', serif";
+    ctx.textAlign = 'left';
+    ctx.textBaseline = 'alphabetic';
+    ctx.shadowColor = 'rgba(52, 28, 16, 0.34)';
+    ctx.shadowBlur = 8;
+    ctx.shadowOffsetY = 2;
+    ctx.fillText('Arraste para mais detalhes', left, height - 98);
+
+    ctx.restore();
+}
+
+
 function drawCatalogCarouselHint(ctx, width, height, activePage = 1) {
     const dotY = height - 28;
     const dotGap = 24;
@@ -6333,6 +6378,7 @@ async function buildProductCatalogPhotoBlob(item, catalogLayout = {}) {
     );
     ctx.restore();
 
+    drawCatalogSwipePrompt(ctx, width, height);
     drawCatalogCarouselHint(ctx, width, height, 1);
 
     return new Promise((resolve, reject) => {
