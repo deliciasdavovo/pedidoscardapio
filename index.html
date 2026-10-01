@@ -6240,7 +6240,8 @@ function drawCatalogSwipePrompt(ctx, width, height) {
     ctx.save();
 
     // Sombra marrom suave concentrada no canto inferior esquerdo.
-    // Ela dá contraste ao texto sem escurecer a fotografia inteira.
+    // O degradê é desenhado sobre toda a foto para desaparecer naturalmente,
+    // sem revelar as bordas de uma área retangular.
     const shade = ctx.createRadialGradient(
         0,
         height,
@@ -6253,7 +6254,7 @@ function drawCatalogSwipePrompt(ctx, width, height) {
     shade.addColorStop(0.48, 'rgba(74, 40, 22, 0.24)');
     shade.addColorStop(1, 'rgba(74, 40, 22, 0)');
     ctx.fillStyle = shade;
-    ctx.fillRect(0, Math.round(height * 0.66), Math.round(width * 0.72), Math.round(height * 0.34));
+    ctx.fillRect(0, 0, width, height);
 
     const left = 52;
     const lineY = height - 164;
