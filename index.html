@@ -7032,9 +7032,12 @@ async function buildProductShareBlob(item, options = {}) {
         drawPrices(left, infoTop, contentWidth);
     } else {
         // Com sabores/recheios: preços à esquerda e tópicos à direita.
-        const dividerX = Math.round(width / 2);
+        // Mantém a coluna de sabores no mesmo lugar, mas dá mais respiro
+        // deslocando apenas o filete vertical para a esquerda.
+        const columnCenterX = Math.round(width / 2);
+        const dividerX = columnCenterX - 28;
         const leftX = left;
-        const rightX = dividerX + 42;
+        const rightX = columnCenterX + 42;
         const leftColWidth = dividerX - leftX - 40;
         const rightColWidth = right - rightX;
         const dividerBottom = panelY + panelHeight - 42;
