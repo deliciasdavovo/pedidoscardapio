@@ -3790,7 +3790,7 @@ flavors: ['Sonho de Valsa', 'Ouro branco', 'Ninho trufado', 'Pessêgo', 'Amendoi
                     items.forEach(item => { mobileList += createProductListItem(item); });
                     mobileList += `</div>`;
 
-                    let desktopGrid = `<div class="hidden sm:grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-7 xl:gap-8 max-w-6xl mx-auto">`;
+                    let desktopGrid = `<div class="hidden sm:grid sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-6 max-w-7xl mx-auto">`;
                     items.forEach(item => { desktopGrid += createProductCard(item); });
                     desktopGrid += `</div>`;
 
@@ -3868,7 +3868,7 @@ flavors: ['Sonho de Valsa', 'Ouro branco', 'Ninho trufado', 'Pessêgo', 'Amendoi
                     <button type="button" onclick="event.stopPropagation(); shareProductCatalog(\'${item.id}\')" class="owner-share-btn owner-catalog-btn absolute top-3 right-14 z-20 w-8 h-8 rounded-full" aria-label="Modo catálogo de ${item.name}" title="Modo catálogo: foto + informações">
                         <i class="fas fa-images text-[10px]"></i>
                     </button>
-                    <div class="relative h-52 overflow-hidden">
+                    <div class="relative h-44 overflow-hidden">
   <img
     id="img-${item.id}"
     src="${(item.images && item.images.length ? item.images[0] : item.image)}"
@@ -3895,9 +3895,9 @@ flavors: ['Sonho de Valsa', 'Ouro branco', 'Ninho trufado', 'Pessêgo', 'Amendoi
     </div>
   ` : '')}
 </div>
-                    <div class="p-6 flex flex-col flex-grow">
+                    <div class="p-5 lg:p-4 flex flex-col flex-grow">
                         <div class="mb-4">
-                            <h3 class="text-[20px] leading-tight serif-font mb-2 group-hover:text-[#2C4A34] transition-colors">${item.name}</h3>
+                            <h3 class="text-[19px] leading-tight serif-font mb-2 group-hover:text-[#2C4A34] transition-colors">${item.name}</h3>
                             <p id="desc-${item.id}" class="product-desc text-[13px] leading-[1.55] text-[#22201C]/55">${item.description}</p>
                             <button id="desc-toggle-${item.id}" onclick="toggleDescription('${item.id}')" class="hidden mt-1 text-[12px] font-semibold text-[#8C8676] hover:text-[#233A29] transition-colors">
                                 Ver mais
@@ -3941,9 +3941,9 @@ ${getFlavorList(item).map(f => `<option value="${f.label}">${f.label}</option>`)
 
                             <div class="flex items-center justify-between">
                                 <div class="inline-flex items-stretch bg-white rounded-xl shadow-sm border border-[#8C8676]/15 overflow-hidden">
-                                    <button onclick="changeQtyUI('${item.id}', -1)" class="w-10 h-10 flex items-center justify-center text-[#2C4A34] text-sm hover:bg-[#2C4A34]/5 active:bg-[#2C4A34]/10 transition-colors"><i class="fas fa-minus"></i></button>
-                                    <input type="number" id="qty-${item.id}" value="${initialQty}" step="${item.units[0] === 'kg' ? '0.1' : '1'}" class="w-11 bg-transparent text-center text-sm font-semibold text-[#22201C] border-x border-[#8C8676]/15 focus:outline-none">
-                                    <button onclick="changeQtyUI('${item.id}', 1)" class="w-10 h-10 flex items-center justify-center text-[#2C4A34] text-sm hover:bg-[#2C4A34]/5 active:bg-[#2C4A34]/10 transition-colors"><i class="fas fa-plus"></i></button>
+                                    <button onclick="changeQtyUI('${item.id}', -1)" class="w-8 h-9 flex items-center justify-center text-[#2C4A34] text-xs hover:bg-[#2C4A34]/5 active:bg-[#2C4A34]/10 transition-colors"><i class="fas fa-minus"></i></button>
+                                    <input type="number" id="qty-${item.id}" value="${initialQty}" step="${item.units[0] === 'kg' ? '0.1' : '1'}" class="w-9 bg-transparent text-center text-xs font-semibold text-[#22201C] border-x border-[#8C8676]/15 focus:outline-none">
+                                    <button onclick="changeQtyUI('${item.id}', 1)" class="w-8 h-9 flex items-center justify-center text-[#2C4A34] text-xs hover:bg-[#2C4A34]/5 active:bg-[#2C4A34]/10 transition-colors"><i class="fas fa-plus"></i></button>
                                 </div>
                                 <div class="text-right">
                                     <p class="text-lg font-bold tracking-[-0.02em] text-[#22201C]" id="price-preview-${item.id}">R$ ${(initialPrice * initialQty).toFixed(2).replace('.', ',')}</p>
@@ -3952,7 +3952,7 @@ ${getFlavorList(item).map(f => `<option value="${f.label}">${f.label}</option>`)
                             </div>
                             
                             <div class="add-reveal">
-                                <button onclick="addToCart('${item.id}')" class="btn-primary w-full py-3.5 rounded-xl text-[14px] tracking-[-0.01em] font-semibold active:scale-95">
+                                <button onclick="addToCart('${item.id}')" class="btn-primary w-full py-3 rounded-xl text-[13px] tracking-[-0.01em] font-semibold active:scale-95">
                                     ${item.isKit ? 'Montar Kit' : 'Adicionar à Cesta'}
                                 </button>
                             </div>
