@@ -5715,6 +5715,13 @@ function getShareDominantColor(sampleCtx, width, height) {
     }
 }
 
+// Configuração visual aprovada para o fundo do segundo card do catálogo.
+// Mantê-la independente de ajustes nas fotos e nos cards exibidos no site.
+const APPROVED_CATALOG_INFO_BACKGROUND = Object.freeze({
+    softWidth: 240,
+    blurAmount: 14.3
+});
+
 function drawShareBlurredBackground(ctx, img, width, height, options = {}) {
     if (!img || !img.width || !img.height) return null;
 
@@ -6599,7 +6606,7 @@ async function buildProductShareBlob(item, options = {}) {
             height,
             includeHeroPhoto
                 ? {}
-                : { softWidth: 240, blurAmount: 14.3 }
+                : APPROVED_CATALOG_INFO_BACKGROUND
         );
     }
 
