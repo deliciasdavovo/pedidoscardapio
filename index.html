@@ -6729,8 +6729,11 @@ async function buildProductShareBlob(item, options = {}) {
         ctx.strokeStyle = 'rgba(190, 107, 46, 0.58)';
         ctx.lineWidth = 2;
         ctx.beginPath();
-        ctx.moveTo(panelX + 8, panelY + 52);
-        ctx.lineTo(panelX + 8, panelY + panelHeight - 52);
+        // O filete fica mais à esquerda para respirar melhor em relação
+        // à categoria, título e bloco de valores.
+        const accentLineX = panelX - 10;
+        ctx.moveTo(accentLineX, panelY + 52);
+        ctx.lineTo(accentLineX, panelY + panelHeight - 52);
         ctx.stroke();
     }
 
