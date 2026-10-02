@@ -3857,7 +3857,7 @@ flavors: ['Sonho de Valsa', 'Ouro branco', 'Ninho trufado', 'Pessêgo', 'Amendoi
                 : (hasSizes ? item.sizes[0].price : (item.units[0] === 'kg' ? item.priceKg : item.price));
             const unitSuffix = item.isKit ? '/pessoa' : (item.units[0] === 'kg' ? '/kg' : '/un');
             const initialPriceLabel = estimatedUnit
-                ? `R$ ${item.priceKg.toFixed(2).replace('.', ',')}/kg <span class="block text-[11px] font-normal text-[#8C8676] mt-1">aprox. R$ ${item.price.toFixed(2).replace('.', ',')}/un</span>`
+                ? `<span class="block text-[10px] uppercase tracking-[0.08em] font-semibold text-[#8C8676] mb-1">Valor aproximado</span>R$ ${item.price.toFixed(2).replace('.', ',')}/un <span class="block text-[11px] font-normal text-[#8C8676] mt-1">R$ ${item.priceKg.toFixed(2).replace('.', ',')}/kg</span>`
                 : `R$ ${initialPrice.toFixed(2).replace('.', ',')} ${unitSuffix}`;
 
             return `
@@ -6422,14 +6422,14 @@ async function buildProductShareBlob(item, options = {}) {
 
     let primaryPriceToDisplay = '';
     let priceDetailLines = [];
-    let estimatedUnitPriceText = '';
+    let secondaryKgPriceText = '';
     let estimatedUnitWeightText = '';
 
     if (isSimpleKgAndUnit) {
         estimatedUnitWeightText = getShareEstimatedUnitWeightText(item);
-        primaryPriceToDisplay = getKgPriceText(item);
-        estimatedUnitPriceText =
+        primaryPriceToDisplay =
             'R$ ' + item.price.toFixed(2).replace('.', ',') + '/un';
+        secondaryKgPriceText = getKgPriceText(item);
     } else if (priceLines.length > 1) {
         // Variações reais: nenhum preço é tratado como principal.
         priceDetailLines = [...priceLines];
@@ -6768,7 +6768,9 @@ async function buildProductShareBlob(item, options = {}) {
         let priceY = startY;
         drawShareSectionLabel(
             ctx,
-            useCompactUnitPriceRows ? 'Preços · por unidade' : 'Valores',
+            isSimpleKgAndUnit
+                ? 'Valor aproximado'
+                : (useCompactUnitPriceRows ? 'Preços · por unidade' : 'Valores'),
             startX,
             priceY
         );
@@ -6790,25 +6792,24 @@ async function buildProductShareBlob(item, options = {}) {
             priceY += 8;
         }
 
-        if (isSimpleKgAndUnit && estimatedUnitPriceText) {
+        if (isSimpleKgAndUnit && secondaryKgPriceText) {
             priceY += 16;
 
             ctx.fillStyle = '#766F65';
             ctx.font = "700 20px 'DM Sans', sans-serif";
-            ctx.fillText('UNIDADE ESTIMADA', startX, priceY);
+            ctx.fillText('PREÇO POR QUILO', startX, priceY);
             priceY += 38;
 
-            // O preço unitário é a segunda informação mais importante do bloco:
-            // recebe destaque próprio, sem competir com o preço por quilo.
-            ctx.fillStyle = '#2C5437';
-            ctx.font = "700 36px 'DM Sans', sans-serif";
+            // O valor por quilo permanece como referência secundária.
+            ctx.fillStyle = '#766F65';
+            ctx.font = "700 30px 'DM Sans', sans-serif";
             priceY = shareWrapText(
                 ctx,
-                estimatedUnitPriceText,
+                secondaryKgPriceText,
                 startX,
                 priceY,
                 maxWidth,
-                44,
+                38,
                 2
             );
 
@@ -7651,15 +7652,15 @@ function createProductListItem(item) {
     const imgSrc = (item.images && item.images.length) ? item.images[0] : (item.image || '');
 
     let priceText;
-    let estimatedUnitPriceText = '';
+    let secondaryPriceText = '';
     if (item.isKit) {
         const kitTotal = getKitComputedTotal(item, 10);
         priceText = 'a partir de R$ ' + (kitTotal / 10).toFixed(2).replace('.', ',') + '/pessoa';
     } else if (hasSizes) {
         priceText = 'a partir de R$ ' + item.sizes[0].price.toFixed(2).replace('.', ',');
     } else if (hasEstimatedUnitPrice(item)) {
-        priceText = 'R$ ' + item.priceKg.toFixed(2).replace('.', ',') + '/kg';
-        estimatedUnitPriceText = 'aprox. R$ ' + item.price.toFixed(2).replace('.', ',') + '/un';
+        priceText = 'aprox. R$ ' + item.price.toFixed(2).replace('.', ',') + '/un';
+        secondaryPriceText = 'R$ ' + item.priceKg.toFixed(2).replace('.', ',') + '/kg';
     } else if (item.units && item.units[0] === 'kg') {
         priceText = 'R$ ' + (item.priceKg || 0).toFixed(2).replace('.', ',') + '/kg';
     } else {
@@ -7697,7 +7698,7 @@ function createProductListItem(item) {
                     <span class="text-[13px] text-[#BE6B2E]" style="font-family: 'DM Sans', sans-serif; font-weight: 700; letter-spacing: -0.01em;">${priceText}</span>
                     ${flavorBadge}${kitBadge}
                 </div>
-                ${estimatedUnitPriceText ? `<p class="text-[11px] leading-snug font-normal text-[#BE6B2E]/75 mt-1">${estimatedUnitPriceText}</p>` : ''}
+                ${secondaryPriceText ? `<p class="text-[11px] leading-snug font-normal text-[#8C8676] mt-1">${secondaryPriceText}</p>` : ''}
             </div>
             <i class="fas fa-chevron-right text-[#8C8676]/30 shrink-0 text-sm ml-1"></i>
         </div>
