@@ -1088,7 +1088,11 @@
         }
 
     </style>
-</head>
+<style>
+.v2-list-action{display:flex;flex-direction:column;align-items:center;gap:4px;flex-shrink:0}.v2-add{background:#2c4a34;color:#fff;border-radius:12px;min-height:48px;padding:8px 10px;font-size:12px;font-weight:700}.v2-count{font-size:11px;color:#2c4a34;font-weight:600}.v2-kit-row{display:flex!important;align-items:center;justify-content:space-between;gap:8px;font-size:14px}.v2-kit-row select[hidden]{display:none!important}.v2-step{display:flex;align-items:center;flex-shrink:0;border:1px solid #c8c5bc;border-radius:10px;overflow:hidden}.v2-step button{width:48px;height:48px;font-size:20px;color:#2c4a34;background:#f4f1ea}.v2-step input{width:64px;min-height:48px;text-align:center;font-size:16px;background:white}.v2-kit-progress{font-size:13px;color:#8b451e;font-weight:600;margin-top:8px}.v2-complete{color:#2c4a34}.v2-visible-flavors .modal-flavor-option{min-height:48px;font-size:15px}.v2-visible-flavors:not(.hidden){display:block}button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid #BE6B2E!important;outline-offset:2px}
+@media(max-width:639px){.product-list-item{gap:10px!important;padding:10px!important}.product-list-item>div:first-of-type{width:76px;height:76px}.product-list-item h3{white-space:normal!important;font-size:17px!important}.product-list-item p{color:#465548!important}.v2-add{max-width:100px}#sticky-cart-bar{bottom:calc(8px + env(safe-area-inset-bottom));padding-left:12px;padding-right:12px}#sticky-cart-bar>button{padding:12px 16px;border-radius:16px;background:#2c4a34}#sticky-total{font-size:22px}#kit-flavor-modal .kit-flavor-panel{max-height:94dvh;inset-inline:8px}#kit-flavor-items{padding:12px}#modal-qty{width:68px;font-size:16px}#product-modal-body .modal-segment-btn{min-height:48px}#checkout-scroll input,#checkout-scroll select{font-size:16px}#cart-items-list button:not(.owner-share-btn){min-width:44px;min-height:44px}#menu-container{padding-bottom:90px}}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important;scroll-behavior:auto!important}}
+</style></head>
 <body class="relative min-h-screen">
 
     <div id="site-toast" class="pointer-events-none fixed top-24 left-1/2 -translate-x-1/2 z-[90] opacity-0">
@@ -1258,7 +1262,7 @@
                     <span id="sticky-cart-count" class="absolute -top-2 -right-2 bg-white text-[#22201C] text-[10px] font-black w-6 h-6 rounded-full flex items-center justify-center shadow-lg">0</span>
                 </div>
                 <div class="text-left">
-                    <p class="text-[15px] font-semibold text-white tracking-[-0.01em]">Ver carrinho</p>
+                    <p class="text-[15px] font-semibold text-white tracking-[-0.01em]">Ver minha cesta</p>
                     <p class="text-[12px] text-white/45">Total estimado</p>
                 </div>
             </div>
@@ -1447,7 +1451,7 @@
                 </div>
                 <button onclick="sendWhatsAppOrder()" class="w-full min-h-[50px] bg-[#2C4A34] hover:bg-[#243D2B] text-white rounded-[14px] font-semibold text-[15px] transition-all flex items-center justify-center gap-2 active:scale-[0.985]">
                     <i class="fab fa-whatsapp text-[18px]"></i>
-                    Enviar pedido no WhatsApp
+                    Enviar pedido para confirmação
                 </button>
             </div>
         </div>
@@ -3414,6 +3418,9 @@ flavors: ['Sonho de Valsa', 'Ouro branco', 'Ninho trufado', 'Pessêgo', 'Amendoi
 
         // ESTADO DA APLICAÇÃO
         let cart = [];
+const V2_CART_KEY='delicias_cart_v2';
+function restoreV2Cart(){try{const saved=JSON.parse(localStorage.getItem(V2_CART_KEY)||'[]');if(!Array.isArray(saved))return;saved.forEach(row=>{const item=MENU_ITEMS.find(i=>i.id===row.id);if(!item||!Number.isFinite(row.qty)||row.qty<=0||!item.units?.includes(row.unit))return;if(row.flavor&&!getFlavorList(item).some(f=>f.label===row.flavor))return;if(row.size&&!item.sizes?.some(s=>s.label===row.size))return;const price=getUnitPriceForSelection(item,row.unit,row.flavor,row.size);if(Number.isFinite(price)&&price>0)addIndividualToCart(row.id,row.unit,row.qty,row.flavor,row.size,price,getImageForSelection(item,row.flavor,row.size));});}catch(_){}}
+function saveV2Cart(){try{localStorage.setItem(V2_CART_KEY,JSON.stringify(cart.map(({id,unit,qty,flavor,size})=>({id,unit,qty,flavor,size}))));}catch(_){}}
         let activeOrderType = 'Encomenda';
         let activeFulfillment = 'Retirada';
         let currentSearch = '';
@@ -3430,6 +3437,7 @@ flavors: ['Sonho de Valsa', 'Ouro branco', 'Ninho trufado', 'Pessêgo', 'Amendoi
         const WHATSAPP_RETURN_KEY = 'delicias_return_from_whatsapp';
 
         window.onload = () => {
+            restoreV2Cart();
             applyOwnerModeState();
             renderCategories();
             renderMenu();
@@ -3437,6 +3445,7 @@ flavors: ['Sonho de Valsa', 'Ouro branco', 'Ninho trufado', 'Pessêgo', 'Amendoi
             setOrderType('Encomenda');
             restoreCheckoutPreferences();
             bindCheckoutPreferencePersistence();
+            updateCartSummary();
             initModalSwipe();
             window.addEventListener('scroll', onScrollSpy, { passive: true });
 
@@ -4576,10 +4585,10 @@ function readCheckoutPreferences() {
 
                                 ${hasFlavors ? `
                                     <div class="kit-flavor-rows-${entry.idx} mt-4 space-y-2">
-                                        ${renderKitFlavorRow(entry.idx, 0, entry.qty, entry.defaultFlavor, baseItem, entry)}
+                                        ${entry.flavors.map((f,i)=>v2KitRow(entry,i,f.label)).join('')}
                                     </div>
-                                    <button onclick="addKitFlavorRow(${entry.idx})" class="mt-3 text-[13px] font-semibold text-[#8C8676] hover:text-[#233A29] flex items-center gap-2">
-                                        <i class="fas fa-plus-circle"></i> Dividir em outro sabor
+                                    <p id="v2-kit-progress-${entry.idx}" class="v2-kit-progress" aria-live="polite"></p><button onclick="v2Distribute(${entry.idx})" class="mt-3 text-[13px] font-semibold text-[#8C8676] hover:text-[#233A29] flex items-center gap-2">
+                                        <i class="fas fa-plus-circle"></i> Distribuir entre os sabores
                                     </button>
                                 ` : `
                                     <p class="mt-4 text-xs text-[#22201C]/55 leading-relaxed">Este item não tem seleção de sabor no cardápio.</p>
@@ -4614,6 +4623,9 @@ function readCheckoutPreferences() {
             `;
         }
 
+        function v2KitRow(entry,i,flavor){const step=Number(getKitModalRowQtyStep(entry));return `<div class="kit-flavor-row kit-flavor-row-${entry.idx} v2-kit-row"><span>${escapeHtml(flavor)}</span><select hidden aria-hidden="true" tabindex="-1"><option value="${escapeHtml(flavor)}"></option></select><div class="v2-step"><button type="button" aria-label="Diminuir ${escapeHtml(flavor)}" onclick="v2KitStep(this,-1,${step})">−</button><input type="number" aria-label="Quantidade de ${escapeHtml(flavor)}" inputmode="${step===1?'numeric':'decimal'}" min="0" step="${step}" value="${flavor===entry.defaultFlavor?entry.qty:0}" oninput="updateKitModalTotal()"><button type="button" aria-label="Aumentar ${escapeHtml(flavor)}" onclick="v2KitStep(this,1,${step})">+</button></div></div>`;}
+function v2KitStep(btn,delta,step){const input=btn.parentElement.querySelector('input');input.value=Math.max(0,(Math.round((Number(input.value)||0)/step)+delta)*step).toFixed(step===1?0:1);updateKitModalTotal();}
+function v2Distribute(idx){const entry=getKitEntry(idx);if(!entry)return;const inputs=[...document.querySelectorAll('.kit-flavor-row-'+idx+' input')];const step=Number(getKitModalRowQtyStep(entry));const n=Math.round(entry.qty/step);inputs.forEach((input,i)=>input.value=((Math.floor(n/inputs.length)+(i<n%inputs.length?1:0))*step).toFixed(step===1?0:1));updateKitModalTotal();}
         function getKitEntry(entryIdx) {
             if (!pendingKitSelection) return null;
             return pendingKitSelection.entries.find(entry => entry.idx === entryIdx) || null;
@@ -4684,6 +4696,7 @@ function readCheckoutPreferences() {
                     return sum + (getUnitPriceForSelection(baseItem, entry.unit, row.flavor, entry.size) * row.qty);
                 }, 0);
 
+                const progress=document.getElementById('v2-kit-progress-'+entry.idx); if(progress){const n=collectKitFlavorRows(entry.idx).reduce((s,r)=>s+r.qty,0);const delta=entry.qty-n;progress.textContent=formatKitQty(n,entry.unit)+' de '+formatKitQty(entry.qty,entry.unit)+(Math.abs(delta)<.001?' · Completo':delta>0?' · Faltam '+formatKitQty(delta,entry.unit):' · Excedeu '+formatKitQty(-delta,entry.unit));progress.classList.toggle('v2-complete',Math.abs(delta)<.001);}
                 total += entryTotal;
                 const entryTotalEl = document.getElementById(`kit-entry-total-${entry.idx}`);
                 if (entryTotalEl) entryTotalEl.innerText = 'R$ ' + entryTotal.toFixed(2);
@@ -4720,7 +4733,7 @@ function readCheckoutPreferences() {
             pendingKitSelection = null;
             closeKitFlavorModal();
             updateCartSummary();
-            openCart();
+            showValidationPopup('Coffee break adicionado à cesta', 'cart');
         }
 
         function buildCakeComposition(comp, peopleQty) {
@@ -4858,7 +4871,7 @@ if (!item.sizes && flavor && item.variants && item.variants[flavor]) {
                 addIndividualToCart(id, unit, qty, flavor, size, price, getImageForSelection(item, flavor, size));
             }
             updateCartSummary();
-            openCart();
+            showValidationPopup(item.name + ' entrou na sua cesta', 'cart');
         }
 
         function addIndividualToCart(id, unit, qty, flavor, size, price, imageOverride = null) {
@@ -5026,6 +5039,8 @@ if (!item.sizes && flavor && item.variants && item.variants[flavor]) {
         }
 
         function updateCartSummary() {
+saveV2Cart();
+document.querySelectorAll('[data-v2-count]').forEach(el=>{const rows=cart.filter(i=>i.id===el.dataset.v2Count);el.textContent=rows.length?(rows.every(i=>i.unit==='un')?rows.reduce((a,i)=>a+i.qty,0)+' na cesta':'Na cesta'):'';});
             const subtotal = cart.reduce((acc, item) => acc + (item.finalPrice * item.qty), 0);
             let total = subtotal;
             const count = cart.length;
@@ -7716,7 +7731,7 @@ function createProductListItem(item) {
                 </div>
                 ${secondaryPriceText ? `<p class="text-[11px] leading-snug font-normal text-[#8C8676] mt-1">${secondaryPriceText}</p>` : ''}
             </div>
-            <i class="fas fa-chevron-right text-[#8C8676]/30 shrink-0 text-sm ml-1"></i>
+            <div class="v2-list-action"><button type="button" class="v2-add" aria-label="Adicionar ou personalizar ${escapeHtml(item.name)}" onclick="event.stopPropagation(); v2QuickAdd('${item.id}')">${item.isKit?'Montar kit':(hasFlavors||hasSizes||hasKg?'Escolher':'+ Adicionar')}</button><span data-v2-count="${escapeHtml(item.id)}" class="v2-count">${cart.some(c=>c.id===item.id)?'Na cesta':''}</span></div>
         </div>
     `;
 }
@@ -7727,6 +7742,7 @@ let currentModalItemId = null;
 let modalImageIdx = 0;
 let currentModalImages = [];
 
+function v2QuickAdd(id){const item=MENU_ITEMS.find(i=>i.id===id);if(!item)return;if(item.isKit||item.flavors?.length||item.sizes?.length||item.units?.includes('kg')||!item.units?.includes('un')){openProductModal(id);return;}const price=getUnitPriceForSelection(item,'un',null,null);if(!Number.isFinite(price)||price<=0){openProductModal(id);return;}addIndividualToCart(id,'un',1,null,null,price,getImageForSelection(item,null,null));updateCartSummary();showValidationPopup(item.name+' entrou na sua cesta','cart');}
 function openProductModal(id) {
     const item = MENU_ITEMS.find(i => i.id === id);
     if (!item) return;
@@ -7841,13 +7857,13 @@ function buildProductModalContent(item) {
                     
                 </div>
                 <input type="hidden" id="modal-flavor" value="">
-                <button type="button" id="modal-flavor-trigger" aria-expanded="false" onclick="toggleModalFlavorMenu()" class="modal-picker-trigger">
+                <button type="button" id="modal-flavor-trigger" aria-expanded="true" onclick="toggleModalFlavorMenu()" class="modal-picker-trigger">
                     <span id="modal-flavor-label" class="text-[#8C8676]">Selecione uma opção</span>
                     <span class="modal-picker-chevron" aria-hidden="true">
                         <i id="modal-flavor-chevron" class="fas fa-chevron-down"></i>
                     </span>
                 </button>
-                <div id="modal-flavor-menu" class="modal-picker-menu hidden" role="listbox">
+                <div id="modal-flavor-menu" class="modal-picker-menu v2-visible-flavors" role="listbox">
                     ${getFlavorList(item).map(f => `
                         <button type="button" role="option" aria-selected="false" data-flavor="${escapeHtml(f.label)}" onclick="selectModalFlavor(this.dataset.flavor)" class="modal-flavor-option">
                             <span>${escapeHtml(f.label)}</span>
@@ -8035,7 +8051,6 @@ function selectModalFlavor(flavor) {
         option.setAttribute('aria-selected', selected ? 'true' : 'false');
     });
 
-    toggleModalFlavorMenu(false);
     onModalFlavorChange();
 }
 
