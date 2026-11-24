@@ -1127,6 +1127,13 @@
 #checkout-footer button{min-height:46px;border-radius:10px;font-size:14px;padding:8px 10px}
 .checkout-confirm-note{font-size:11px;text-align:center;color:#5d605a;margin:4px 0 0;line-height:1.25}
 @media(max-width:639px){#checkout-panel{height:100dvh;border-radius:0}#checkout-header{padding-top:env(safe-area-inset-top);height:calc(52px + env(safe-area-inset-top))}#checkout-scroll{padding-inline:12px}#checkout-footer{padding-inline:12px}}
+</style><style>
+/* Sabores: lista compacta, seleção inequívoca, sem menu duplicado. */
+#modal-flavor-menu.v2-visible-flavors{gap:4px!important}
+#modal-flavor-menu .modal-flavor-option{min-height:44px;padding:7px 11px;border-radius:9px;font-size:14px;line-height:1.25;font-weight:500}
+#modal-flavor-menu .modal-flavor-option.is-selected{background:#e5eee4;border:1px solid #2c4a34;box-shadow:inset 0 0 0 1px #2c4a34;font-weight:700;color:#233a29}
+#modal-flavor-menu .modal-option-check{width:18px;height:18px}
+#modal-flavor-menu .is-selected .modal-option-check{background:#2c4a34;color:#fff}
 </style></head>
 <body class="relative min-h-screen">
 
@@ -1834,7 +1841,7 @@
   category: 'Mini salgados',
   image: 'img/folhados-recheados.jpeg',
   price: 2.50,
-  priceKg: 69.00,
+  priceKg: 74.00,
   units: ['un', 'kg'],
   flavors: ['Presunto', 'Frango', 'Queijo', 'Peito de peru', 'Palmito com milho', 'Brócolis', 'Alho poró'],
   sizes: [
@@ -2428,7 +2435,7 @@ price: 34.00,
   category: 'Doces panificação',
   image: 'img/pao-de-mel-novo.jpg',
   price: 9.80,
-  priceKg: 85.00,
+  priceKg: 99.00,
   units: ['un', 'kg']
 },
 {
@@ -4307,6 +4314,7 @@ ${getFlavorList(item).map(f => `<option value="${f.label}">${f.label}</option>`)
 
             const select = document.getElementById(`flavor-${id}`);
             const selectedFlavor = select ? select.value : null;
+            if(unit==='kg' && item.sizes?.length){const active=Array.from(document.querySelectorAll(`[id^="size-${id}-"]`)).findIndex(b=>b.classList.contains('bg-[#2C4A34]'));price=getUnitPriceForSelection(item,unit,selectedFlavor,item.sizes[Math.max(0,active)].label);}
 
             if (!item.sizes && selectedFlavor && item.variants && item.variants[selectedFlavor]) {
                 const variant = item.variants[selectedFlavor];
@@ -4463,7 +4471,9 @@ function readCheckoutPreferences() {
 
             if (size && item.sizes && item.sizes.length > 0) {
                 const selectedSize = item.sizes.find(s => s.label === size);
-                if (selectedSize && typeof selectedSize.price === 'number') {
+                if (selectedSize && unit === 'kg' && typeof selectedSize.priceKg === 'number') {
+                    price = selectedSize.priceKg;
+                } else if (selectedSize && unit !== 'kg' && typeof selectedSize.price === 'number') {
                     price = selectedSize.price;
                 }
             } else if (flavor && item.variants && item.variants[flavor]) {
@@ -4878,9 +4888,9 @@ function v2Distribute(idx){const entry=getKitEntry(idx);if(!entry)return;const i
             let price = item.price;
 
             if (item.sizes && item.sizes.length > 0) {
-                const activeIdx = Array.from(document.querySelectorAll(`[id^="size-${id}-"]`)).findIndex(b => b.classList.contains('bg-[#8C8676]'));
-                size = item.sizes[activeIdx].label;
-                price = item.sizes[activeIdx].price;
+                const activeIdx = Array.from(document.querySelectorAll(`[id^="size-${id}-"]`)).findIndex(b => b.classList.contains('bg-[#2C4A34]'));
+                size = item.sizes[Math.max(0,activeIdx)].label;
+                price = item.sizes[Math.max(0,activeIdx)].price;
             }
 
             if (item.isKit && item.composition) {
@@ -4900,7 +4910,7 @@ if (!item.sizes && flavor && item.variants && item.variants[flavor]) {
         price = v.price;
     }
 }
-                addIndividualToCart(id, unit, qty, flavor, size, price, getImageForSelection(item, flavor, size));
+                addIndividualToCart(id, unit, qty, flavor, size, getUnitPriceForSelection(item,unit,flavor,size), getImageForSelection(item, flavor, size));
             }
             updateCartSummary();
             showValidationPopup(item.name + ' entrou na sua cesta', 'cart');
@@ -8022,6 +8032,7 @@ function updateModalPricePreview() {
 
     const flavorSelect = document.getElementById('modal-flavor');
     const selectedFlavor = flavorSelect ? flavorSelect.value : null;
+    if(unit==='kg' && item.sizes?.length){const active=item.sizes.findIndex((_,i)=>document.getElementById('modal-size-'+i)?.classList.contains('is-active'));price=getUnitPriceForSelection(item,unit,selectedFlavor,item.sizes[Math.max(0,active)].label);}
     if (!item.sizes && selectedFlavor && item.variants && item.variants[selectedFlavor]) {
         const variant = item.variants[selectedFlavor];
         if (unit === 'kg' && typeof variant.priceKg === 'number') price = variant.priceKg;
