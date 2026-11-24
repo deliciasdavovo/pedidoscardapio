@@ -1161,6 +1161,28 @@
 .coffee-wizard-panel footer{background:#fff;padding:10px 14px calc(10px + env(safe-area-inset-bottom));border-top:1px solid #e4dfd5}.coffee-wizard-panel footer>div{font-size:13px;color:#2c4a34;font-weight:700;margin-bottom:6px}.coffee-main-action{width:100%;min-height:46px;border-radius:10px;background:#2c4a34;color:white;font-size:14px;font-weight:600;padding:10px}.coffee-main-action i{margin-left:5px}
 .kit-extra-picker{background:white;border:1px solid #dedbd2;border-radius:14px;padding:12px;color:#2c4a34}.kit-extra-picker summary{font-size:14px;font-weight:700;cursor:pointer;min-height:44px;align-content:center}.kit-extra-picker label{display:block;font-size:12px;font-weight:600;margin:8px 0 4px}.kit-extra-picker select{display:block;width:100%;font-size:16px;min-height:44px;border:1px solid #dedbd2;border-radius:9px;background:#fff;padding:6px 8px;color:#22201c}.kit-extra-picker button{margin-top:12px}
 @media(max-width:639px){#coffee-wizard:not(.hidden){align-items:flex-end}.coffee-wizard-panel{width:100%;max-height:96dvh;border-radius:18px 18px 0 0}.coffee-option img,.coffee-custom-icon{width:48px;height:48px}}
+</style><style>
+/* Entrada unificada: lista discreta com ícone, título, descrição e seta. */
+#discovery-overlay{overflow-y:auto;overscroll-behavior:contain}
+#discovery-overlay .discovery-shell{height:auto;min-height:100dvh;max-width:620px;padding: max(18px,env(safe-area-inset-top)) 20px max(18px,env(safe-area-inset-bottom));gap:0}
+#discovery-overlay .discovery-brand{margin-bottom:18px;flex-shrink:0}
+#discovery-overlay .discovery-hero{margin-bottom:18px;flex-shrink:0}
+#discovery-overlay .discovery-title{font-size:clamp(27px,7.2vw,42px)}
+#discovery-overlay .discovery-subtitle{margin-top:8px}
+#discovery-overlay .discovery-section-label{margin-bottom:8px}
+#discovery-overlay #discovery-cards{display:flex!important;flex-direction:column;gap:7px;flex-shrink:0}
+#discovery-overlay .discovery-card,#discovery-overlay .coffee-home-entry{width:100%;min-height:52px;height:auto;display:flex!important;flex-direction:row;align-items:center;justify-content:flex-start;gap:11px;border-radius:12px;padding:9px 12px;text-align:left;color:#2c4a34;background:#f4f1ea;border:1px solid #d8d3c8;box-shadow:none;transform:none}
+#discovery-overlay .discovery-card:hover,#discovery-overlay .coffee-home-entry:hover{background:#eaece2;border-color:#a7b3a4;transform:none;box-shadow:none}
+#discovery-overlay .discovery-entry-copy,#discovery-overlay .coffee-home-entry span{flex:1;min-width:0;text-align:left}
+#discovery-overlay .discovery-entry-copy strong,#discovery-overlay .coffee-home-entry strong{display:block;font-family:'DM Sans',sans-serif;font-weight:700;font-size:14px;line-height:1.25;letter-spacing:0;color:#2c4a34}
+#discovery-overlay .discovery-entry-copy small,#discovery-overlay .coffee-home-entry small{display:block;font-family:'DM Sans',sans-serif;font-size:11px;line-height:1.35;color:#51604f;margin-top:2px}
+#discovery-overlay .discovery-entry-icon,#discovery-overlay .coffee-home-entry>i:first-child{width:22px;flex-shrink:0;text-align:center;font-size:15px}
+#discovery-overlay .discovery-entry-arrow,#discovery-overlay .coffee-home-entry>i:last-child{font-size:12px;flex-shrink:0}
+#discovery-overlay .coffee-home-entry{margin:7px 0 0;flex-shrink:0}
+#discovery-overlay .discovery-cta{min-height:48px;margin-top:12px;flex-shrink:0}
+#discovery-overlay .discovery-footnote{margin-top:10px}
+#welcome-banner .order-intro-hint{font-size:12px;line-height:1.45;color:#f4f1ea;margin:6px auto 0;max-width:380px;font-family:'DM Sans',sans-serif}
+@media(max-width:639px){#discovery-overlay .discovery-shell{justify-content:center;padding-inline:18px}#discovery-overlay .discovery-title{font-size:clamp(26px,7vw,34px)}#welcome-banner{padding-top:8px}#welcome-banner h2{font-size:22px}}
 </style></head>
 <body class="relative min-h-screen">
 
@@ -1310,8 +1332,8 @@
 <!-- Faixa de boas-vindas (verde-pinho) -->
     <div id="welcome-banner" class="bg-[#2C4A34] text-[#F4F1EA] px-6 pt-2 pb-14 sm:pb-20 -mt-px">
         <div class="max-w-7xl mx-auto text-center">
-            <p class="text-[10px] sm:text-[11px] uppercase tracking-[0.18em] text-[#C9A576] font-semibold mb-2">Delícias da Vovó</p>
-            <h2 class="serif-font text-[22px] sm:text-3xl leading-snug">Conheça nosso cardápio<br class="sm:hidden"> e faça sua encomenda</h2>
+            <h2 class="serif-font text-[22px] sm:text-3xl leading-snug">Monte seu pedido do seu jeito</h2>
+            <p class="order-intro-hint">Escolha suas delícias, adicione à cesta e envie seu pedido.</p>
         </div>
     </div>
 
@@ -3658,11 +3680,11 @@ function saveV2Cart(){try{localStorage.setItem(V2_CART_KEY,JSON.stringify(cart.m
             // Coffees & Cestas continuam no menu de categorias e no cardápio completo,
             // mas não ficam mais como atalho na página inicial.
             const discoveryItems = [
-                { label: 'Pão de bolinha', type: 'category', value: 'Pão de bolinha' },
-                { label: 'Salgados & Lanches', type: 'group', value: 'Salgados & Lanches' },
-                { label: 'Bolos & Doces', type: 'group', value: 'Bolos & Doces' },
-                { label: 'Sobremesas', type: 'group', value: 'Sobremesas' },
-                { label: 'Especiais', type: 'group', value: 'Especiais' }
+                { label: 'Pão de bolinha', type: 'category', value: 'Pão de bolinha', icon:'fa-bread-slice', subtitle:'Doces e salgados para compartilhar' },
+                { label: 'Salgados & Lanches', type: 'group', value: 'Salgados & Lanches', icon:'fa-utensils', subtitle:'Mini salgados, lanches e tortas' },
+                { label: 'Bolos & Doces', type: 'group', value: 'Bolos & Doces', icon:'fa-cake-candles', subtitle:'Bolos caseiros, docinhos e biscoitos' },
+                { label: 'Sobremesas', type: 'group', value: 'Sobremesas', icon:'fa-spoon', subtitle:'Tortas doces e sobremesas especiais' },
+                { label: 'Especiais', type: 'group', value: 'Especiais', icon:'fa-star', subtitle:'Delícias da temporada' }
             ];
 
             container.innerHTML = discoveryItems.map((item, i) => {
@@ -3674,7 +3696,7 @@ function saveV2Cart(){try{localStorage.setItem(V2_CART_KEY,JSON.stringify(cart.m
 
                 return `
                     <button type="button" class="discovery-card ${isLastOdd ? 'discovery-card-wide' : ''}" onclick="${action}">
-                        <span class="discovery-card-title">${item.label}</span>
+                        <i class="fas ${item.icon} discovery-entry-icon" aria-hidden="true"></i><span class="discovery-entry-copy"><strong>${item.label}</strong><small>${item.subtitle}</small></span><i class="fas fa-chevron-right discovery-entry-arrow" aria-hidden="true"></i>
                     </button>`;
             }).join('');
         }
