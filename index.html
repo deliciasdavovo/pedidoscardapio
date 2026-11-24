@@ -1093,6 +1093,40 @@
 @media(max-width:639px){#sticky-cart-bar{bottom:calc(8px + env(safe-area-inset-bottom));padding-left:12px;padding-right:12px}#sticky-cart-bar>button{padding:12px 16px;border-radius:16px;background:#2c4a34}#sticky-total{font-size:22px}#kit-flavor-modal .kit-flavor-panel{max-height:94dvh;inset-inline:8px}#kit-flavor-items{padding:12px}#modal-qty{width:68px;font-size:16px}#product-modal-body .modal-segment-btn{min-height:48px}#checkout-scroll input,#checkout-scroll select{font-size:16px}#cart-items-list button:not(.owner-share-btn){min-width:44px;min-height:44px}#menu-container{padding-bottom:90px}}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important;scroll-behavior:auto!important}}
  .v2-visible-flavors.modal-picker-menu{max-height:none;overflow:visible;box-shadow:none;padding:0;background:transparent;display:grid!important;gap:6px}.v2-visible-flavors .modal-flavor-option{background:#fff;border:1px solid #dedbd2;min-height:48px;padding:10px 12px;color:#22201c;border-radius:12px;font-size:14px}.v2-visible-flavors .modal-flavor-option.is-selected{background:#e9efe8;border-color:#2c4a34;color:#2c4a34}.v2-visible-flavors .modal-option-check{display:flex;align-items:center;justify-content:center;flex-shrink:0;width:20px;height:20px;border:1px solid #a6ada4;border-radius:50%;opacity:1!important}.v2-visible-flavors .modal-option-check i{visibility:hidden}.v2-visible-flavors .is-selected .modal-option-check{background:#2c4a34;border-color:#2c4a34;color:white}.v2-visible-flavors .is-selected .modal-option-check i{visibility:visible}
+</style><style>
+/* Checkout mobile: hierarquia, campos compactos e rodapé de ação */
+#checkout-panel{background:#f8f7f4}
+#checkout-header{height:52px;background:#fff;border-bottom:1px solid #e8e5de;padding-inline:12px}
+#checkout-header>button{min-height:44px;min-width:44px}
+#checkout-header>button:last-child{background:transparent}
+#checkout-title{font-family:'DM Sans',sans-serif;font-weight:700;color:#263d2c}
+#checkout-scroll{padding:12px 14px 16px;overscroll-behavior:contain;scroll-padding-bottom:16px;min-width:0}
+.checkout-stack{display:flex;flex-direction:column;gap:14px}
+.checkout-stack>section{display:flex;flex-direction:column;gap:6px}
+#checkout-scroll section>p:first-child{font-size:14px;font-weight:700;color:#2c4a34;padding:0 2px}
+#checkout-scroll section>p:not(:first-child){font-size:11px;color:#5d605a;line-height:1.4;margin:0;padding:0 2px}
+#checkout-scroll .bg-white{border-radius:12px;border-color:#e6e3dc;box-shadow:none}
+#checkout-scroll .p-3{padding:9px 10px}
+#checkout-scroll label{color:#50564e;font-size:12px;font-weight:600;margin-bottom:4px}
+#checkout-scroll .checkout-field{min-height:44px;border:1px solid #dedbd3;background:#fff;border-radius:9px;padding:0 10px;font-size:16px;box-sizing:border-box}
+#checkout-scroll .checkout-field:focus{border-color:#2c4a34;box-shadow:0 0 0 2px #2c4a3420}
+#checkout-scroll .schedule-field-shell{height:44px;border-radius:9px}
+#checkout-scroll #sched-fields{grid-template-columns:minmax(0,1fr) 94px!important;gap:6px}
+#checkout-scroll #sched-fields input{font-size:16px!important;text-align:left;padding-inline:7px}
+#checkout-scroll #sched-fields #order-time{text-align:center}
+#checkout-scroll .toggle-container{gap:8px;background:transparent;padding:0;border:0}
+#checkout-scroll .toggle-btn{min-height:44px;border:1px solid #dedbd3;background:#fff;border-radius:10px;font-size:14px;box-shadow:none;color:#4c5349}
+#checkout-scroll .toggle-btn.active{background:#e9efe8;border-color:#2c4a34;color:#2c4a34;font-weight:700}
+#checkout-scroll .toggle-btn i{margin-right:4px}
+#checkout-scroll #delivery-cep-status{font-size:11px;color:#5d605a;margin-top:5px}
+#checkout-scroll #special-delivery-note{font-size:12px;padding:8px 10px}
+#checkout-footer{padding:9px 14px calc(8px + env(safe-area-inset-bottom));box-shadow:0 -4px 18px #22201c08}
+#checkout-footer #delivery-fee-row{margin-bottom:4px;font-size:12px}
+#checkout-footer .checkout-total-row{margin-bottom:7px}
+#checkout-footer #cart-final-total{font-size:21px;font-weight:700;color:#253d2b;white-space:nowrap}
+#checkout-footer button{min-height:46px;border-radius:10px;font-size:14px;padding:8px 10px}
+.checkout-confirm-note{font-size:11px;text-align:center;color:#5d605a;margin:4px 0 0;line-height:1.25}
+@media(max-width:639px){#checkout-panel{height:100dvh;border-radius:0}#checkout-header{padding-top:env(safe-area-inset-top);height:calc(52px + env(safe-area-inset-top))}#checkout-scroll{padding-inline:12px}#checkout-footer{padding-inline:12px}}
 </style></head>
 <body class="relative min-h-screen">
 
@@ -1339,26 +1373,22 @@
     <div id="checkout-modal" class="fixed inset-0 z-[65] invisible" role="dialog" aria-modal="true" aria-labelledby="checkout-title">
         <div id="checkout-overlay" class="absolute inset-0 bg-black/35 opacity-0 transition-opacity duration-200" onclick="closeCheckout()"></div>
 
-        <div id="checkout-panel" class="absolute inset-x-0 bottom-0 h-[94dvh] sm:inset-y-0 sm:right-0 sm:left-auto sm:h-full w-full sm:max-w-lg bg-[#F4F1EA] shadow-[0_-12px_40px_rgba(0,0,0,0.16)] sm:shadow-2xl rounded-t-[30px] sm:rounded-none flex flex-col overflow-hidden">
-            <div class="sm:hidden shrink-0 flex justify-center pt-2.5 pb-1 bg-[#F4F1EA]">
-                <div class="w-9 h-1 rounded-full bg-[#C7C7CC]"></div>
-            </div>
-
-            <div class="shrink-0 grid grid-cols-[1fr_auto_1fr] items-center px-4 sm:px-5 h-[54px] bg-[#F4F1EA]/95 border-b border-black/[0.06]">
+        <div id="checkout-panel" class="absolute inset-x-0 bottom-0 h-full sm:inset-y-0 sm:right-0 sm:left-auto sm:h-full w-full sm:max-w-lg bg-[#F4F1EA] shadow-[0_-12px_40px_rgba(0,0,0,0.16)] sm:shadow-2xl rounded-t-none sm:rounded-none flex flex-col overflow-hidden">
+            <div id="checkout-header" class="shrink-0 grid grid-cols-[1fr_auto_1fr] items-center px-4 sm:px-5 h-[54px] bg-[#F4F1EA]/95 border-b border-black/[0.06]">
                 <button type="button" onclick="backToCart()" class="justify-self-start inline-flex items-center gap-1 text-[15px] font-medium text-[#2C4A34] active:opacity-50 transition-opacity">
                     <i class="fas fa-chevron-left text-[11px]"></i>
                     Cesta
                 </button>
-                <h2 id="checkout-title" class="text-[16px] font-semibold tracking-[-0.01em] text-[#2C4A34] serif-font">Finalizar pedido</h2>
+                <h2 id="checkout-title" class="text-[16px] font-semibold tracking-[-0.01em] text-[#2C4A34]">Finalizar pedido</h2>
                 <button type="button" onclick="closeCheckout()" aria-label="Fechar" class="justify-self-end w-8 h-8 rounded-full bg-[#E9E2D7] text-[#6F6A5E] flex items-center justify-center active:scale-95 transition-transform">
                     <i class="fas fa-times text-[13px]"></i>
                 </button>
             </div>
 
             <div id="checkout-scroll" class="flex-grow min-h-0 overflow-y-auto px-4 sm:px-6 pt-4 pb-5 custom-scrollbar">
-                <div class="space-y-4 sm:space-y-5">
+                <div class="checkout-stack">
                     <section class="space-y-2">
-                        <p class="px-1 text-[12px] font-semibold text-[#636366]">Seus dados</p>
+                        <p class="px-1 text-[12px] font-semibold text-[#636366]">Seus dados e agendamento</p>
                         <div class="bg-white rounded-[18px] overflow-hidden border border-black/[0.05]">
                             <div class="p-3">
                                 <label for="order-name" class="block text-[11px] font-medium text-[#8E8E93] mb-1.5 px-1">Nome</label>
@@ -1384,10 +1414,10 @@
                     </section>
 
                     <section class="space-y-2">
-                        <p class="px-1 text-[12px] font-semibold text-[#636366]">Recebimento</p>
+                        <p class="px-1 text-[12px] font-semibold text-[#636366]">Como deseja receber?</p>
                         <div class="toggle-container">
-                            <button type="button" onclick="setFulfillment('Retirada')" id="btn-pickup" class="toggle-btn active">Retirada</button>
-                            <button type="button" onclick="setFulfillment('Entrega')" id="btn-delivery" class="toggle-btn">Entrega</button>
+                            <button type="button" onclick="setFulfillment('Retirada')" id="btn-pickup" class="toggle-btn active" aria-pressed="true"><i class="fas fa-store" aria-hidden="true"></i> Retirada</button>
+                            <button type="button" onclick="setFulfillment('Entrega')" id="btn-delivery" class="toggle-btn" aria-pressed="false"><i class="fas fa-motorcycle" aria-hidden="true"></i> Entrega</button>
                         </div>
 
                         <div id="fulfillment-details">
@@ -1426,8 +1456,8 @@
                                         <label for="delivery-address" class="block text-[11px] font-medium text-[#8E8E93] px-1">Endereço</label>
                                         <input type="text" id="delivery-address" name="street-address" autocomplete="street-address" oninput="this.dataset.autoFilled='false'" placeholder="Rua e bairro" class="checkout-field w-full px-4 text-[15px]">
                                         <div class="grid grid-cols-[100px_minmax(0,1fr)] gap-2">
-                                            <input type="text" id="delivery-number" name="address-line2" inputmode="numeric" autocomplete="off" placeholder="Número" class="checkout-field w-full px-3 text-[14px]">
-                                            <input type="text" id="delivery-complement" autocomplete="off" placeholder="Complemento (opcional)" class="checkout-field w-full px-3 text-[14px]">
+                                            <input type="text" id="delivery-number" name="address-line2" inputmode="numeric" autocomplete="off" aria-label="Número do endereço" placeholder="Número" class="checkout-field w-full px-3 text-[14px]">
+                                            <input type="text" id="delivery-complement" autocomplete="off" aria-label="Complemento (opcional)" placeholder="Complemento (opcional)" class="checkout-field w-full px-3 text-[14px]">
                                         </div>
                                     </div>
                                 </div>
@@ -1441,19 +1471,20 @@
                 </div>
             </div>
 
-            <div class="shrink-0 bg-white/95 border-t border-black/[0.06] px-4 sm:px-6 pt-3 pb-[max(0.9rem,env(safe-area-inset-bottom))]">
+            <div id="checkout-footer" class="shrink-0 bg-white border-t border-black/[0.06]">
                 <div id="delivery-fee-row" class="hidden mb-2 flex justify-between items-center text-[12px] text-[#636366]">
                     <span>Taxa de entrega</span>
                     <span id="delivery-fee-value" class="font-semibold text-[#1C1C1E]">Informe o CEP</span>
                 </div>
-                <div class="flex items-center justify-between gap-4 mb-3">
-                    <span class="text-[13px] font-medium text-[#636366]">Total estimado</span>
+                <div class="checkout-total-row flex items-center justify-between gap-4">
+                    <span class="text-[13px] font-medium text-[#636366]"id="checkout-total-label">Total estimado</span>
                     <span class="text-[24px] font-semibold text-[#1C1C1E] tracking-[-0.03em]" id="cart-final-total">R$ 0,00</span>
                 </div>
                 <button onclick="sendWhatsAppOrder()" class="w-full min-h-[50px] bg-[#2C4A34] hover:bg-[#243D2B] text-white rounded-[14px] font-semibold text-[15px] transition-all flex items-center justify-center gap-2 active:scale-[0.985]">
                     <i class="fab fa-whatsapp text-[18px]"></i>
-                    Enviar pedido para confirmação
+                    Enviar pedido pelo WhatsApp
                 </button>
+                <p class="checkout-confirm-note">O pedido será confirmado pela nossa equipe.</p>
             </div>
         </div>
     </div>
@@ -5076,10 +5107,12 @@ document.querySelectorAll('[data-v2-count]').forEach(el=>{const rows=cart.filter
             document.getElementById('sticky-total').innerText = subtotal.toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
 
             const reviewTotal = document.getElementById('cart-review-total');
-            if (reviewTotal) reviewTotal.innerText = 'R$ ' + subtotal.toFixed(2);
+            if (reviewTotal) reviewTotal.innerText = subtotal.toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
 
             const finalTotal = document.getElementById('cart-final-total');
-            if (finalTotal) finalTotal.innerText = 'R$ ' + total.toFixed(2);
+            if (finalTotal) finalTotal.innerText = total.toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
+            const totalLabelEl=document.getElementById('checkout-total-label');
+            if(totalLabelEl) totalLabelEl.textContent=activeFulfillment==='Entrega' && (specialDelivery || deliveryNeedsQuote() || !(getSelectedDeliveryFee()>0)) ? 'Subtotal (sem entrega)' : 'Total estimado';
 
             document.getElementById('sticky-cart-count').innerText = count;
             const bar = document.getElementById('sticky-cart-bar');
@@ -5158,6 +5191,8 @@ document.querySelectorAll('[data-v2-count]').forEach(el=>{const rows=cart.filter
             activeFulfillment = method;
             document.getElementById('btn-pickup').classList.toggle('active', method === 'Retirada');
             document.getElementById('btn-delivery').classList.toggle('active', method === 'Entrega');
+            document.getElementById('btn-pickup').setAttribute('aria-pressed', String(method === 'Retirada'));
+            document.getElementById('btn-delivery').setAttribute('aria-pressed', String(method === 'Entrega'));
             document.getElementById('pickup-location-container').classList.toggle('hidden', method === 'Entrega');
             document.getElementById('delivery-address-container').classList.toggle('hidden', method === 'Retirada');
             updateCartSummary();
