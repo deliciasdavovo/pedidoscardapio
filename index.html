@@ -1254,6 +1254,20 @@ body.cart-open #mobile-bottom-nav,body:has(#mobile-search-input:focus) #mobile-b
 #modal-cart-action{white-space:normal;line-height:1.35;font-size:15px;min-height:50px}
 #cart-items-list button[onclick^="updateCartQty"],#cart-items-list button[onclick^="removeFromCart"]{min-width:44px;min-height:44px}
 @media(max-width:639px){.product-list-item .product-summary{font-size:14px}.product-list-item{align-items:flex-start}#product-modal-body>div:first-child{height:24dvh;min-height:160px;max-height:230px}}
+</style><style>
+/* Cards mobile: título em destaque; descrição e detalhes com peso visual secundário. */
+.product-list-clean .product-summary{color:#898e86!important;font-size:13px!important;line-height:1.45;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2!important;overflow:hidden;white-space:normal;overflow-wrap:break-word;margin-top:4px}
+.product-list-clean .product-summary.expanded{display:block;-webkit-line-clamp:unset!important;overflow:visible}
+.product-list-clean h3{color:#292923;font-size:18px;line-height:1.23;font-weight:500;white-space:normal;overflow-wrap:break-word}
+.product-list-clean .product-list-price{font-family:'DM Sans',sans-serif;font-size:15px;font-weight:750;line-height:1.35;letter-spacing:-.015em;color:#BB642A}
+.product-list-clean .product-list-meta{margin-top:4px;font-family:'DM Sans',sans-serif;font-size:11.5px;line-height:1.4;color:#999c96;font-weight:450}
+.product-list-clean .product-list-chevron{font-size:12px;margin:0;color:#c2c5be}
+.product-list-clean .product-list-image{align-self:center}
+.product-list-clean .owner-share-btn{z-index:2}
+.product-card .product-desc{color:#8c9089!important;font-size:13px!important;-webkit-line-clamp:2!important;line-height:1.48}
+.product-card .product-desc.expanded{-webkit-line-clamp:unset!important}
+#modal-description{color:#767d74!important;font-size:14px!important;line-height:1.55}
+@media(max-width:639px){.product-list-clean{align-items:center!important}.product-list-clean .product-summary{font-size:13px!important}}
 </style></head>
 <body class="relative min-h-screen">
 
@@ -8040,23 +8054,21 @@ function createProductListItem(item) {
     }
 
     const flavorCount = hasFlavors ? item.flavors.length : 0;
-    const flavorBadge = flavorCount > 1
-        ? `<span class="inline-block text-[10px] font-bold text-[#8C8676]/70 bg-[#8C8676]/8 px-2 py-0.5 rounded-full">${flavorCount} opções</span>`
-        : '';
-
-    const kitBadge = item.isKit
-        ? `<span class="inline-block text-[10px] font-bold text-[#233A29] bg-[#8C8676]/10 px-2 py-0.5 rounded-full">Kit</span>`
-        : '';
-
+    const miniMeta = [
+        flavorCount > 1 ? `${flavorCount} opções de sabor` : null,
+        item.isKit ? 'Kit personalizável' : null,
+        secondaryPriceText
+    ].filter(Boolean).join(' · ');
     return `
-        <div class="product-list-item relative flex items-center gap-4 px-4 py-3.5" role="button" tabindex="0" aria-label="Ver detalhes de ${escapeHtml(item.name)}" onclick="openProductModal('${item.id}')" onkeydown="if(event.target===this&&(event.key==='Enter'||event.key===' ')){event.preventDefault();openProductModal('${item.id}');}">
-            <button type="button" onclick="event.stopPropagation(); shareProductImage('${item.id}')" class="owner-share-btn absolute top-2.5 right-2.5 z-10 w-7 h-7 rounded-full" aria-label="${getOwnerShareActionLabel()} de ${escapeHtml(item.name)}" title="${getOwnerShareActionLabel()}">
+        <div class="product-list-item product-list-clean relative flex items-center gap-3 px-3 py-3" role="button" tabindex="0" aria-label="Ver detalhes de ${escapeHtml(item.name)}" onclick="openProductModal('${item.id}')" onkeydown="if(event.target===this&&(event.key==='Enter'||event.key===' ')){event.preventDefault();openProductModal('${item.id}');}">
+            <div class="product-list-image relative shrink-0 w-[96px] h-[96px] rounded-2xl overflow-hidden bg-[#ECE9E1]">
+            <button type="button" onclick="event.stopPropagation(); shareProductImage('${item.id}')" class="owner-share-btn absolute top-1.5 right-1.5 z-10 w-7 h-7 rounded-full" aria-label="${getOwnerShareActionLabel()} de ${escapeHtml(item.name)}" title="${getOwnerShareActionLabel()}">
                 ${getOwnerShareIconHtml('text-[9px]')}
             </button>
-            <button type="button" onclick="event.stopPropagation(); shareProductCatalog(\'${item.id}\')" class="owner-share-btn owner-catalog-btn absolute top-2.5 right-11 z-10 w-7 h-7 rounded-full" aria-label="Modo catálogo de ${escapeHtml(item.name)}" title="Modo catálogo: foto + informações">
+            <button type="button" onclick="event.stopPropagation(); shareProductCatalog(\'${item.id}\')" class="owner-share-btn owner-catalog-btn absolute top-1.5 left-1.5 z-10 w-7 h-7 rounded-full" aria-label="Modo catálogo de ${escapeHtml(item.name)}" title="Modo catálogo: foto + informações">
                 <i class="fas fa-images text-[9px]"></i>
             </button>
-            <div class="shrink-0 w-[100px] h-[100px] rounded-2xl overflow-hidden bg-[#ECE9E1]">
+
                 ${imgSrc
                     ? `<img src="${escapeHtml(imgSrc)}" onerror="handleImgError(this)" class="w-full h-full object-cover" loading="lazy">`
                     : `<div class="w-full h-full flex items-center justify-center"><i class="fas fa-cookie-bite text-2xl text-[#8C8676]/25"></i></div>`
@@ -8064,15 +8076,11 @@ function createProductListItem(item) {
             </div>
             <div class="flex-grow min-w-0">
                 <h3 class="serif-font text-[17px] text-[#22201C] leading-snug">${escapeHtml(item.name)}</h3>
-                <p class="product-summary text-[14px] leading-relaxed mt-1">${escapeHtml(item.description)}</p>
-                ${item.description && item.description.length>100?`<button type="button" class="product-read-more" aria-expanded="false" onclick="event.stopPropagation();toggleListDescription(this)">Ler descrição completa</button>`:''}
-                <div class="flex flex-wrap items-center gap-x-2 gap-y-1 mt-2">
-                    <span class="text-[13px] text-[#BE6B2E]" style="font-family: 'DM Sans', sans-serif; font-weight: 700; letter-spacing: -0.01em;">${priceText}</span>
-                    ${flavorBadge}${kitBadge}
-                </div>
-                ${secondaryPriceText ? `<p class="text-[11px] leading-snug font-normal text-[#8C8676] mt-1">${secondaryPriceText}</p>` : ''}
+                <p class="product-summary text-[13px] leading-relaxed mt-1">${escapeHtml(item.description)}</p>
+                <p class="product-list-price mt-2">${priceText}</p>
+                ${miniMeta ? `<p class="product-list-meta">${escapeHtml(miniMeta)}</p>` : ''}
             </div>
-            <i class="fas fa-chevron-right text-[#8C8676]/30 shrink-0 text-sm ml-1"></i>
+            <i class="fas fa-chevron-right product-list-chevron shrink-0" aria-hidden="true"></i>
         </div>
     `;
 }
