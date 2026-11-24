@@ -1183,6 +1183,33 @@
 #discovery-overlay .discovery-footnote{margin-top:10px}
 #welcome-banner .order-intro-hint{font-size:12px;line-height:1.45;color:#f4f1ea;margin:6px auto 0;max-width:380px;font-family:'DM Sans',sans-serif}
 @media(max-width:639px){#discovery-overlay .discovery-shell{justify-content:center;padding-inline:18px}#discovery-overlay .discovery-title{font-size:clamp(26px,7vw,34px)}#welcome-banner{padding-top:8px}#welcome-banner h2{font-size:22px}}
+</style><style>
+/* Navegação simplificada para celular; mantém o layout de desktop existente. */
+#mobile-search-strip{display:flex;align-items:center;gap:9px;background:#fff;padding:7px 13px;border-bottom:1px solid #e6e3dc;color:#2c4a34}
+#mobile-search-strip>i{font-size:16px;flex-shrink:0}
+#mobile-search-input{flex:1;min-width:0;width:100%;min-height:36px;font-family:'DM Sans',sans-serif;font-style:normal;font-size:16px;color:#22201c;background:transparent;border:0;outline:none}
+#mobile-search-input::placeholder{color:#777a71;opacity:1}
+#mobile-search-input:focus-visible{outline:none!important}
+#mobile-search-clear{width:36px;height:36px;border-radius:50%;font-size:15px;color:#52624f;flex-shrink:0}
+#mobile-search-clear[hidden]{display:none!important}
+#mobile-category-chips{background:#faf8f4;border-bottom:1px solid #e1ded6;overflow:hidden}
+#mobile-category-chips[hidden]{display:none!important}
+#mobile-category-items{display:flex;align-items:center;gap:6px;overflow-x:auto;overscroll-behavior-x:contain;scrollbar-width:none;white-space:nowrap;padding:8px 11px}
+#mobile-category-items::-webkit-scrollbar{display:none}
+#mobile-category-items button{min-height:38px;flex-shrink:0;border:1px solid #d8d3c8;padding:7px 13px;border-radius:20px;color:#2c4a34;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600;background:#fff}
+#mobile-category-items button.active{border-color:#2c4a34;background:#2c4a34;color:white}
+#mobile-bottom-nav{position:fixed;bottom:0;left:0;right:0;z-index:55;display:flex;align-items:stretch;background:#fff;border-top:1px solid #e1ded6;box-shadow:0 -4px 16px #22201c10;padding:3px 6px calc(3px + env(safe-area-inset-bottom))}
+#mobile-bottom-nav>button{position:relative;flex:1;min-width:0;min-height:58px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;color:#2c4a34;font-size:11px;font-weight:700;font-family:'DM Sans',sans-serif}
+#mobile-bottom-nav>button>i,#mobile-bottom-nav .mobile-nav-basket>i{font-size:19px}
+#mobile-bottom-nav small{font-size:10px;font-weight:600;color:#6a695f;white-space:nowrap}
+#mobile-bottom-nav [hidden]{display:none!important}
+#mobile-bottom-nav .mobile-nav-basket{position:relative}
+#mobile-nav-badge{position:absolute;left:13px;top:-8px;min-width:17px;height:17px;border-radius:99px;background:#be6b2e;color:#fff;display:grid;place-items:center;font-size:10px;padding-inline:3px}
+body.cart-open #mobile-bottom-nav,body:has(#mobile-search-input:focus) #mobile-bottom-nav{display:none}
+.discovery-search-quick{width:100%;display:flex;align-items:center;gap:12px;min-height:48px;padding:10px 13px;margin-bottom:12px;text-align:left;border:1px solid #d8d3c8;border-radius:12px;background:#fff;color:#2c4a34}
+.discovery-search-quick span{flex:1;font-family:'DM Sans',sans-serif;font-size:13px;color:#666b62}.discovery-search-quick>i{font-size:14px}
+@media(max-width:639px){#main-header #search-toggle-btn{display:none}#search-bar{display:none!important}#sticky-cart-bar{display:none!important}#menu-container{padding-bottom:calc(90px + env(safe-area-inset-bottom))!important}#welcome-banner{padding-bottom:54px}#mobile-bottom-nav button:focus-visible,#mobile-category-items button:focus-visible{outline:2px solid #be6b2e;outline-offset:-2px}}
+@media(min-width:640px){#mobile-search-strip,#mobile-category-chips,#mobile-bottom-nav{display:none!important}.discovery-search-quick{display:none}}
 </style></head>
 <body class="relative min-h-screen">
 
@@ -1218,6 +1245,12 @@
                 </div>
             </div>
         </header>
+        <div id="mobile-search-strip" class="sm:hidden" role="search" aria-label="Buscar produtos">
+            <i class="fas fa-search" aria-hidden="true"></i>
+            <input type="search" id="mobile-search-input" autocomplete="off" aria-label="Buscar no cardápio" placeholder="Buscar bolo, salgado, quiche..." oninput="handleMobileSearch(this.value)">
+            <button id="mobile-search-clear" type="button" aria-label="Limpar busca" onclick="clearSearch();document.getElementById('mobile-search-input').focus()" hidden><i class="fas fa-times" aria-hidden="true"></i></button>
+        </div>
+        <nav id="mobile-category-chips" class="sm:hidden" aria-label="Navegar por categorias"><div id="mobile-category-items"></div></nav>
     </div>
 
     <!-- Menu Lateral Retrátil (Departamentos) -->
@@ -1312,6 +1345,7 @@
                 <p class="discovery-subtitle">Escolha uma categoria para começar ou entre direto no cardápio completo.</p>
             </section>
 
+            <button type="button" class="discovery-search-quick" onclick="openCatalogSearch()"><i class="fas fa-search" aria-hidden="true"></i><span>Buscar bolo, salgado, quiche...</span><i class="fas fa-arrow-right" aria-hidden="true"></i></button>
             <p class="discovery-section-label">Explore o cardápio</p>
             <div id="discovery-cards"></div>
             <button type="button" class="coffee-home-entry" onclick="openCoffeeWizard()"><i class="fas fa-mug-hot" aria-hidden="true"></i><span><strong>Monte seu Coffee Break</strong><small>Escolha a sugestão e personalize</small></span><i class="fas fa-chevron-right" aria-hidden="true"></i></button>
@@ -1362,6 +1396,15 @@
         </button>
     </div>
 
+    <!-- Navegação inferior fixa: apenas no cardápio mobile -->
+    <nav id="mobile-bottom-nav" class="sm:hidden" aria-label="Navegação principal">
+        <button type="button" onclick="goMobileHome()" aria-label="Voltar ao início"><i class="fas fa-home" aria-hidden="true"></i><span>Início</span></button>
+        <button type="button" onclick="openMobileCategories()" aria-label="Abrir categorias"><i class="fas fa-th-large" aria-hidden="true"></i><span>Categorias</span></button>
+        <button type="button" onclick="openCart()" aria-label="Abrir minha cesta">
+            <span class="mobile-nav-basket"><i class="fas fa-shopping-basket" aria-hidden="true"></i><b id="mobile-nav-badge" hidden>0</b></span>
+            <span>Minha cesta</span><small id="mobile-nav-total" hidden></small>
+        </button>
+    </nav>
     <!-- Seletor guiado de coffee break -->
     <div id="coffee-wizard" class="hidden" role="dialog" aria-modal="true" aria-labelledby="coffee-wizard-title">
       <div class="coffee-wizard-overlay" onclick="closeCoffeeWizard()"></div>
@@ -3939,7 +3982,7 @@ function saveV2Cart(){try{localStorage.setItem(V2_CART_KEY,JSON.stringify(cart.m
                 emptyState.innerHTML = `
                     <i class="fas fa-cookie-bite text-6xl text-[#8C8676]/15"></i>
                     <p class="text-xl serif-font italic text-[#8C8676]/40">Nenhuma delícia encontrada</p>
-                    <p class="text-sm text-[#8C8676]/35">para <span class="font-semibold text-[#8C8676]/55">"${currentSearch}"</span></p>
+                    <p class="text-sm text-[#8C8676]/35">para <span class="font-semibold text-[#8C8676]/55">"${escapeHtml(currentSearch)}"</span></p>
                     <button onclick="clearSearch()" class="mt-2 px-7 py-3 rounded-2xl border border-[#8C8676]/20 text-[#8C8676] text-sm font-semibold hover:bg-[#8C8676]/5 transition-all active:scale-95">
                         Limpar busca
                     </button>
@@ -3957,6 +4000,7 @@ function saveV2Cart(){try{localStorage.setItem(V2_CART_KEY,JSON.stringify(cart.m
                 container.appendChild(footer);
             }
 
+            renderMobileCategoryChips();
             requestAnimationFrame(refreshAllDescriptionToggles);
         }
 
@@ -4085,6 +4129,97 @@ ${getFlavorList(item).map(f => `<option value="${f.label}">${f.label}</option>`)
             `;
         }
 
+        // Navegação mobile: busca persistente, chips e atalhos inferiores.
+        function closeDiscoveryForNavigation() {
+            const overlay=document.getElementById('discovery-overlay');
+            if(overlay){overlay.style.display='none';overlay.classList.remove('hiding');}
+        }
+
+        function openCatalogSearch() {
+            closeDiscoveryForNavigation();
+            activeGroupName='Todos';
+            activeGroupCategories=null;
+            if(currentSearch)clearSearch();
+            renderMenu();
+            setActiveGroup('Todos');
+            window.scrollTo({top:0,behavior:'instant'});
+            const input=document.getElementById('mobile-search-input');
+            if(input&&window.matchMedia('(max-width:639px)').matches){input.focus();}
+            else toggleSearch();
+        }
+
+        function handleMobileSearch(value) {
+            currentSearch=value;
+            const desktopInput=document.getElementById('search-input');
+            if(desktopInput)desktopInput.value=value;
+            renderMenu();
+            updateSearchUI(value);
+            updateWelcomeBanner(Boolean(value));
+            const btn=document.getElementById('mobile-search-clear');
+            if(btn)btn.hidden=!value;
+            window.scrollTo({top:0,behavior:'instant'});
+        }
+
+        function goMobileHome() {
+            clearSearch();
+            const input=document.getElementById('mobile-search-input');
+            if(input)input.blur();
+            window.scrollTo({top:0,behavior:'instant'});
+            showDiscovery();
+        }
+
+        function openMobileCategories() {
+            closeDiscoveryForNavigation();
+            if(currentSearch)clearSearch();
+            openSideMenu();
+        }
+
+        function renderMobileCategoryChips() {
+            const el=document.getElementById('mobile-category-items');
+            if(!el)return;
+            const categories=Array.from(document.querySelectorAll('#menu-container section[data-cat]')).map(sec=>sec.dataset.cat);
+            el.replaceChildren();
+            if(!categories.length){document.getElementById('mobile-category-chips').hidden=true;return;}
+            document.getElementById('mobile-category-chips').hidden=false;
+            ['Todos',...categories].forEach(cat=>{
+                const button=document.createElement('button');
+                button.type='button';
+                button.textContent=cat;
+                button.dataset.cat=cat;
+                button.setAttribute('aria-pressed','false');
+                button.addEventListener('click',()=>scrollToMobileCategory(cat));
+                el.appendChild(button);
+            });
+            updateMobileChipSpy();
+        }
+
+        function setMobileCategorySelected(cat) {
+            const buttons=Array.from(document.querySelectorAll('#mobile-category-items button'));
+            const target=buttons.find(b=>b.dataset.cat===cat)||buttons[0];
+            buttons.forEach(b=>{const on=b===target;b.classList.toggle('active',on);b.setAttribute('aria-pressed',String(on));});
+            if(target && !target.matches(':focus'))target.scrollIntoView({block:'nearest',inline:'nearest',behavior:'smooth'});
+        }
+
+        function scrollToMobileCategory(cat) {
+            const header=document.getElementById('main-header');
+            const target=cat==='Todos'?document.getElementById('menu-container'):document.getElementById(sanitizeId(cat));
+            if(!target)return;
+            setMobileCategorySelected(cat);
+            const offset=(header?.offsetHeight||0)+9;
+            const y=Math.max(0,target.getBoundingClientRect().top+window.scrollY-offset);
+            window.scrollTo({top:y,behavior:'smooth'});
+        }
+
+        function updateMobileChipSpy() {
+            if(window.innerWidth>=640)return;
+            const header=document.getElementById('main-header');
+            const boundary=(header?.offsetHeight||0)+30;
+            const sections=Array.from(document.querySelectorAll('#menu-container section[data-cat]'));
+            let active='Todos';
+            for(const sec of sections){if(sec.getBoundingClientRect().top<=boundary)active=sec.dataset.cat;else break;}
+            setMobileCategorySelected(active);
+        }
+
         // LÓGICA DE UI
         function toggleSearch() {
             const bar = document.getElementById('search-bar');
@@ -4116,14 +4251,22 @@ ${getFlavorList(item).map(f => `<option value="${f.label}">${f.label}</option>`)
         function clearSearch() {
             const input = document.getElementById('search-input');
             if (input) input.value = '';
+            const mobileInput=document.getElementById('mobile-search-input');
+            if(mobileInput) mobileInput.value='';
+            const mobileClear=document.getElementById('mobile-search-clear');
+            if(mobileClear) mobileClear.hidden=true;
             currentSearch = '';
             renderMenu();
             updateSearchUI('');
-            updateWelcomeBanner(true);
+            updateWelcomeBanner(!document.getElementById('search-bar').classList.contains('opacity-0'));
         }
 
         function handleSearch(val) {
             currentSearch = val;
+            const mobileInput=document.getElementById('mobile-search-input');
+            if(mobileInput)mobileInput.value=val;
+            const mobileClear=document.getElementById('mobile-search-clear');
+            if(mobileClear)mobileClear.hidden=!val;
             renderMenu();
             updateSearchUI(val);
             updateWelcomeBanner(true);
@@ -4235,7 +4378,7 @@ ${getFlavorList(item).map(f => `<option value="${f.label}">${f.label}</option>`)
         function onScrollSpy() {
             if (spyScheduled) return;
             spyScheduled = true;
-            requestAnimationFrame(() => { spyScheduled = false; updateActiveOnScroll(); });
+            requestAnimationFrame(() => { spyScheduled = false; updateActiveOnScroll(); updateMobileChipSpy(); });
         }
 
         function refreshDescriptionToggle(id) {
@@ -5194,6 +5337,10 @@ document.querySelectorAll('[data-v2-count]').forEach(el=>{const rows=cart.filter
                 feeRow.classList.add('hidden');
             }
 
+            const mobileBadge=document.getElementById('mobile-nav-badge');
+            if(mobileBadge){mobileBadge.textContent=String(count);mobileBadge.hidden=count===0;}
+            const mobileTotal=document.getElementById('mobile-nav-total');
+            if(mobileTotal){mobileTotal.textContent=subtotal.toLocaleString('pt-BR',{style:'currency',currency:'BRL'});mobileTotal.hidden=count===0;}
             document.getElementById('cart-badge').innerText = count;
             document.getElementById('cart-badge').classList.toggle('hidden', count === 0);
             document.getElementById('header-total').innerText = 'R$ ' + subtotal.toFixed(2);
