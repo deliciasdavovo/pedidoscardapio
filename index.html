@@ -1146,6 +1146,21 @@
 #kit-flavor-items .v2-step input{width:54px;min-height:44px}
 #kit-flavor-items .v2-kit-row>span{flex:1;min-width:80px;overflow-wrap:anywhere}
 @media(max-width:420px){#kit-flavor-items [data-kit-entry]{padding:12px}#kit-flavor-items .kit-flavor-product-row{display:flex;flex-direction:column}#kit-flavor-items .kit-flavor-product-row>img{display:none}#cart-items-list{padding:12px}#cart-items-list>div{gap:8px;padding:12px;border-radius:16px}#cart-items-list>div>img{width:48px;height:48px}}
+</style><style>
+.coffee-home-entry,.coffee-category-entry{width:100%;display:flex;align-items:center;gap:12px;border-radius:14px;padding:12px 14px;text-align:left;color:#2c4a34;background:#f4f1ea;border:1px solid #d8d3c8}
+.coffee-home-entry{margin:8px 0}.coffee-category-entry{margin:0 auto 22px;max-width:480px}
+.coffee-home-entry span,.coffee-category-entry span{flex:1}.coffee-home-entry strong,.coffee-category-entry strong{display:block;font-size:15px}.coffee-home-entry small,.coffee-category-entry small{display:block;font-size:12px;color:#51604f}
+#coffee-wizard:not(.hidden){position:fixed;inset:0;z-index:80;display:flex;align-items:center;justify-content:center}
+.coffee-wizard-overlay{position:absolute;inset:0;background:#22201c99}
+.coffee-wizard-panel{position:relative;width:min(100%,480px);max-height:94dvh;display:flex;flex-direction:column;background:#f4f1ea;color:#22201c;border-radius:20px;overflow:hidden;box-shadow:0 14px 55px #0003}
+.coffee-wizard-panel header{background:#fff;display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border-bottom:1px solid #e4dfd5}
+.coffee-wizard-panel header p{font-size:10px;font-weight:700;letter-spacing:.1em;color:#6f7369}.coffee-wizard-panel h2{font-family:Lora,serif;font-size:21px;color:#2c4a34}.coffee-wizard-panel header button{width:44px;height:44px;color:#2c4a34}
+.coffee-wizard-scroll{overflow:auto;min-height:0;padding:14px;overscroll-behavior:contain}.coffee-label{display:block;font-size:14px;font-weight:700;color:#2c4a34;margin:0 0 8px}
+.coffee-people-control{display:flex;align-items:center;gap:5px;margin-bottom:18px}.coffee-people-control button,.coffee-people-control input{width:48px;min-height:44px;background:#fff;border:1px solid #d8d3c8;border-radius:10px;text-align:center;font-size:18px;color:#2c4a34}.coffee-people-control input{width:76px;font-size:16px;font-weight:700}.coffee-people-control span{font-size:13px;margin-left:4px}
+#coffee-options{display:flex;flex-direction:column;gap:8px}.coffee-option{display:flex;align-items:center;width:100%;gap:10px;text-align:left;background:#fff;border:1px solid #dedbd2;border-radius:12px;padding:10px;min-height:80px}.coffee-option[aria-pressed=true]{border-color:#2c4a34;box-shadow:inset 0 0 0 1px #2c4a34;background:#eef2e9}.coffee-option img,.coffee-custom-icon{width:60px;height:60px;flex-shrink:0;border-radius:9px;object-fit:cover}.coffee-custom-icon{display:grid;place-items:center;background:#e4eadd;color:#2c4a34;font-size:20px}.coffee-option-copy{flex:1;min-width:0;display:flex;flex-direction:column;gap:4px}.coffee-option-copy strong{font-size:15px;color:#2c4a34}.coffee-option-copy small{font-size:12px;color:#55574e;line-height:1.35}.coffee-option-price{font-size:12px;font-weight:700;color:#2c4a34}.coffee-radio{width:18px;height:18px;border:1px solid #91998e;border-radius:50%;flex-shrink:0}.coffee-option[aria-pressed=true] .coffee-radio{border:5px solid #2c4a34;background:white}
+.coffee-wizard-panel footer{background:#fff;padding:10px 14px calc(10px + env(safe-area-inset-bottom));border-top:1px solid #e4dfd5}.coffee-wizard-panel footer>div{font-size:13px;color:#2c4a34;font-weight:700;margin-bottom:6px}.coffee-main-action{width:100%;min-height:46px;border-radius:10px;background:#2c4a34;color:white;font-size:14px;font-weight:600;padding:10px}.coffee-main-action i{margin-left:5px}
+.kit-extra-picker{background:white;border:1px solid #dedbd2;border-radius:14px;padding:12px;color:#2c4a34}.kit-extra-picker summary{font-size:14px;font-weight:700;cursor:pointer;min-height:44px;align-content:center}.kit-extra-picker label{display:block;font-size:12px;font-weight:600;margin:8px 0 4px}.kit-extra-picker select{display:block;width:100%;font-size:16px;min-height:44px;border:1px solid #dedbd2;border-radius:9px;background:#fff;padding:6px 8px;color:#22201c}.kit-extra-picker button{margin-top:12px}
+@media(max-width:639px){#coffee-wizard:not(.hidden){align-items:flex-end}.coffee-wizard-panel{width:100%;max-height:96dvh;border-radius:18px 18px 0 0}.coffee-option img,.coffee-custom-icon{width:48px;height:48px}}
 </style></head>
 <body class="relative min-h-screen">
 
@@ -1277,6 +1292,7 @@
 
             <p class="discovery-section-label">Explore o cardápio</p>
             <div id="discovery-cards"></div>
+            <button type="button" class="coffee-home-entry" onclick="openCoffeeWizard()"><i class="fas fa-mug-hot" aria-hidden="true"></i><span><strong>Monte seu Coffee Break</strong><small>Escolha a sugestão e personalize</small></span><i class="fas fa-chevron-right" aria-hidden="true"></i></button>
 
             <button onclick="enterMenu()" class="discovery-cta" aria-label="Ver o cardápio completo">
                 <span>Ver cardápio completo</span>
@@ -1324,6 +1340,20 @@
         </button>
     </div>
 
+    <!-- Seletor guiado de coffee break -->
+    <div id="coffee-wizard" class="hidden" role="dialog" aria-modal="true" aria-labelledby="coffee-wizard-title">
+      <div class="coffee-wizard-overlay" onclick="closeCoffeeWizard()"></div>
+      <div class="coffee-wizard-panel">
+        <header><div><p>ENCOMENDAS PARA GRUPOS</p><h2 id="coffee-wizard-title">Monte seu Coffee Break</h2></div><button type="button" onclick="closeCoffeeWizard()" aria-label="Fechar"><i class="fas fa-times"></i></button></header>
+        <div class="coffee-wizard-scroll">
+          <label for="coffee-people" class="coffee-label">Para quantas pessoas?</label>
+          <div class="coffee-people-control"><button type="button" onclick="changeCoffeePeople(-1)" aria-label="Diminuir convidados">−</button><input id="coffee-people" type="number" inputmode="numeric" min="5" max="10000" step="1" value="20" oninput="updateCoffeeWizardPrices()"><button type="button" onclick="changeCoffeePeople(1)" aria-label="Aumentar convidados">+</button><span>pessoas</span></div>
+          <p class="coffee-label">Escolha um tipo de Coffee Break</p>
+          <div id="coffee-options"></div>
+        </div>
+        <footer><div id="coffee-wizard-estimate" aria-live="polite"></div><button type="button" onclick="startCoffeeWizard()" class="coffee-main-action">Personalizar Coffee Break <i class="fas fa-arrow-right" aria-hidden="true"></i></button></footer>
+      </div>
+    </div>
     <!-- Pop-up de Sabores do Coffee Break -->
     <div id="kit-flavor-modal" class="fixed inset-0 z-[70] invisible">
         <div class="absolute inset-0 bg-[#22201C]/70 backdrop-blur-md opacity-0 transition-opacity duration-300" onclick="closeKitFlavorModal()"></div>
@@ -3480,6 +3510,7 @@ function saveV2Cart(){try{localStorage.setItem(V2_CART_KEY,JSON.stringify(cart.m
         let toastAutoHideTimer = null;
         let toastCleanupTimer = null;
         let pendingKitSelection = null;
+        let coffeeWizardChoice = "cb1";
         const OWNER_MODE_KEY = 'delicias_owner_mode_v1';
         let ownerModeTapCount = 0;
         let ownerModeTapTimer = null;
@@ -3503,6 +3534,7 @@ function saveV2Cart(){try{localStorage.setItem(V2_CART_KEY,JSON.stringify(cart.m
             // Tecla Escape fecha busca/modais na ordem de prioridade
             document.addEventListener('keydown', (e) => {
                 if (e.key !== 'Escape') return;
+                if (!document.getElementById('coffee-wizard').classList.contains('hidden')) {closeCoffeeWizard();return;}
                 const bar = document.getElementById('search-bar');
                 const kitModal = document.getElementById('kit-flavor-modal');
                 const cartModal = document.getElementById('cart-modal');
@@ -3874,7 +3906,7 @@ function saveV2Cart(){try{localStorage.setItem(V2_CART_KEY,JSON.stringify(cart.m
                         ${desktopGrid}
                     `;
 
-                    section.innerHTML = html;
+                    section.innerHTML = cat==='Coffee Breaks' ? '<button class="coffee-category-entry" type="button" onclick="openCoffeeWizard()"><i class="fas fa-mug-hot" aria-hidden="true"></i><span><strong>Monte seu Coffee Break</strong><small>Escolha por número de pessoas ou monte do zero</small></span><i class="fas fa-chevron-right" aria-hidden="true"></i></button>'+html : html;
                     container.appendChild(section);
                 }
             });
@@ -4556,6 +4588,29 @@ function readCheckoutPreferences() {
             return Number(qty).toFixed(unit === 'kg' ? 1 : 0) + (unit === 'kg' ? 'kg' : 'un');
         }
 
+        function openCoffeeWizard(){
+            const modal=document.getElementById('coffee-wizard');
+            const kits=MENU_ITEMS.filter(i=>i.isKit&&i.category==='Coffee Breaks');
+            if(!kits.some(i=>i.id===coffeeWizardChoice)&&coffeeWizardChoice!=='custom')coffeeWizardChoice=kits[0]?.id||'custom';
+            document.getElementById('coffee-options').innerHTML=kits.map(kit=>`
+                <button type="button" class="coffee-option" data-coffee="${escapeHtml(kit.id)}" onclick="chooseCoffeeWizard(this.dataset.coffee)" aria-pressed="false">
+                <img src="${escapeHtml(kit.image)}" alt="" onerror="handleImgError(this)">
+                <span class="coffee-option-copy"><strong>${escapeHtml(kit.name)}</strong><small>${escapeHtml(kit.description.replace(/^Sugestão para coffee break com /i,''))}</small><span class="coffee-option-price" data-coffee-price="${escapeHtml(kit.id)}"></span></span><span class="coffee-radio" aria-hidden="true"></span></button>`).join('')+`
+                <button type="button" class="coffee-option" data-coffee="custom" onclick="chooseCoffeeWizard('custom')" aria-pressed="false"><span class="coffee-custom-icon"><i class="fas fa-plus"></i></span><span class="coffee-option-copy"><strong>Monte do zero</strong><small>Selecione os produtos e as quantidades que preferir.</small></span><span class="coffee-radio" aria-hidden="true"></span></button>`;
+            modal.classList.remove('hidden');document.body.classList.add('cart-open');chooseCoffeeWizard(coffeeWizardChoice);
+        }
+        function closeCoffeeWizard(){document.getElementById('coffee-wizard').classList.add('hidden');if(document.getElementById('cart-modal').classList.contains('invisible')&&document.getElementById('kit-flavor-modal').classList.contains('invisible'))document.body.classList.remove('cart-open');}
+        function coffeePeople(){const n=Number(document.getElementById('coffee-people').value);return Number.isInteger(n)&&n>=5&&n<=10000?n:null;}
+        function changeCoffeePeople(delta){const input=document.getElementById('coffee-people');input.value=Math.max(5,Math.min(10000,(coffeePeople()||20)+delta));updateCoffeeWizardPrices();}
+        function chooseCoffeeWizard(id){coffeeWizardChoice=id;document.querySelectorAll('[data-coffee]').forEach(el=>el.setAttribute('aria-pressed',String(el.dataset.coffee===id)));updateCoffeeWizardPrices();}
+        function coffeeMoney(n){return n.toLocaleString('pt-BR',{style:'currency',currency:'BRL'});}
+        function updateCoffeeWizardPrices(){const n=coffeePeople();const selected=MENU_ITEMS.find(i=>i.id===coffeeWizardChoice&&i.isKit);document.querySelectorAll('[data-coffee-price]').forEach(el=>{const item=MENU_ITEMS.find(i=>i.id===el.dataset.coffeePrice);el.textContent=n&&item?coffeeMoney(getKitComputedTotal(item,n)/n)+' por pessoa · sugestão':'';});document.getElementById('coffee-wizard-estimate').textContent=!n?'Informe a quantidade (mínimo 5 pessoas)':selected?'Sugestão para '+n+' pessoas: '+coffeeMoney(getKitComputedTotal(selected,n)):'Total conforme os produtos escolhidos';}
+        function startCoffeeWizard(){const n=coffeePeople();if(!n){document.getElementById('coffee-people').reportValidity();showValidationPopup('Informe uma quantidade válida de pessoas (mínimo 5).');return;}const item=coffeeWizardChoice==='custom'?{name:'Coffee personalizado',isKit:true,composition:[],custom:true}:MENU_ITEMS.find(i=>i.id===coffeeWizardChoice&&i.isKit);if(!item)return;closeCoffeeWizard();const discovery=document.getElementById('discovery-overlay');if(discovery&&discovery.style.display!=='none'){discovery.style.display='none';goToCategory('Coffee Breaks');}openKitFlavorModal(item,n);}
+        function kitExtraProducts(){return MENU_ITEMS.filter(i=>!i.isKit&&i.category!=='Cestas de café da manhã'&&i.units?.some(u=>u==='un'||u==='kg'));}
+        function kitExtraPicker(){return `<details id="kit-extra-picker" class="kit-extra-picker" ${pendingKitSelection.entries.length?'':'open'}><summary><i class="fas fa-plus-circle" aria-hidden="true"></i> Acrescentar outro produto</summary><label for="kit-extra-category">Categoria</label><select id="kit-extra-category" onchange="refreshKitExtraProducts()"><option value="">Todas as categorias</option>${CATEGORIES.filter(cat=>kitExtraProducts().some(i=>i.category===cat)).map(cat=>`<option value="${escapeHtml(cat)}">${escapeHtml(cat)}</option>`).join('')}</select><label for="kit-extra-product">Produto</label><select id="kit-extra-product" onchange="refreshKitExtraOptions()"></select><div id="kit-extra-options"></div><button type="button" class="coffee-main-action" onclick="addKitExtraProduct()">Adicionar à composição</button></details>`;}
+        function refreshKitExtraProducts(){const cat=document.getElementById('kit-extra-category').value;const list=kitExtraProducts().filter(i=>!cat||i.category===cat);document.getElementById('kit-extra-product').innerHTML=list.map(i=>`<option value="${escapeHtml(i.id)}">${escapeHtml(i.name)}</option>`).join('');refreshKitExtraOptions();}
+        function refreshKitExtraOptions(){const item=MENU_ITEMS.find(i=>i.id===document.getElementById('kit-extra-product')?.value);const el=document.getElementById('kit-extra-options');if(!item){el.innerHTML='';return;}el.innerHTML=`<label for="kit-extra-unit">Forma de venda</label><select id="kit-extra-unit">${item.units.filter(u=>u==='un'||u==='kg').map(u=>`<option value="${u}">${u==='kg'?'Quilo':'Unidade'}</option>`).join('')}</select>`+(item.sizes?.length?`<label for="kit-extra-size">Tamanho</label><select id="kit-extra-size">${item.sizes.map(s=>`<option value="${escapeHtml(s.label)}">${escapeHtml(s.label)}</option>`).join('')}</select>`:'');}
+        function addKitExtraProduct(){if(!pendingKitSelection)return;const item=MENU_ITEMS.find(i=>i.id===document.getElementById('kit-extra-product')?.value);if(!item)return;const unit=document.getElementById('kit-extra-unit')?.value;const size=document.getElementById('kit-extra-size')?.value||null;const defaultFlavor=getDefaultFlavorForKitItem(item,{});if(!item.units.includes(unit)||!Number.isFinite(getUnitPriceForSelection(item,unit,defaultFlavor,size))){showValidationPopup('Este produto não está disponível nesta forma de venda.');return;}const existing=pendingKitSelection.entries.find(e=>e.id===item.id&&e.unit===unit&&e.size===size);if(existing){document.querySelector('[data-kit-entry="'+existing.idx+'"]')?.scrollIntoView({block:'start',behavior:'smooth'});showValidationPopup('Produto já está na composição. Ajuste a quantidade.');return;}const snap=new Map(pendingKitSelection.entries.map(e=>[e.idx,collectKitFlavorRows(e.idx)]));const idx=Math.max(-1,...pendingKitSelection.entries.map(e=>e.idx))+1;pendingKitSelection.entries.push({id:item.id,idx,name:item.name,unit,size,qty:unit==='kg'?0.5:1,flavors:getFlavorList(item),defaultFlavor,flavor:defaultFlavor,image:getImageForSelection(item,defaultFlavor,size),extra:true});renderKitFlavorItems(snap);document.querySelector('[data-kit-entry="'+idx+'"]')?.scrollIntoView({block:'start',behavior:'smooth'});}
         function openKitFlavorModal(item, peopleQty) {
             const entries = resolveKitComposition(item, peopleQty)
                 .map((comp, idx) => {
@@ -4572,7 +4627,7 @@ function readCheckoutPreferences() {
                 })
                 .filter(Boolean);
 
-            if (!entries.length) {
+            if (!entries.length&&!item.custom) {
                 showValidationPopup('Não encontramos itens para montar este coffee break.');
                 return;
             }
@@ -4610,7 +4665,7 @@ function readCheckoutPreferences() {
             }, 300);
         }
 
-        function renderKitFlavorItems() {
+        function renderKitFlavorItems(snapshot = null) {
             const container = document.getElementById('kit-flavor-items');
             if (!pendingKitSelection) return;
 
@@ -4632,7 +4687,7 @@ function readCheckoutPreferences() {
                                     <div class="min-w-0">
                                         <h3 class="serif-font text-base font-semibold text-[#22201C] truncate">${escapeHtml(entry.name)}</h3>
                                         <div class="flex flex-wrap gap-2 mt-1">${sizeBadge}${fixedFlavorBadge}</div>
-                                        <p class="text-[12px] text-[#8C8676]/70 font-medium mt-2">Sugestão: ${formatKitQty(entry.qty, entry.unit)}</p>
+                                        <p class="text-[12px] text-[#8C8676]/70 font-medium mt-2">${entry.extra?'Adicionado à composição':'Sugestão: '+formatKitQty(entry.qty,entry.unit)}</p>
                                     </div>
                                     <p class="text-sm font-bold text-[#22201C] whitespace-nowrap" id="kit-entry-total-${entry.idx}">R$ 0,00</p>
                                 </div>
@@ -4651,8 +4706,9 @@ function readCheckoutPreferences() {
                         </div>
                     </div>
                 `;
-            }).join('');
-
+            }).join('') + kitExtraPicker();
+            if(snapshot)pendingKitSelection.entries.forEach(entry=>{if(!snapshot.has(entry.idx))return;const rows=snapshot.get(entry.idx);if(entry.flavors.length){document.querySelectorAll('.kit-flavor-row-'+entry.idx).forEach(row=>{row.querySelector('input').value=rows.find(r=>r.flavor===row.querySelector('select').value)?.qty||0;});}else{const input=document.getElementById('kit-fixed-'+entry.idx);if(input)input.value=rows[0]?.qty||0;}});
+            refreshKitExtraProducts();
             updateKitModalTotal();
         }
 
@@ -4880,7 +4936,7 @@ function v2Distribute(idx){const entry=getKitEntry(idx);if(!entry)return;const i
                 const subItem = MENU_ITEMS.find(si => si.id === comp.id);
                 if (!subItem) return sum;
 
-                return sum + (getUnitPriceForSelection(subItem, comp.unit, comp.flavor, comp.size) * comp.qty);
+                return sum + (getUnitPriceForSelection(subItem, comp.unit, getDefaultFlavorForKitItem(subItem,comp), comp.size) * comp.qty);
             }, 0);
         }
 
