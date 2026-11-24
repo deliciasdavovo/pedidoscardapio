@@ -1134,6 +1134,18 @@
 #modal-flavor-menu .modal-flavor-option.is-selected{background:#e5eee4;border:1px solid #2c4a34;box-shadow:inset 0 0 0 1px #2c4a34;font-weight:700;color:#233a29}
 #modal-flavor-menu .modal-option-check{width:18px;height:18px}
 #modal-flavor-menu .is-selected .modal-option-check{background:#2c4a34;color:#fff}
+</style><style>
+.cart-edit-link{font-size:13px;font-weight:600;color:#2c4a34;min-height:44px;display:inline-flex;align-items:center;gap:6px}
+.cart-edit-qty{width:62px;min-width:0;text-align:center;font-size:16px;color:#22201c;background:#fff;border-inline:1px solid #e6e3dc}
+.kit-fixed-qty{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:10px;font-size:13px;color:#2c4a34}
+#kit-flavor-items .kit-flavor-product-row{display:grid;grid-template-columns:52px minmax(0,1fr);gap:8px}
+#kit-flavor-items .kit-flavor-product-row>img{width:52px;height:52px}
+#kit-flavor-items .kit-flavor-product-row h3{white-space:normal}
+#kit-flavor-items .v2-kit-row{flex-wrap:wrap}
+#kit-flavor-items .v2-step button{width:40px;height:44px}
+#kit-flavor-items .v2-step input{width:54px;min-height:44px}
+#kit-flavor-items .v2-kit-row>span{flex:1;min-width:80px;overflow-wrap:anywhere}
+@media(max-width:420px){#kit-flavor-items [data-kit-entry]{padding:12px}#kit-flavor-items .kit-flavor-product-row{display:flex;flex-direction:column}#kit-flavor-items .kit-flavor-product-row>img{display:none}#cart-items-list{padding:12px}#cart-items-list>div{gap:8px;padding:12px;border-radius:16px}#cart-items-list>div>img{width:48px;height:48px}}
 </style></head>
 <body class="relative min-h-screen">
 
@@ -1332,7 +1344,7 @@
             <div class="bg-white px-6 py-5 sm:px-8 border-t border-[#8C8676]/10 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
                     <p class="text-[13px] font-semibold text-[#8C8676]">Total estimado</p>
-                    <p id="kit-flavor-total" class="text-3xl font-bold text-[#22201C]">R$ 0,00</p>
+                    <p id="kit-flavor-total" class="text-3xl font-bold text-[#22201C]">R$ 0,00</p><p id="kit-per-person" class="text-xs font-semibold text-[#2C4A34]" aria-live="polite"></p>
                 </div>
                 <button onclick="confirmKitFlavorSelection()" class="btn-primary px-7 py-4 rounded-2xl text-[15px] tracking-[-0.01em] font-semibold active:scale-95 flex items-center justify-center gap-3">
                     <i class="fas fa-shopping-basket"></i> Adicionar ao carrinho
@@ -4567,7 +4579,7 @@ function readCheckoutPreferences() {
 
             pendingKitSelection = { item, peopleQty, entries };
             document.getElementById('kit-flavor-title').innerText = item.name;
-            document.getElementById('kit-flavor-subtitle').innerText = `${peopleQty} ${peopleQty === 1 ? 'pessoa' : 'pessoas'} - escolha um sabor ou divida em sabores diferentes.`;
+            document.getElementById('kit-flavor-subtitle').innerText = `${peopleQty} ${peopleQty === 1 ? 'pessoa' : 'pessoas'} · ajuste as quantidades e sabores à vontade.`;
             renderKitFlavorItems();
 
             const modal = document.getElementById('kit-flavor-modal');
@@ -4620,7 +4632,7 @@ function readCheckoutPreferences() {
                                     <div class="min-w-0">
                                         <h3 class="serif-font text-base font-semibold text-[#22201C] truncate">${escapeHtml(entry.name)}</h3>
                                         <div class="flex flex-wrap gap-2 mt-1">${sizeBadge}${fixedFlavorBadge}</div>
-                                        <p class="text-[12px] text-[#8C8676]/70 font-medium mt-2">${formatKitQty(entry.qty, entry.unit)} calculado para o kit</p>
+                                        <p class="text-[12px] text-[#8C8676]/70 font-medium mt-2">Sugestão: ${formatKitQty(entry.qty, entry.unit)}</p>
                                     </div>
                                     <p class="text-sm font-bold text-[#22201C] whitespace-nowrap" id="kit-entry-total-${entry.idx}">R$ 0,00</p>
                                 </div>
@@ -4633,7 +4645,7 @@ function readCheckoutPreferences() {
                                         <i class="fas fa-plus-circle"></i> Distribuir entre os sabores
                                     </button>
                                 ` : `
-                                    <p class="mt-4 text-xs text-[#22201C]/55 leading-relaxed">Este item não tem seleção de sabor no cardápio.</p>
+                                    <div class="kit-fixed-qty"><span>Quantidade (${entry.unit})</span><div class="v2-step"><button type="button" aria-label="Diminuir quantidade" onclick="v2KitStep(this,-1,${getKitModalRowQtyStep(entry)})">−</button><input id="kit-fixed-${entry.idx}" type="number" aria-label="Quantidade de ${escapeHtml(entry.name)}" inputmode="${entry.unit==='kg'?'decimal':'numeric'}" min="0" step="${getKitModalRowQtyStep(entry)}" value="${entry.qty}" oninput="updateKitModalTotal()"><button type="button" aria-label="Aumentar quantidade" onclick="v2KitStep(this,1,${getKitModalRowQtyStep(entry)})">+</button></div></div>
                                 `}
                             </div>
                         </div>
@@ -4679,7 +4691,7 @@ function v2Distribute(idx){const entry=getKitEntry(idx);if(!entry)return;const i
             if (!entry || !baseItem) return [];
 
             if (!entry.flavors.length) {
-                return [{ qty: entry.qty, flavor: entry.flavor || null }];
+                const qty=Number(document.getElementById('kit-fixed-'+entryIdx)?.value ?? entry.qty);return Number.isFinite(qty)&&qty>0?[{qty,flavor:entry.flavor||null}]:[];
             }
 
             return Array.from(document.querySelectorAll(`.kit-flavor-row-${entryIdx}`)).map(row => {
@@ -4738,28 +4750,21 @@ function v2Distribute(idx){const entry=getKitEntry(idx);if(!entry)return;const i
                     return sum + (getUnitPriceForSelection(baseItem, entry.unit, row.flavor, entry.size) * row.qty);
                 }, 0);
 
-                const progress=document.getElementById('v2-kit-progress-'+entry.idx); if(progress){const n=collectKitFlavorRows(entry.idx).reduce((s,r)=>s+r.qty,0);const delta=entry.qty-n;progress.textContent=formatKitQty(n,entry.unit)+' de '+formatKitQty(entry.qty,entry.unit)+(Math.abs(delta)<.001?' · Completo':delta>0?' · Faltam '+formatKitQty(delta,entry.unit):' · Excedeu '+formatKitQty(-delta,entry.unit));progress.classList.toggle('v2-complete',Math.abs(delta)<.001);}
+                const progress=document.getElementById('v2-kit-progress-'+entry.idx); if(progress){const n=collectKitFlavorRows(entry.idx).reduce((s,r)=>s+r.qty,0);const delta=entry.qty-n;progress.textContent='Escolhido: '+formatKitQty(n,entry.unit)+(Math.abs(delta)<.001?' · Conforme sugestão':n===0?' · Item removido':delta>0?' · Abaixo da sugestão':' · Acima da sugestão');progress.classList.toggle('v2-complete',Math.abs(delta)<.001);}
                 total += entryTotal;
                 const entryTotalEl = document.getElementById(`kit-entry-total-${entry.idx}`);
                 if (entryTotalEl) entryTotalEl.innerText = 'R$ ' + entryTotal.toFixed(2);
             });
 
-            document.getElementById('kit-flavor-total').innerText = 'R$ ' + total.toFixed(2);
+            document.getElementById('kit-flavor-total').innerText = total.toLocaleString('pt-BR',{style:'currency',currency:'BRL'});const pp=document.getElementById('kit-per-person');if(pp)pp.textContent=(total/pendingKitSelection.peopleQty).toLocaleString('pt-BR',{style:'currency',currency:'BRL'})+' por pessoa';
         }
 
         function confirmKitFlavorSelection() {
             if (!pendingKitSelection) return;
 
-            for (const entry of pendingKitSelection.entries) {
-                const rows = collectKitFlavorRows(entry.idx);
-                const selectedTotal = rows.reduce((sum, row) => sum + row.qty, 0);
-                const expectedTotal = entry.qty;
-
-                if (Math.abs(selectedTotal - expectedTotal) > 0.001) {
-                    showValidationPopup(`Ajuste ${entry.name}: a soma dos sabores precisa dar ${formatKitQty(expectedTotal, entry.unit)}.`);
-                    return;
-                }
-            }
+            const inputs=[...document.querySelectorAll('#kit-flavor-items input[type="number"]')];
+            if(inputs.some(i=>i.value!=='' && !i.checkValidity())){showValidationPopup('Revise as quantidades informadas.');return;}
+            if(!pendingKitSelection.entries.some(entry=>collectKitFlavorRows(entry.idx).length)){showValidationPopup('Escolha ao menos um produto para o coffee break.');return;}
 
             pendingKitSelection.entries.forEach(entry => {
                 const baseItem = MENU_ITEMS.find(si => si.id === entry.id);
@@ -5158,7 +5163,7 @@ document.querySelectorAll('[data-v2-count]').forEach(el=>{const rows=cart.filter
                     <div class="flex-grow min-w-0">
                         <div class="flex justify-between items-start mb-1">
                             <div>
-                                <h4 class="serif-font text-sm font-semibold truncate">${item.name}</h4>
+                                <h4 class="serif-font text-sm font-semibold">${escapeHtml(item.name)}</h4>
                                 <div class="flex flex-wrap gap-2 mt-1">
                                     ${item.size ? `<span class="text-[11px] bg-[#8C8676]/10 text-[#8C8676] px-2 py-0.5 rounded-full font-semibold">${item.size}</span>` : ''}
                                     ${item.flavor ? `<span class="text-[11px] bg-[#22201C]/5 text-[#22201C] px-2.5 py-1 rounded-full font-semibold">Sabor: ${item.flavor}</span>` : ''}
@@ -5166,26 +5171,29 @@ document.querySelectorAll('[data-v2-count]').forEach(el=>{const rows=cart.filter
                                 <p class="text-[12px] text-[#8C8676]/70 font-medium mt-1">${estimatedUnit ? 'aprox. ' : ''}R$ ${item.finalPrice.toFixed(2).replace('.', ',')} /${unitLabel}</p>
                                 ${estimatedUnit ? '<p class="text-[10px] leading-relaxed text-[#8C8676]/60 mt-1">Valor unitário estimado pelo peso. O preço final é calculado por quilo.</p>' : ''}
                             </div>
-                            <button onclick="removeFromCart(${idx})" class="text-red-300 hover:text-red-600 transition-colors p-2">
+                            <button onclick="removeFromCart(${idx})" aria-label="Remover ${escapeHtml(item.name)}" class="text-red-300 hover:text-red-600 transition-colors p-2">
                                 <i class="fas fa-trash-alt text-sm"></i>
                             </button>
                         </div>
                         <div class="flex justify-between items-end mt-2">
                             <div class="inline-flex items-stretch bg-white rounded-xl shadow-sm border border-[#8C8676]/15 overflow-hidden">
                                 <button onclick="updateCartQty(${idx}, -1)" class="w-8 h-8 flex items-center justify-center text-[#2C4A34] text-xs hover:bg-[#2C4A34]/5 active:bg-[#2C4A34]/10 transition-colors"><i class="fas fa-minus"></i></button>
-                                <span class="min-w-[2.5rem] px-1 flex items-center justify-center text-xs font-semibold text-[#22201C] border-x border-[#8C8676]/15">${item.qty.toFixed(item.unit === 'kg' ? 1 : 0)}${unitLabel}</span>
+                                <input class="cart-edit-qty" type="number" aria-label="Quantidade de ${escapeHtml(item.name)} em ${unitLabel}" inputmode="${item.unit==='kg'?'decimal':'numeric'}" min="${item.unit==='kg'?0.1:1}" step="${item.unit==='kg'?0.1:1}" value="${item.qty.toFixed(item.unit==='kg'?1:0)}" onchange="setCartQty(${idx},this)">
                                 <button onclick="updateCartQty(${idx}, 1)" class="w-8 h-8 flex items-center justify-center text-[#2C4A34] text-xs hover:bg-[#2C4A34]/5 active:bg-[#2C4A34]/10 transition-colors"><i class="fas fa-plus"></i></button>
                             </div>
                             <span class="text-base font-bold text-[#22201C]">${estimatedUnit ? 'aprox. ' : ''}R$ ${(item.finalPrice * item.qty).toFixed(2).replace('.', ',')}</span>
                         </div>
+                        <button type="button" class="cart-edit-link" onclick="editCartItem(${idx})"><i class="fas fa-pen" aria-hidden="true"></i> Editar produto</button>
                     </div>
                 </div>
             `}).join('');
         }
 
+        function editCartItem(idx){const row=cart[idx];if(row)openProductModal(row.id,row);}
+        function setCartQty(idx,input){const item=cart[idx];if(!item)return;const step=item.unit==='kg'?0.1:1;const n=Number(input.value);if(!Number.isFinite(n)||n<step){input.value=item.qty;return;}item.qty=Number((Math.round(n/step)*step).toFixed(step===1?0:1));updateCartSummary();renderCartItems();}
         function updateCartQty(idx, delta) {
             const item = cart[idx]; const step = item.unit === 'kg' ? 0.1 : 1;
-            item.qty += (delta * step); if (item.qty <= 0) cart.splice(idx, 1);
+            item.qty = Number((item.qty + delta * step).toFixed(step===1?0:1)); if (item.qty <= 0) cart.splice(idx, 1);
             updateCartSummary(); renderCartItems();
         }
 
@@ -7785,11 +7793,13 @@ function createProductListItem(item) {
 // ===== PRODUCT DETAIL MODAL (MOBILE) =====
 
 let currentModalItemId = null;
+let editingCartRow = null;
 let modalImageIdx = 0;
 let currentModalImages = [];
 
 function v2QuickAdd(id){const item=MENU_ITEMS.find(i=>i.id===id);if(!item)return;if(item.isKit||item.flavors?.length||item.sizes?.length||item.units?.includes('kg')||!item.units?.includes('un')){openProductModal(id);return;}const price=getUnitPriceForSelection(item,'un',null,null);if(!Number.isFinite(price)||price<=0){openProductModal(id);return;}addIndividualToCart(id,'un',1,null,null,price,getImageForSelection(item,null,null));updateCartSummary();showValidationPopup(item.name+' entrou na sua cesta','cart');}
-function openProductModal(id) {
+function openProductModal(id, editing = null) {
+    editingCartRow = editing;
     const item = MENU_ITEMS.find(i => i.id === id);
     if (!item) return;
     currentModalItemId = id;
@@ -7809,10 +7819,18 @@ function openProductModal(id) {
         });
     });
 
+    if(editing){
+        if(item.units?.includes('kg') && item.units?.includes('un')) setModalUnit(editing.unit);
+        if(editing.size && item.sizes?.length){const i=item.sizes.findIndex(s=>s.label===editing.size);if(i>=0)setModalSize(i);}
+        if(editing.flavor)selectModalFlavor(editing.flavor);
+        document.getElementById('modal-qty').value=editing.qty;
+        const action=document.getElementById('modal-cart-action');if(action)action.innerHTML='<i class="fas fa-check" aria-hidden="true"></i> Salvar alterações';
+    }
     updateModalPricePreview();
 }
 
 function closeProductModal() {
+    editingCartRow=null;
     const overlay = document.getElementById('product-modal-overlay');
     const panel = document.getElementById('product-modal-panel');
     if (!overlay || !panel) return;
@@ -7932,7 +7950,7 @@ function buildProductModalContent(item) {
                 </div>
 
                 <div class="pt-3 border-t border-[#8C8676]/10">
-                    <button onclick="addToCartFromModal()" class="btn-primary w-full min-h-[50px] px-5 py-3 rounded-[14px] text-[13px] tracking-[-0.01em] font-semibold active:scale-[0.985] inline-flex items-center justify-center gap-2.5 shadow-[0_5px_14px_rgba(190,107,46,0.16)]">
+                    <button id="modal-cart-action" onclick="addToCartFromModal()" class="btn-primary w-full min-h-[50px] px-5 py-3 rounded-[14px] text-[13px] tracking-[-0.01em] font-semibold active:scale-[0.985] inline-flex items-center justify-center gap-2.5 shadow-[0_5px_14px_rgba(190,107,46,0.16)]">
                         <i class="fas fa-shopping-basket text-xs"></i>
                         ${item.isKit ? 'Montar Kit' : 'Adicionar à cesta'}
                     </button>
@@ -8145,8 +8163,9 @@ function addToCartFromModal() {
     const item = MENU_ITEMS.find(i => i.id === id);
     if (!item) return;
 
-    const qty = parseFloat(document.getElementById('modal-qty').value) || 1;
+    const qty = Number(document.getElementById('modal-qty').value);
     const unit = getModalUnit();
+    if(!Number.isFinite(qty)||qty<(item.isKit?5:unit==='kg'?0.1:1)||(unit==='un'&&!Number.isInteger(qty))){showValidationPopup('Informe uma quantidade válida.');return;}
     const flavorSelect = document.getElementById('modal-flavor');
     const flavor = flavorSelect ? flavorSelect.value : null;
 
@@ -8166,6 +8185,7 @@ function addToCartFromModal() {
         size = item.sizes[Math.max(0, activeIdx)].label;
     }
 
+    const edited=editingCartRow;
     closeProductModal();
 
     if (item.isKit && item.composition) {
@@ -8175,6 +8195,7 @@ function addToCartFromModal() {
 
     const price = getUnitPriceForSelection(item, unit, flavor, size);
     const image = getImageForSelection(item, flavor, size);
+    if(edited){const idx=cart.indexOf(edited);if(idx<0)return;const duplicate=cart.find(row=>row!==edited&&row.id===id&&row.unit===unit&&row.flavor===flavor&&row.size===size);if(duplicate){duplicate.qty+=qty;cart.splice(idx,1);}else{cart[idx]={...item,qty,unit,flavor,size,finalPrice:price,image};}updateCartSummary();renderCartItems();showValidationPopup('Produto atualizado na cesta','cart');return;}
     addIndividualToCart(id, unit, qty, flavor, size, price, image);
     updateCartSummary();
     showValidationPopup(item.name + ' entrou na sua cesta', 'cart');
