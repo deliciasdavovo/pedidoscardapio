@@ -1210,6 +1210,23 @@ body.cart-open #mobile-bottom-nav,body:has(#mobile-search-input:focus) #mobile-b
 .discovery-search-quick span{flex:1;font-family:'DM Sans',sans-serif;font-size:13px;color:#666b62}.discovery-search-quick>i{font-size:14px}
 @media(max-width:639px){#main-header #search-toggle-btn{display:none}#search-bar{display:none!important}#sticky-cart-bar{display:none!important}#menu-container{padding-bottom:calc(90px + env(safe-area-inset-bottom))!important}#welcome-banner{padding-bottom:54px}#mobile-bottom-nav button:focus-visible,#mobile-category-items button:focus-visible{outline:2px solid #be6b2e;outline-offset:-2px}}
 @media(min-width:640px){#mobile-search-strip,#mobile-category-chips,#mobile-bottom-nav{display:none!important}.discovery-search-quick{display:none}}
+</style><style>
+.coffee-menu-banner{max-width:1180px;margin:16px auto 0;padding:13px 17px;border:1px solid #c4d0c0;border-radius:15px;background:#edf2e9;display:flex;align-items:center;gap:13px;color:#2c4a34}
+.coffee-menu-banner[hidden]{display:none!important}
+.coffee-banner-icon{width:43px;height:43px;flex-shrink:0;display:grid;place-items:center;border-radius:12px;background:#dce9d8;font-size:20px}
+.coffee-banner-copy{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
+.coffee-banner-copy strong{font-size:15px;line-height:1.3}
+.coffee-banner-copy span{font-size:12px;line-height:1.4;color:#4b5a49}
+.coffee-menu-banner>button{flex-shrink:0;padding:10px 13px;min-height:44px;border-radius:10px;background:#2c4a34;color:white;font-size:13px;font-weight:700}
+.coffee-menu-banner>button i{margin-left:5px}
+#discovery-overlay .coffee-home-entry{background:#e9f0e5;border-color:#b8cab3;margin:0 0 13px;min-height:64px;box-shadow:0 2px 8px #2c4a340d}
+#discovery-overlay .coffee-home-entry strong{font-size:16px}
+#discovery-overlay .coffee-home-entry small{font-size:12px;line-height:1.4}
+#discovery-overlay .coffee-home-entry:hover{background:#e0ebdb;border-color:#a0b59b}
+#mobile-category-items .coffee-mobile-chip{background:#e8efe4;border-color:#b7cbb2;color:#2c4a34;font-weight:700}
+#mobile-category-items .coffee-mobile-chip i{margin-right:5px}
+#side-menu-list .coffee-side-link{color:#2c4a34;font-weight:700;background:#e8efe4;border-radius:10px;margin:8px 0}
+@media(max-width:639px){.coffee-menu-banner{margin:12px 12px 0;padding:11px;gap:10px;flex-wrap:wrap}.coffee-menu-banner>button{width:100%;min-height:44px}.coffee-banner-icon{width:38px;height:38px;font-size:18px}.coffee-banner-copy strong{font-size:14px}}
 </style></head>
 <body class="relative min-h-screen">
 
@@ -1346,9 +1363,9 @@ body.cart-open #mobile-bottom-nav,body:has(#mobile-search-input:focus) #mobile-b
             </section>
 
             <button type="button" class="discovery-search-quick" onclick="openCatalogSearch()"><i class="fas fa-search" aria-hidden="true"></i><span>Buscar bolo, salgado, quiche...</span><i class="fas fa-arrow-right" aria-hidden="true"></i></button>
+            <button type="button" class="coffee-home-entry" onclick="openCoffeeWizard()"><i class="fas fa-mug-hot" aria-hidden="true"></i><span><strong>Monte seu Coffee Break</strong><small>Escolha um dos 5 modelos ou monte do zero e personalize para seu grupo</small></span><i class="fas fa-chevron-right" aria-hidden="true"></i></button>
             <p class="discovery-section-label">Explore o cardápio</p>
             <div id="discovery-cards"></div>
-            <button type="button" class="coffee-home-entry" onclick="openCoffeeWizard()"><i class="fas fa-mug-hot" aria-hidden="true"></i><span><strong>Monte seu Coffee Break</strong><small>Escolha a sugestão e personalize</small></span><i class="fas fa-chevron-right" aria-hidden="true"></i></button>
 
             <button onclick="enterMenu()" class="discovery-cta" aria-label="Ver o cardápio completo">
                 <span>Ver cardápio completo</span>
@@ -1374,6 +1391,11 @@ body.cart-open #mobile-bottom-nav,body:has(#mobile-search-input:focus) #mobile-b
 <!-- Conteúdo Principal (folha arredondada encaixando no cabeçalho) -->
     <div class="relative z-10 -mt-10 sm:-mt-14 bg-[#F4F1EA] rounded-t-[2rem] sm:rounded-t-[2.75rem] shadow-[0_-16px_44px_rgba(20,34,22,0.14)] min-h-screen">
         <div class="w-11 h-1.5 bg-[#8C8676]/30 rounded-full mx-auto mt-3.5 sm:mt-4"></div>
+        <section id="coffee-menu-banner" class="coffee-menu-banner" aria-label="Montar Coffee Break">
+            <div class="coffee-banner-icon"><i class="fas fa-mug-hot" aria-hidden="true"></i></div>
+            <div class="coffee-banner-copy"><strong>Planejando um Coffee Break?</strong><span>Escolha um modelo, informe os convidados e personalize tudo.</span></div>
+            <button type="button" onclick="openCoffeeWizard()">Montar meu Coffee Break <i class="fas fa-arrow-right" aria-hidden="true"></i></button>
+        </section>
         <main id="menu-container" class="max-w-7xl mx-auto px-4 sm:px-6 pt-7 sm:pt-10 space-y-12 sm:space-y-24 pb-32 sm:pb-48">
             <!-- Produtos injetados via JS -->
         </main>
@@ -3806,7 +3828,8 @@ function saveV2Cart(){try{localStorage.setItem(V2_CART_KEY,JSON.stringify(cart.m
 
             let html = `<button onclick="selectGroupFromMenu('Todos')" data-group="Todos" class="side-group active">
                 <i class="fas fa-utensils mr-2.5 text-[11px] opacity-60"></i>Todos os produtos
-            </button>`;
+            </button>
+            <button type="button" class="side-group coffee-side-link" onclick="closeSideMenu();openCoffeeWizard()"><i class="fas fa-mug-hot mr-2.5" aria-hidden="true"></i>Monte seu Coffee Break</button>`;
 
             MACRO_GROUPS.forEach(group => {
                 html += `<div class="side-section">
@@ -3935,6 +3958,8 @@ function saveV2Cart(){try{localStorage.setItem(V2_CART_KEY,JSON.stringify(cart.m
         function renderMenu() {
             const container = document.getElementById('menu-container');
             container.innerHTML = '';
+            const coffeeBanner=document.getElementById('coffee-menu-banner');
+            if(coffeeBanner)coffeeBanner.hidden=Boolean(currentSearch);
 
             // Durante a busca, procura em todo o cardápio (ignora o filtro de departamento)
             const categoriesToRender = (activeGroupCategories && !currentSearch)
@@ -4179,6 +4204,15 @@ ${getFlavorList(item).map(f => `<option value="${f.label}">${f.label}</option>`)
             if(!el)return;
             const categories=Array.from(document.querySelectorAll('#menu-container section[data-cat]')).map(sec=>sec.dataset.cat);
             el.replaceChildren();
+            if(categories.length && !currentSearch){
+                const coffeeButton=document.createElement('button');
+                coffeeButton.type='button';
+                coffeeButton.className='coffee-mobile-chip';
+                coffeeButton.innerHTML='<i class="fas fa-mug-hot" aria-hidden="true"></i> Montar Coffee';
+                coffeeButton.setAttribute('aria-label','Montar Coffee Break personalizado');
+                coffeeButton.onclick=openCoffeeWizard;
+                el.appendChild(coffeeButton);
+            }
             if(!categories.length){document.getElementById('mobile-category-chips').hidden=true;return;}
             document.getElementById('mobile-category-chips').hidden=false;
             ['Todos',...categories].forEach(cat=>{
