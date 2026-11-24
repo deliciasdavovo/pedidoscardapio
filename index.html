@@ -1090,8 +1090,9 @@
     </style>
 <style>
 .v2-list-action{display:flex;flex-direction:column;align-items:center;gap:4px;flex-shrink:0}.v2-add{background:#2c4a34;color:#fff;border-radius:12px;min-height:48px;padding:8px 10px;font-size:12px;font-weight:700}.v2-count{font-size:11px;color:#2c4a34;font-weight:600}.v2-kit-row{display:flex!important;align-items:center;justify-content:space-between;gap:8px;font-size:14px}.v2-kit-row select[hidden]{display:none!important}.v2-step{display:flex;align-items:center;flex-shrink:0;border:1px solid #c8c5bc;border-radius:10px;overflow:hidden}.v2-step button{width:48px;height:48px;font-size:20px;color:#2c4a34;background:#f4f1ea}.v2-step input{width:64px;min-height:48px;text-align:center;font-size:16px;background:white}.v2-kit-progress{font-size:13px;color:#8b451e;font-weight:600;margin-top:8px}.v2-complete{color:#2c4a34}.v2-visible-flavors .modal-flavor-option{min-height:48px;font-size:15px}.v2-visible-flavors:not(.hidden){display:block}button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid #BE6B2E!important;outline-offset:2px}
-@media(max-width:639px){.product-list-item{gap:10px!important;padding:10px!important}.product-list-item>div:first-of-type{width:76px;height:76px}.product-list-item h3{white-space:normal!important;font-size:17px!important}.product-list-item p{color:#465548!important}.v2-add{max-width:100px}#sticky-cart-bar{bottom:calc(8px + env(safe-area-inset-bottom));padding-left:12px;padding-right:12px}#sticky-cart-bar>button{padding:12px 16px;border-radius:16px;background:#2c4a34}#sticky-total{font-size:22px}#kit-flavor-modal .kit-flavor-panel{max-height:94dvh;inset-inline:8px}#kit-flavor-items{padding:12px}#modal-qty{width:68px;font-size:16px}#product-modal-body .modal-segment-btn{min-height:48px}#checkout-scroll input,#checkout-scroll select{font-size:16px}#cart-items-list button:not(.owner-share-btn){min-width:44px;min-height:44px}#menu-container{padding-bottom:90px}}
+@media(max-width:639px){#sticky-cart-bar{bottom:calc(8px + env(safe-area-inset-bottom));padding-left:12px;padding-right:12px}#sticky-cart-bar>button{padding:12px 16px;border-radius:16px;background:#2c4a34}#sticky-total{font-size:22px}#kit-flavor-modal .kit-flavor-panel{max-height:94dvh;inset-inline:8px}#kit-flavor-items{padding:12px}#modal-qty{width:68px;font-size:16px}#product-modal-body .modal-segment-btn{min-height:48px}#checkout-scroll input,#checkout-scroll select{font-size:16px}#cart-items-list button:not(.owner-share-btn){min-width:44px;min-height:44px}#menu-container{padding-bottom:90px}}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important;scroll-behavior:auto!important}}
+ .v2-visible-flavors.modal-picker-menu{max-height:none;overflow:visible;box-shadow:none;padding:0;background:transparent;display:grid!important;gap:6px}.v2-visible-flavors .modal-flavor-option{background:#fff;border:1px solid #dedbd2;min-height:48px;padding:10px 12px;color:#22201c;border-radius:12px;font-size:14px}.v2-visible-flavors .modal-flavor-option.is-selected{background:#e9efe8;border-color:#2c4a34;color:#2c4a34}.v2-visible-flavors .modal-option-check{display:flex;align-items:center;justify-content:center;flex-shrink:0;width:20px;height:20px;border:1px solid #a6ada4;border-radius:50%;opacity:1!important}.v2-visible-flavors .modal-option-check i{visibility:hidden}.v2-visible-flavors .is-selected .modal-option-check{background:#2c4a34;border-color:#2c4a34;color:white}.v2-visible-flavors .is-selected .modal-option-check i{visibility:visible}
 </style></head>
 <body class="relative min-h-screen">
 
@@ -5072,7 +5073,7 @@ document.querySelectorAll('[data-v2-count]').forEach(el=>{const rows=cart.filter
             document.getElementById('cart-badge').innerText = count;
             document.getElementById('cart-badge').classList.toggle('hidden', count === 0);
             document.getElementById('header-total').innerText = 'R$ ' + subtotal.toFixed(2);
-            document.getElementById('sticky-total').innerText = 'R$ ' + subtotal.toFixed(2);
+            document.getElementById('sticky-total').innerText = subtotal.toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
 
             const reviewTotal = document.getElementById('cart-review-total');
             if (reviewTotal) reviewTotal.innerText = 'R$ ' + subtotal.toFixed(2);
@@ -7731,7 +7732,7 @@ function createProductListItem(item) {
                 </div>
                 ${secondaryPriceText ? `<p class="text-[11px] leading-snug font-normal text-[#8C8676] mt-1">${secondaryPriceText}</p>` : ''}
             </div>
-            <div class="v2-list-action"><button type="button" class="v2-add" aria-label="Adicionar ou personalizar ${escapeHtml(item.name)}" onclick="event.stopPropagation(); v2QuickAdd('${item.id}')">${item.isKit?'Montar kit':(hasFlavors||hasSizes||hasKg?'Escolher':'+ Adicionar')}</button><span data-v2-count="${escapeHtml(item.id)}" class="v2-count">${cart.some(c=>c.id===item.id)?'Na cesta':''}</span></div>
+            <i class="fas fa-chevron-right text-[#8C8676]/30 shrink-0 text-sm ml-1"></i>
         </div>
     `;
 }
@@ -7857,15 +7858,9 @@ function buildProductModalContent(item) {
                     
                 </div>
                 <input type="hidden" id="modal-flavor" value="">
-                <button type="button" id="modal-flavor-trigger" aria-expanded="true" onclick="toggleModalFlavorMenu()" class="modal-picker-trigger">
-                    <span id="modal-flavor-label" class="text-[#8C8676]">Selecione uma opção</span>
-                    <span class="modal-picker-chevron" aria-hidden="true">
-                        <i id="modal-flavor-chevron" class="fas fa-chevron-down"></i>
-                    </span>
-                </button>
-                <div id="modal-flavor-menu" class="modal-picker-menu v2-visible-flavors" role="listbox">
+                <div id="modal-flavor-menu" class="modal-picker-menu v2-visible-flavors" role="group" aria-label="Escolha o sabor">
                     ${getFlavorList(item).map(f => `
-                        <button type="button" role="option" aria-selected="false" data-flavor="${escapeHtml(f.label)}" onclick="selectModalFlavor(this.dataset.flavor)" class="modal-flavor-option">
+                        <button type="button" aria-pressed="false" data-flavor="${escapeHtml(f.label)}" onclick="selectModalFlavor(this.dataset.flavor)" class="modal-flavor-option">
                             <span>${escapeHtml(f.label)}</span>
                             <span class="modal-option-check" aria-hidden="true"><i class="fas fa-check"></i></span>
                         </button>
@@ -8048,7 +8043,7 @@ function selectModalFlavor(flavor) {
     document.querySelectorAll('.modal-flavor-option').forEach(option => {
         const selected = option.dataset.flavor === flavor;
         option.classList.toggle('is-selected', selected);
-        option.setAttribute('aria-selected', selected ? 'true' : 'false');
+        option.setAttribute('aria-pressed', selected ? 'true' : 'false');
     });
 
     onModalFlavorChange();
@@ -8111,9 +8106,8 @@ function addToCartFromModal() {
 
     if (item.flavors && item.flavors.length > 0 && !flavor) {
         showValidationPopup('Escolha um sabor antes de adicionar à cesta.');
-        toggleModalFlavorMenu(true);
-        const flavorTrigger = document.getElementById('modal-flavor-trigger');
-        if (flavorTrigger) flavorTrigger.focus();
+        const firstFlavor = document.querySelector('#modal-flavor-menu .modal-flavor-option');
+        if (firstFlavor) { firstFlavor.focus(); firstFlavor.scrollIntoView({block:'nearest'}); }
         return;
     }
 
