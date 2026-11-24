@@ -1268,6 +1268,32 @@ body.cart-open #mobile-bottom-nav,body:has(#mobile-search-input:focus) #mobile-b
 .product-card .product-desc.expanded{-webkit-line-clamp:unset!important}
 #modal-description{color:#767d74!important;font-size:14px!important;line-height:1.55}
 @media(max-width:639px){.product-list-clean{align-items:center!important}.product-list-clean .product-summary{font-size:13px!important}}
+</style><style>
+/* Restaurar categorias da abertura: cartões brancos grandes em duas colunas. */
+#discovery-overlay #discovery-cards{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr));gap:11px;width:100%;flex-shrink:0}
+#discovery-overlay #discovery-cards .discovery-card{
+ display:flex!important;flex-direction:column;justify-content:center;align-items:center;text-align:center;
+ min-width:0;min-height:clamp(82px,12vh,108px);width:100%;padding:13px 10px;
+ border:1px solid rgba(158,118,78,.11);border-radius:20px;background:#fff;color:#22201c;
+ box-shadow:0 1px 2px #1422160a,0 7px 18px #14221612;transform:none;gap:0;
+}
+#discovery-overlay #discovery-cards .discovery-card:hover{background:#fffcf7;border-color:#dbcdb9;box-shadow:0 2px 8px #14221615}
+#discovery-overlay #discovery-cards .discovery-card:focus-visible{outline:3px solid #2c4a34;outline-offset:2px}
+#discovery-overlay #discovery-cards .discovery-card-wide{grid-column:1/-1;min-height:76px}
+#discovery-overlay #discovery-cards .discovery-card-title{
+ font-family:'Lora',serif;font-size:clamp(15px,3.8vw,18px);font-weight:400;line-height:1.3;
+ letter-spacing:-.015em;color:#22201c;text-align:center;max-width:100%;white-space:normal;
+}
+#discovery-overlay .discovery-shell{justify-content:center;height:auto;min-height:100dvh;padding-block:max(24px,env(safe-area-inset-top)) max(18px,env(safe-area-inset-bottom))}
+#discovery-overlay .coffee-home-entry{margin:12px 0 0}
+@media(max-width:430px){
+ #discovery-overlay #discovery-cards{gap:9px}
+ #discovery-overlay #discovery-cards .discovery-card{min-height:86px;border-radius:17px;padding:10px 7px}
+ #discovery-overlay #discovery-cards .discovery-card-wide{min-height:70px}
+ #discovery-overlay .discovery-brand{margin-bottom:12px}
+ #discovery-overlay .discovery-hero{margin-bottom:14px}
+ #discovery-overlay .discovery-title{font-size:clamp(26px,7vw,34px)}
+}
 </style></head>
 <body class="relative min-h-screen">
 
@@ -3802,7 +3828,7 @@ function saveV2Cart(){try{localStorage.setItem(V2_CART_KEY,JSON.stringify(cart.m
 
                 return `
                     <button type="button" class="discovery-card ${isLastOdd ? 'discovery-card-wide' : ''}" onclick="${action}">
-                        <i class="fas ${item.icon} discovery-entry-icon" aria-hidden="true"></i><span class="discovery-entry-copy"><strong>${item.label}</strong><small>${item.subtitle}</small></span><i class="fas fa-chevron-right discovery-entry-arrow" aria-hidden="true"></i>
+                        <span class="discovery-card-title">${item.label}</span>
                     </button>`;
             }).join('');
         }
